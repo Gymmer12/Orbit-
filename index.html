@@ -93,7 +93,7 @@ $('savescore').onclick=()=>{let n=$('player').value.trim();if(!n){$('scorestatus
 const products=[['Nebula Badge',20],['Galaxy Frame',40],['Comet Trail',60],['Orbit Crown',100]];function renderShop(){let box=$('products');box.replaceChildren();products.forEach(([name,cost])=>{let row=document.createElement('div');row.className='product';let label=document.createElement('div');label.textContent=name;let price=document.createElement('div');price.className='price';price.textContent='◈ '+cost+' ';let b=document.createElement('button');b.className='control secondary';b.textContent=s.items.includes(name)?'Owned':'Buy';b.disabled=s.items.includes(name);b.onclick=()=>{if(s.coins<cost){alert('You need '+(cost-s.coins)+' more Orbits.');return}s.coins-=cost;s.items.push(name);persist()};price.append(b);row.append(label,price);box.append(row)});$('inventory').textContent=s.items.length?s.items.join(' • '):'Nothing unlocked yet.'}
 showQuestion();showWord();persist();
 })();
-</script><script src="config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</script><script src="config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function(){
 'use strict';
