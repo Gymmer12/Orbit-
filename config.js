@@ -1,9 +1,5 @@
-/* ORBIT + PUBLIC browser configuration.
-   Supabase Dashboard -> Project Settings -> API:
-   Use Project URL and publishable (or legacy anon) key ONLY.
-   NEVER put a secret/service_role key here.
-*/
+/* Public Supabase browser configuration for ORBIT +. Never add secret or service_role keys. */
 window.ORBIT_CONFIG = {
-  url: "",
-  anonKey: ""
+  url: "https://gcpfnnmibnttaqepqswx.supabase.co",
+  anonKey: "sb_publishable_RHfVEyoBZc5K3triiDqS3w_uFZXLXu1"
 };
