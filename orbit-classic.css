@@ -1,0 +1,137 @@
+/* ORBIT + Classic skin — references original ORBIT screenshots and user-provided art.
+   Navigation stays limited to Home, Social, Games, Leaderboard and Shop. */
+:root {
+  --blue: #050c40;
+  --panel: #071045;
+  --line: #1b2b77;
+  --bright: #73a3ff;
+  --muted: #b3c6fa;
+  --text: #f5f7ff;
+}
+html,body{background:#050b32;color:#eaf0ff;font-family:Inter,Segoe UI,Arial,sans-serif}
+.layout{height:100dvh;min-height:500px}
+.sidebar{width:205px;background:linear-gradient(180deg,#071e75 0%,#041453 42%,#04113f 100%);border-right:1px solid #23418e;box-shadow:3px 0 22px #01082166}
+.identity{height:83px;padding:11px 8px 6px;border-bottom:1px solid #183688}
+.identity .brand.original-mark{font-size:0;display:flex;align-items:center;gap:0;justify-content:center;width:100%}
+.original-mark img{display:block;width:min(181px,100%);height:55px;object-fit:contain;filter:drop-shadow(0 0 8px #388aff44)}
+.original-mark .plus-mark{font-size:16px;font-weight:900;color:#b8ccff;text-shadow:0 0 8px #68aeff;position:relative;left:-6px;top:10px}
+.sidenav{padding:7px 5px 16px;scrollbar-width:thin;scrollbar-color:#6380a1 transparent}
+.navheading{font-size:10px;letter-spacing:.04em;color:#93b7fa;margin:15px 10px 5px;font-weight:700}
+.navlink{gap:8px;padding:7px 9px;border:1px solid transparent;border-radius:5px;font-size:12px;font-weight:600;color:#d3defb;transition:background .14s}
+.navlink .glyph{font-size:14px;width:17px;color:#79b5ff}
+.navlink:hover{background:#132b84;color:#fff}
+.navlink.active{background:linear-gradient(90deg,#334ab7,#293b9b);border-color:#3d52af;box-shadow:inset 3px 0 #95a2ff;color:#fff}
+.navlink.sub,.socialsubmenu .navlink{padding-left:23px;font-size:11px}
+.socialsubmenu{border-left:1px solid #3158b3;margin:2px 2px 9px 14px;padding-left:3px}
+.socialsubmenu[hidden]{display:none}
+.socialToggle{font-weight:700}
+.profile{padding:8px 10px;min-height:54px;background:linear-gradient(160deg,#091747,#031034);border-top:1px solid #25419a}
+.profile .name{font-size:11px}.profile .status{font-size:10px}
+.avatar{width:30px;height:30px;border-width:1px;background:linear-gradient(145deg,#0f60e8,#7051f1)}
+.content{background:#050a2c;background-image:linear-gradient(180deg,#03092e,#080b35);scrollbar-width:thin;scrollbar-color:#53618b #060b29}
+.stars{display:none}
+.topbar{height:43px;background:#061141eb;border-bottom:1px solid #283b84;padding:0 14px;box-shadow:0 4px 9px #04082355}
+.topbar strong{font-size:12px;font-weight:700}
+.topbar .hint{font-size:11px;color:#94b0fa}
+.coins{font-size:11px;background:linear-gradient(110deg,#0f277a,#071753);border:1px solid #3c53aa;padding:6px 11px}
+.view{min-height:calc(100dvh - 43px)}
+/* Screenshot 3: deep violet galactic home with actual original artwork */
+#home{background-color:#120b36;background-image:
+  linear-gradient(90deg,rgba(37,13,59,.40),rgba(33,15,66,.31) 55%,rgba(61,21,59,.44)),
+  linear-gradient(180deg,rgba(5,8,42,.05),rgba(11,5,42,.58)),
+  url("assets/orbit-home-poster.jpg");
+ background-size:cover;background-position:50% 48%;background-repeat:no-repeat;
+ min-height:calc(100dvh - 43px);isolation:isolate}
+#home .ringplanet{display:none}
+#home .homehero{padding:34px 20px 16px;min-height:260px;overflow:visible}
+#home .home-logo{display:block;width:175px;height:190px;object-fit:contain;margin:-5px auto -12px;filter:drop-shadow(0 8px 18px #010623bb) drop-shadow(0 0 12px #4e98ff55)}
+#home .home-plus{display:inline-block;position:absolute;top:161px;left:calc(50% + 72px);font-size:32px;color:#d9e5ff;text-shadow:0 2px 16px #2f86ff}
+#home .motto{letter-spacing:4px;font-weight:600;font-size:12px;margin-top:5px;text-shadow:0 2px 9px #010821}
+#home .herolead{font-size:12px;max-width:580px;margin:14px auto 2px;color:#e3e7ff;text-shadow:0 2px 7px #000;line-height:1.5}
+#home .homebody{max-width:650px;margin:-5px auto 0;padding:0 20px 50px}
+#home .announcement{background:linear-gradient(110deg,#291f65e8,#46295fe6);border:1px solid #765bee;border-radius:10px;box-shadow:0 0 0 1px #3449c6aa,0 15px 35px #020626aa;padding:13px 14px}
+#home .announcement h3{font-size:15px;margin:10px 0 5px}
+#home .announcement p{font-size:12px;color:#dae0ff}
+#home .pill{background:#f4cc64;font-size:9px;padding:4px 8px;color:#2b224a}
+#home .sectionlabel{font-size:11px;margin:20px 0 8px;text-shadow:0 1px 7px #000}
+#home .quickgrid{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+#home .quick{min-height:85px;padding:11px;border-radius:8px;background:linear-gradient(130deg,#12369bef,#071963e8);border-color:#556bdf;box-shadow:0 5px 12px #03082982;gap:5px}
+#home .quick:hover{background:linear-gradient(130deg,#2045c1,#092783)}
+#home .quick .qicon{font-size:20px;color:#b8d9ff}
+#home .quick strong{font-size:11px}
+#home .quick small{font-size:9px;color:#9ab8f7;line-height:1.4}
+#home .home-note{display:block;margin:15px auto;color:#cfdbff;font-size:10px;letter-spacing:.08em}
+/* Screenshots 1–2: flat dark navy chat, slim header, message timeline, right member rail */
+#text{background:#05092a}
+#text .pane{max-width:none;padding:0;height:calc(100dvh - 43px);display:flex;flex-direction:column;margin:0}
+#text .social-header{display:none}
+#text .channel-bar{height:40px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 15px;background:#070d39;border-bottom:1px solid #2a3d88;font-size:13px;gap:15px}
+#text .channel-bar strong{color:#f3f6ff}
+#text .channel-bar small{border-left:1px solid #35519b;margin-left:10px;padding-left:10px;color:#abc5fd;font-size:10px}
+#text .channel-bar .memberHint{font-size:10px;color:#6ff0b3;white-space:nowrap}
+#text .accountbar{background:#0d1643;border-radius:0;padding:8px 12px;border:0;border-bottom:1px solid #253979;margin:0;flex-shrink:0}
+#text .accountbar .row{gap:7px}
+#text .accountbar input{padding:7px 9px;max-width:220px!important;font-size:11px}
+#text .accountbar .control{padding:6px 10px;font-size:11px}
+#text .accountbar #sessionStatus{font-size:11px;color:#c6d9ff}
+#text .accountbar #authStatus{font-size:10px;color:#8eadde;line-height:1.3;margin:4px 0 0}
+#text .two{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 173px;gap:0}
+#text .social-content{min-height:0;overflow:hidden;background:#050a2a;border:0;border-right:1px solid #1f3776;border-radius:0;padding:0;box-shadow:none;display:flex;flex-direction:column}
+#text .social-content>.row:first-child{background:#060b30;border-bottom:1px solid #222f74;padding:8px 15px;margin:0;min-height:36px}
+#text .social-content>.row:first-child h3{font-size:12px;margin:0;font-weight:800}
+#text .social-content>.row:first-child .tag{font-size:9px}
+#text .messagefeed{flex:1;min-height:80px;max-height:none;overflow:auto;scrollbar-width:thin;scrollbar-color:#536393 #050a2c;padding:0;background:#050a2a}
+#text .msg{display:flex;gap:7px;align-items:flex-start;padding:7px 12px;border:0;border-top:1px solid #0b1550}
+#text .msg:nth-child(2n){background:#060c32}
+#text .msg:hover{background:#0e1642}
+#text .bubbleavatar{width:29px;height:29px;min-width:29px;border:2px solid #74b9f8;background:linear-gradient(140deg,#6e34b9,#145acb);font-size:11px}
+#text .msgname{font-size:11px;color:#b4c9ff}
+#text .msgtime{font-size:9px;color:#819ac8}
+#text .msgbody{font-size:11px;line-height:1.55;margin-top:3px;color:#ebeeff}
+#text .stack{flex-shrink:0;background:#0b1545;padding:10px 12px;border-top:1px solid #203a92;gap:7px}
+#text .stack #nickname{max-width:100%;font-size:11px;padding:7px 10px}
+#text .stack #message{height:47px;min-height:47px;max-height:130px;background:#0d2267;border-color:#183a9a;font-size:11px;resize:vertical}
+#text .stack .control{padding:7px 12px;font-size:11px;min-height:31px}
+#text .feedback{font-size:10px}
+#text .two>.card:last-child{border:none;border-radius:0;background:#060d2f;box-shadow:none;padding:14px 8px;overflow:auto}
+#text .two>.card:last-child .tag{font-size:9px}
+#text .two>.card:last-child h3{font-size:12px}
+#text .two>.card:last-child p{font-size:10px;line-height:1.5}
+#text .members-title{padding:0 0 10px;font-size:10px;letter-spacing:.07em;color:#8caef7}
+#text .memberItem{display:flex;align-items:center;gap:7px;padding:7px 2px;font-size:11px;color:#bfcef1}
+#text .memberItem .memberAvatar{width:24px;height:24px;border-radius:50%;flex-shrink:0;border:1px solid #3b62b6;background:#1a2b78;display:grid;place-items:center;font-size:10px;color:#dce6ff}
+#text .members-list{margin:4px 0 10px;max-height:45vh;overflow:auto}
+/* Direct messages: user list on the left, conversation to the right */
+#text[data-channel="dm"] .social-content{display:grid;grid-template-columns:196px minmax(0,1fr);grid-template-rows:36px minmax(0,1fr) auto auto}
+#text[data-channel="dm"] .social-content>.row:first-child{grid-column:1/-1;grid-row:1}
+#text[data-channel="dm"] #dmDirectory{display:flex;flex-direction:column;grid-column:1;grid-row:2/5;background:#0a1549;border-right:1px solid #2a478d;padding:10px 7px;min-height:0;overflow:auto}
+#text[data-channel="dm"] #dmDirectory .directory{max-height:none;overflow:visible}
+#text[data-channel="dm"] #dmDirectory .person{border:0;border-radius:5px;padding:9px 7px;background:transparent;font-size:10px}
+#text[data-channel="dm"] #dmDirectory .person.active{background:#273f9b}
+#text[data-channel="dm"] #dmDirectory .channel-note{font-size:10px}
+#text[data-channel="dm"] #dmPreferences{font-size:10px;align-items:flex-start}
+#text[data-channel="dm"] #messages{grid-column:2;grid-row:2}
+#text[data-channel="dm"] #dmActions{grid-column:2;grid-row:3;background:#101946;padding:5px 10px}
+#text[data-channel="dm"] #composer{grid-column:2;grid-row:4}
+#text[data-channel="dm"] .social-content #composer .control{margin:0}
+#text[data-channel="announcements"] #messages{background:#070d33}
+#text[data-channel="announcements"] .msg{background:#101748;border-left:3px solid #d4ac60;margin:8px;border-radius:5px}
+#text[data-channel="announcements"] #composer{display:none!important}
+/* Matching dark panels for games, ranking and shop */
+#games,#leaderboard,#shop{background:linear-gradient(145deg,#04092a,#070d34)}
+#games .pane,#leaderboard .pane,#shop .pane{max-width:1100px}
+.pane-title{font-size:23px}
+.card{background:#091441;border:1px solid #28458c;border-radius:8px;box-shadow:0 4px 18px #01072633}
+.card h3{font-size:16px}
+.tag{color:#8bb8ff}
+.control{background:#142d91;border-color:#3c63ba;border-radius:5px}
+.control.secondary{background:#0e205e}
+.field{background:#080f35;border:1px solid #294d99;border-radius:5px}
+.answers button{background:#0b1f68;border-color:#284a99;border-radius:6px}
+.answers button:hover{background:#19358f}
+.product{border-bottom-color:#1a3274}
+.footer{background:#040a26;color:#7d96d2}
+@media(max-width:1050px){#text .two{grid-template-columns:minmax(0,1fr) 145px}#home .homebody{max-width:640px}}
+@media(max-width:800px){.sidebar{width:190px}#home .homehero{padding-top:26px}#home .home-logo{width:160px;height:180px}#home .home-plus{top:150px}#home .quickgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.sidebar{position:fixed;inset:0 auto 0 0;width:220px;transform:translateX(-100%);transition:transform .2s}.sidebar.open{transform:translateX(0)}.topbar{height:43px}#home .homebody{padding:0 12px 32px}#home .homehero{min-height:245px}#home .home-logo{height:158px;width:145px}#home .home-plus{top:130px;left:calc(50% + 57px)}#home .motto{font-size:10px}.quickgrid,.gamegrid{grid-template-columns:1fr 1fr}#text .two{grid-template-columns:1fr}#text .two>.card:last-child{display:none}#text .pane{height:calc(100dvh - 43px)}#text .social-content{border-right:0}#text[data-channel="dm"] .social-content{grid-template-columns:125px minmax(0,1fr)}#text[data-channel="dm"] #dmDirectory{padding:5px}#text .channel-bar small{display:none}#text .accountbar input{max-width:unset!important;width:100%}#text .accountbar #authFields .row{display:flex;flex-wrap:wrap}}
+@media(max-width:390px){#home .quickgrid{grid-template-columns:1fr 1fr}#home .quick{min-height:78px;padding:9px}#text[data-channel="dm"] .social-content{grid-template-columns:108px minmax(0,1fr)}#text .channel-bar{padding:0 8px}#text .stack{padding:8px}}
