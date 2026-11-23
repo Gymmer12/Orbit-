@@ -123,3 +123,12 @@
  .home-announcements-head{flex-wrap:wrap}
  .home-announcements.home-featured{padding:14px}
 }
+
+/* Keep the 2048 thumbnail digits inside their arcade tile at every width. */
+#games .arcade-game-card[data-arcade-game="game2048"] .arcade-card-art{
+ font-size:clamp(16px,1.25vw,23px)!important;letter-spacing:-.07em;
+ line-height:1;white-space:nowrap;text-align:center;
+ overflow:hidden;max-width:100%;box-sizing:border-box;
+}
+#games .arcade-game-card .arcade-card-art{box-sizing:border-box;overflow:hidden}
+@media(max-width:520px){#games .arcade-game-card[data-arcade-game="game2048"] .arcade-card-art{font-size:19px!important}}
