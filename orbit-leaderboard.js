@@ -95,7 +95,7 @@ async function init(db,person){
  client=db;user=person;loadedGame='';loadedAt=0;requestSeq++;
  resetRows('Open the Leaderboard to see rankings.');
 }
-function open(){load(true)}
+function open(){return load(true)}
 function refresh(){loadedAt=0;if($('leaderboard')?.classList.contains('active'))return load(true)}
 function clear(){
  client=null;user=null;loadedGame='';loadedAt=0;requestSeq++;
