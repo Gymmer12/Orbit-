@@ -73,7 +73,7 @@ begin
  where id=p_run_id and user_id=v_user for update;
  if not found then raise exception 'Game session not found.';end if;
  if v_run.finished_at is not null then raise exception 'This game was already finished.';end if;
- v_duration := pg_catalog.extract(epoch from(now()-v_run.started_at));
+ v_duration := extract(epoch from (now()-v_run.started_at));
  if v_duration<4 then
    -- A super-short run earns nothing, and is still marked completed.
    v_max_score:=0;
