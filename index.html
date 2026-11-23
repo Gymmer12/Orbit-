@@ -705,6 +705,10 @@ function memberStatusKind(p,online){
 }
 async function touchPresence(){
  if(!db||!user||!memberApproved||document.hidden)return;
+ if(window.OrbitSettings?.myStatus()==='invisible'){
+  await db.from('orbit_presence').delete().eq('user_id',user.id);
+  return;
+ }
  const {error:e}=await db.from('orbit_presence').upsert({user_id:user.id},{onConflict:'user_id'});
  if(e)console.warn('Presence update did not succeed',e.message);
 }
@@ -765,6 +769,7 @@ async function refreshMemberRail(){
   modIds=new Set((mods.data||[]).map(m=>m.user_id));
   blocked=new Set((blocks.data||[]).map(b=>b.blocked_id));
   isStaff=adminApproved||modIds.has(user.id);
+  window.OrbitSettings?.setRole(adminApproved?'ORBIT + Administrator':isStaff?'ORBIT + Moderator':'ORBIT + Member');
   $('announcementsActions').classList.toggle('staff-visible',current==='announcements'&&isStaff);
   box.replaceChildren();
   const online=memberRoster.filter(p=>onlineNow(p.id)).sort((a,b)=>a.nickname.localeCompare(b.nickname));
