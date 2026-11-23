@@ -1,18 +1,20 @@
 /* ORBIT + Arcade — original browser mini-game implementations.
  * Tetris (falling blocks), Snake, Flappy Bird style flight.
- * Stardust is non-redeemable, earned in capped amounts through Supabase RPC.
+ * Cosmos is non-redeemable, earned in capped amounts through Supabase RPC.
  * Scores originate in the browser; server checks rate/eligibility, not full gameplay.
  */
 (function(){
 'use strict';
 const $=id=>document.getElementById(id);
+const EXTRAS=window.OrbitArcadeExtras||null;
 const canvas=$('arcadeCanvas');
 const ctx=canvas?.getContext('2d');
 const W=340,H=480;
 const RULES={
- tetris:{name:'Tetris',instructions:'Move with ← →, rotate with ↑, soft drop with ↓, and hard drop with Space. Clear lines for points.',conversion:'2% of your Tetris points. A score of 500 earns 10 Stardust. Formula: score ÷ 50.'},
- snake:{name:'Snake',instructions:'Use ← ↑ → ↓ or WASD to steer. Collect glowing stars. Avoid walls and your own tail.',conversion:'50% of your apples collected. 20 apples earn 10 Stardust. Formula: score ÷ 2.'},
- flappy:{name:'Flappy Bird',instructions:'Press Space, ↑, tap the canvas, or use the Flap button to fly. Pass through gaps to score.',conversion:'100% of pipes passed. 10 pipes earn 10 Stardust. Formula: 1 Stardust per pipe.'}
+ tetris:{name:'Tetris',instructions:'Move with ← →, rotate with ↑, soft drop with ↓, and hard drop with Space. Clear lines for points.',conversion:'2% of your Tetris points. A score of 500 earns 10 Cosmos. Formula: score ÷ 50.'},
+ snake:{name:'Snake',instructions:'Use ← ↑ → ↓ or WASD to steer. Collect glowing stars. Avoid walls and your own tail.',conversion:'50% of your apples collected. 20 apples earn 10 Cosmos. Formula: score ÷ 2.'},
+ flappy:{name:'Flappy Bird',instructions:'Press Space, ↑, tap the canvas, or use the Flap button to fly. Pass through gaps to score.',conversion:'100% of pipes passed. 10 pipes earn 10 Cosmos. Formula: 1 Cosmos per pipe.'},
+ ...(EXTRAS?.RULES||{})
 };
 const COLORS=['#000000','#84d4fc','#8198ff','#fbce7b','#bf8eff','#6cedc2','#ff8393','#629dff'];
 const PIECES=[
@@ -26,7 +28,7 @@ const PIECES=[
 ];
 let db=null,member=null,game='tetris',state=null,score=0,runId=null,
  playing=false,paused=false,requestId=0,lastTime=0,waiting=false,initialized=false;
-let wallet={total:0,today:0,daily_cap:60,best:{tetris:0,snake:0,flappy:0}};
+let wallet={total:0,today:0,daily_cap:60,best:Object.fromEntries(Object.keys(RULES).map(k=>[k,0]))};
 function setStatus(s){const p=$('arcadeStatus');if(p)p.textContent=s}
 function setOverlay(title,message){
  const box=$('arcadeOverlay');if(!box)return;
@@ -37,17 +39,17 @@ function setOverlay(title,message){
 function hideOverlay(){if($('arcadeOverlay'))$('arcadeOverlay').hidden=true}
 function isVisible(){return $('games')?.classList.contains('active')&&!document.hidden}
 function setScore(n){
- score=Math.max(0,Math.trunc(n));
+ score=Math.max(0,Math.min(250000,Math.trunc(n)));
  $('arcadeScore').textContent=score.toLocaleString();
 }
 function updateWallet(){
  $('arcadeBalance').textContent=Number(wallet.total||0).toLocaleString();
- $('sidebarStardustCount').textContent=Number(wallet.total||0).toLocaleString();
+ $('sidebarCosmosCount').textContent=Number(wallet.total||0).toLocaleString();
  $('arcadeEarnedToday').textContent=Number(wallet.today||0).toLocaleString();
  $('arcadeBest').textContent=Number(wallet.best?.[game]||0).toLocaleString();
  const list=$('arcadePersonalBests');
  list.replaceChildren();
- for(const key of ['tetris','snake','flappy']){
+ for(const key of Object.keys(RULES)){
   const row=document.createElement('div');row.className='arcade-best';
   const label=document.createElement('span');label.textContent=RULES[key].name;
   const count=document.createElement('b');count.textContent=Number(wallet.best?.[key]||0).toLocaleString();
@@ -57,7 +59,7 @@ function updateWallet(){
 async function loadSummary(){
  if(!db||!member)return;
  const {data,error}=await db.rpc('orbit_game_summary');
- if(error){setStatus('Stardust balance unavailable: '+error.message);return}
+ if(error){setStatus('Cosmos balance unavailable: '+error.message);return}
  if(data&&typeof data==='object'){
   wallet={total:Number(data.total||0),today:Number(data.today||0),daily_cap:60,best:data.best||wallet.best};
   updateWallet();
@@ -295,7 +297,9 @@ function draw(){
  if(game==='tetris')tetrisDraw();
  if(game==='snake')snakeDraw();
  if(game==='flappy')flappyDraw();
+ if(EXTRAS?.RULES[game])EXTRAS.draw(game,state,ctx);
 }
+function gameAPI(){return {add:n=>{if(Number.isFinite(n)&&n>0)setScore(score+n)},end:reason=>endGame(reason)}}
 function setControls(){
  const start=$('arcadeStart'),pause=$('arcadePause'),stop=$('arcadeStop');
  start.disabled=waiting||playing;
@@ -310,7 +314,8 @@ function frame(time){
  lastTime=time;
  if(game==='tetris')tetrisStep(dt);
  else if(game==='snake')snakeStep(dt);
- else flappyStep(dt);
+ else if(game==='flappy')flappyStep(dt);
+ else if(EXTRAS?.RULES[game])EXTRAS.step(game,state,dt,gameAPI());
  draw();
  if(playing&&!paused)requestId=requestAnimationFrame(frame);
 }
@@ -330,14 +335,14 @@ async function endGame(reason){
  playing=false;paused=false;waiting=true;cancelAnimationFrame(requestId);setControls();
  const session=runId;runId=null;
  const final=score,owner=member?.id,finishedGame=game,claimClient=db;
- setOverlay(reason||'Round finished','Score: '+final.toLocaleString()+'. Checking Stardust earned…');
+ setOverlay(reason||'Round finished','Score: '+final.toLocaleString()+'. Checking Cosmos earned…');
  if(!session||!claimClient||!owner){waiting=false;setControls();return}
  setStatus('Saving your result…');
  try{
   const {data,error}=await claimClient.rpc('orbit_finish_game',{p_run_id:session,p_score:final});
   if(member?.id!==owner)return;
   if(error){
-   setStatus('Score: '+final.toLocaleString()+'. Stardust not awarded: '+error.message);
+   setStatus('Score: '+final.toLocaleString()+'. Cosmos not awarded: '+error.message);
    setOverlay('Round over','Score: '+final.toLocaleString()+'. You can try a new round.');
    await loadSummary();return;
   }
@@ -345,9 +350,9 @@ async function endGame(reason){
   wallet.best={...wallet.best,[finishedGame]:Number(data.best||0)};
   updateWallet();
   const reward=Number(data.earned||0);
-  const summary=reward?'+'+reward+' Stardust ✦':'0 Stardust (daily limit reached or low score)';
+  const summary=reward?'+'+reward+' Cosmos ✦':'0 Cosmos (daily limit reached or low score)';
   setOverlay('Round complete',final.toLocaleString()+' points · '+summary);
-  setStatus('Round saved. '+summary+'. You have earned '+wallet.today+' of 60 Stardust today.');
+  setStatus('Round saved. '+summary+'. You have earned '+wallet.today+' of 60 Cosmos today.');
  }catch(e){
   if(member?.id===owner)setStatus('Could not save the round: '+(e?.message||'network error'));
  }finally{
@@ -363,7 +368,7 @@ async function startGame(){
  if(error){setStatus('Unable to start: '+error.message);setOverlay('Could not start',error.message);setControls();return}
  runId=data;
  setScore(0);
- state=game==='tetris'?tetrisCreate():game==='snake'?snakeCreate():flappyCreate();
+ state=game==='tetris'?tetrisCreate():game==='snake'?snakeCreate():game==='flappy'?flappyCreate():EXTRAS?.create(game);
  playing=true;paused=false;
  hideOverlay();setStatus('Playing '+RULES[game].name+'. Enjoy your round!');
  lastTime=performance.now();setControls();draw();requestId=requestAnimationFrame(frame);
@@ -371,12 +376,13 @@ async function startGame(){
 function chooseGame(next){
  if(!Object.prototype.hasOwnProperty.call(RULES,next))return;
  if(playing||waiting){setStatus('Finish the current round before switching games.');return}
- game=next;score=0;runId=null;state=next==='tetris'?tetrisCreate():next==='snake'?snakeCreate():flappyCreate();
+ game=next;score=0;runId=null;state=next==='tetris'?tetrisCreate():next==='snake'?snakeCreate():next==='flappy'?flappyCreate():EXTRAS?.create(next);
  $('arcadeCurrentName').textContent=RULES[game].name;
  $('arcadeInfoTitle').textContent='How to play '+RULES[game].name;
  $('arcadeInstructions').textContent=RULES[game].instructions;
  $('arcadeConversion').textContent=RULES[game].conversion;
  setScore(0);
+ EXTRAS?.keypad(game,key=>{if(!playing||paused||waiting)return;EXTRAS.key(game,state,key,gameAPI());draw()});
  for(const button of document.querySelectorAll('[data-arcade-game]')){
   const selected=button.dataset.arcadeGame===game;
   button.classList.toggle('selected',selected);
@@ -384,7 +390,7 @@ function chooseGame(next){
  }
  updateWallet();setControls();
  setOverlay(RULES[game].name,'Select Start game when you’re ready.');
- setStatus('Score-based Stardust is limited to 60 per day, shared across all three games.');
+ setStatus('You can earn up to 60 Cosmos per day, shared across all 16 games.');
  draw();
 }
 function control(name){
@@ -392,6 +398,7 @@ function control(name){
  if(game==='tetris')tetrisInput(name);
  else if(game==='snake')snakeInput(name);
  else if(game==='flappy'&&['rotate','up','drop'].includes(name))flap();
+ else if(EXTRAS?.RULES[game])EXTRAS.input(game,state,name==='down'&&game==='minesweeper'?'flag':name==='rotate'&&['blockblast','minesweeper'].includes(game)?'drop':name,gameAPI());
  draw();
 }
 function handleKey(e){
@@ -399,6 +406,7 @@ function handleKey(e){
  if(e.target?.closest?.('input,textarea,select,button,[contenteditable]'))return;
  const map={ArrowLeft:'left',a:'left',A:'left',ArrowRight:'right',d:'right',D:'right',
   ArrowUp:'rotate',w:'rotate',W:'rotate',ArrowDown:'down',s:'down',S:'down',' ':'drop'};
+ if(EXTRAS?.RULES[game]&&EXTRAS.key(game,state,e.key,gameAPI())){e.preventDefault();draw();return}
  const key=map[e.key];if(!key)return;
  e.preventDefault();
  if(game==='flappy')control('rotate');
@@ -414,7 +422,17 @@ function bind(){
   const action=button.dataset.arcadeInput;
   control(game==='flappy'?'rotate':action);
  }));
- canvas?.addEventListener('pointerdown',e=>{if(game==='flappy'&&playing&&!paused){e.preventDefault();flap()}});
+ canvas?.addEventListener('pointerdown',e=>{
+ if(!playing||paused||waiting)return;
+ if(game==='flappy'){e.preventDefault();flap();return}
+ if(EXTRAS?.RULES[game]){
+  e.preventDefault();const area=canvas.getBoundingClientRect();
+  if(area.width&&area.height){
+   const x=(e.clientX-area.left)*340/area.width,y=(e.clientY-area.top)*480/area.height;
+   EXTRAS.pointer(game,state,x,y,gameAPI());draw()
+  }
+ }
+});
  document.addEventListener('keydown',handleKey);
  document.addEventListener('visibilitychange',()=>{if(document.hidden&&playing&&!paused)pauseGame()});
  chooseGame('tetris');
@@ -425,14 +443,14 @@ async function init(client,person){
  if(member?.id===person.id&&db===client){updateWallet();return}
  if(playing){cancelAnimationFrame(requestId);playing=false;paused=false;runId=null}
  db=client;member=person;
- wallet={total:0,today:0,daily_cap:60,best:{tetris:0,snake:0,flappy:0}};
+ wallet={total:0,today:0,daily_cap:60,best:Object.fromEntries(Object.keys(RULES).map(k=>[k,0]))};
  updateWallet();chooseGame('tetris');await loadSummary();
 }
 function open(){if(!db||!member)return;draw();loadSummary()}
 function pause(){if(playing&&!paused)pauseGame()}
 function clear(){
  cancelAnimationFrame(requestId);db=null;member=null;runId=null;playing=false;paused=false;waiting=false;
- wallet={total:0,today:0,daily_cap:60,best:{tetris:0,snake:0,flappy:0}};
+ wallet={total:0,today:0,daily_cap:60,best:Object.fromEntries(Object.keys(RULES).map(k=>[k,0]))};
  updateWallet();if(initialized)chooseGame('tetris');
 }
 window.OrbitArcade={init,open,pause,clear,loadSummary};
