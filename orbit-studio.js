@@ -226,6 +226,8 @@ function decorateAvatar(element,id,nick){
  if(!element)return;
  const item=get(id);
  element.classList.add('orbit-avatar');
+ const ownColor=window.OrbitSettings?.memberColor(id);
+ if(ownColor)element.style.setProperty('--member-avatar-color',ownColor);
  element.dataset.ring=item.avatar_ring;
  element.dataset.avatar=item.avatar_style;
  element.replaceChildren();
