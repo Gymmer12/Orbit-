@@ -27,6 +27,7 @@
 <link rel="stylesheet" href="orbit-member-settings.css">
 <link rel="stylesheet" href="orbit-arcade.css">
 <link rel="stylesheet" href="orbit-arcade-v2.css">
+<link rel="stylesheet" href="orbit-chat-cleanup.css">
 </head>
 <body>
 <div id="authGate" role="region" aria-label="ORBIT + account sign-in">
@@ -150,7 +151,7 @@
 <div class="profile"><button type="button" class="avatar orbit-avatar" id="sidebarAvatar" aria-label="Customize your profile in Orbit Studio" title="Customize your profile">O+</button><button id="sidebarProfileButton" class="sidebar-profile-detail" type="button" title="Open your settings"><span class="name" id="profileName">ORBIT + Player</span><span class="status" id="sidebarStatus"><span class="settings-presence-dot online"></span> Online</span></button><button id="sidebarSignout" type="button" title="Sign out of ORBIT +">Sign out</button></div>
 </aside>
 <div class="content" id="content"><div class="stars"></div>
-<header class="topbar"><div class="row"><button class="mobilemenu" id="menu" aria-label="Open navigation">☰</button><strong id="pagetitle"># &nbsp; Chat</strong><span class="hint">Stay in the Loop. Keep it simple.</span></div></header>
+<header class="topbar"><div class="row topbar-current"><button class="mobilemenu" id="menu" aria-label="Open navigation">☰</button><strong id="pagetitle"># Chat</strong><span class="hint" id="topbarSubtitle">Talk with approved members</span></div><span class="topbar-online" id="topbarOnline" hidden>● <span id="memberCount">0 online</span></span></header>
 <section class="view" id="home" aria-label="ORBIT + homepage">
  <div class="orbit-home-hero">
   <div class="home-brandmark">
@@ -423,11 +424,9 @@
  </div>
 </div>
 </section>
-<section class="view active" id="text" data-channel="general"><div class="channel-bar"><span><strong id="channelBarName"># chat</strong><small id="channelBarDesc">Just a place to chat and catch up.</small></span><span class="memberHint">● <span id="memberCount">0 online</span></span></div><div class="pane">
-<div class="social-header"><div><h1 class="pane-title" id="socialTitle"># Chat</h1><p class="pane-sub" id="socialDescription">Talk with other approved ORBIT + members.</p></div><div class="tag" id="socialChannelLabel">CHAT</div></div>
+<section class="view active" id="text" data-channel="general"><div class="pane">
 <div id="accountBox" class="accountbar"><div class="row"><strong id="sessionStatus">Account connected to ORBIT +</strong><button class="control secondary hide" id="signout">Sign out</button></div><div id="authFields"><div class="row"><input class="field" style="max-width:220px" id="authNickname" maxlength="24" placeholder="Public nickname" aria-label="Public nickname"><input class="field" style="max-width:240px" type="email" id="authEmail" placeholder="School email (e.g. 24jamesh@tesdk12.net)" aria-label="School email address" inputmode="email" autocomplete="email"><input class="field" style="max-width:200px" type="password" id="authPassword" placeholder="Password" aria-label="Account password"></div><div class="row"><button class="control" id="signup">Register</button><button class="control secondary" id="signin">Log in</button></div></div><div id="authStatus" class="channel-note" aria-live="polite">ORBIT + registration uses @tesdk12.net school email addresses. Use a new password, not your school login password. Your email stays private.</div></div>
 <div class="two"><div class="card social-content">
-<div class="row" style="justify-content:space-between"><h3 id="chatTitle"># Chat</h3><span class="tag" id="chatBadge">GROUP CHAT</span></div>
 <div id="announcementsFeed" aria-live="polite"></div>
 <div id="announcementsActions"><div class="row" style="justify-content:space-between"><strong>Staff announcements</strong><button class="announce-action" id="announcementNew" type="button">+ New announcement</button></div>
 <div class="announce-fields" id="announcementEditor" hidden>
@@ -731,6 +730,8 @@ function activateView(viewId){
   $('dmDirectory').hidden=true;
   $('dmToggle').setAttribute('aria-expanded','false');
   $('pagetitle').textContent=viewId==='home'?'⌂ Home':viewId==='settings'?'⚙ Settings':viewId==='games'?'✦ Games':viewId==='leaderboard'?'♛ Leaderboard':'✦ Orbit Studio';
+  $('topbarSubtitle').textContent='Stay in the Loop. Keep it simple.';
+  $('topbarOnline').hidden=true;
   $('sidebar').classList.remove('open');
  }
  if(viewId==='home'||viewId==='studio')window.OrbitStudio?.updatePreview();
@@ -770,14 +771,9 @@ function openSocial(channel,recipientId=null){
  const target=memberRoster.find(p=>p.id===selected);
  const label=channel==='dm'?(target?'✉ '+target.nickname:'✉ Direct Messages'):channel==='announcements'?'📣 Announcements':'# Chat';
  $('pagetitle').textContent=label;
- $('channelBarName').textContent=channel==='dm'?'✉ direct-messages':channel==='announcements'?'# announcements':'# chat';
- $('channelBarDesc').textContent=channel==='dm'?'Choose someone to message privately':channel==='announcements'?'Updates from ORBIT + staff':'Just a place to chat, hang out, and catch up';
- $('socialTitle').textContent=label;
- $('socialDescription').textContent=channel==='dm'?'Select a member from the sidebar.':channel==='announcements'?'Official updates from the administrator and moderators.':'Messages shared by approved members.';
- $('chatTitle').textContent=label;
+ $('topbarSubtitle').textContent=channel==='dm'?(target?'Private conversation':'Choose someone to message privately'):channel==='announcements'?'Updates from administrators and moderators':'Talk with approved ORBIT + members';
+ $('topbarOnline').hidden=channel!=='general';
  $('sidebarChannelTitle').textContent=channel==='dm'?'Direct Messages':channel==='announcements'?'Announcements':'Chat';
- $('socialChannelLabel').textContent=channel==='dm'?'PRIVATE':channel==='announcements'?'ANNOUNCEMENTS':'CHAT';
- $('chatBadge').textContent=channel==='dm'?'PRIVATE':channel==='announcements'?'STAFF POSTING':'GROUP CHAT';
  $('sidebarChannelText').textContent=channel==='dm'?'Choose a member to start a private chat.':channel==='announcements'?'Only staff can create and edit announcements.':'Everyone approved can read and send messages.';
  $('message').placeholder=channel==='dm'?'Message this person...':'Type a message...';
  show('dmActions',channel==='dm'&&!!selected);
