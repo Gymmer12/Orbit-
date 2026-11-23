@@ -25,7 +25,7 @@ create policy orbit_ban_admin_add on public.orbit_bans for insert to authenticat
 with check (
  banned_by=(select auth.uid())
  and exists(select 1 from public.orbit_admins a where a.user_id=(select auth.uid()))
- and not exists(select 1 from public.orbit_admins protected where protected.user_id=user_id)
+ and not exists(select 1 from public.orbit_admins protected where protected.user_id=orbit_bans.user_id)
 );
 drop policy if exists orbit_ban_admin_remove on public.orbit_bans;
 create policy orbit_ban_admin_remove on public.orbit_bans for delete to authenticated
