@@ -128,9 +128,10 @@ function renderPaletteState(){
  if(readability){
   const r1=paletteContrast(colors.text,colors.background);
   const r2=paletteContrast(colors.text,colors.surface);
-  const tooLow=Math.min(r1,r2)<4.5;
+  const r3=paletteContrast(colors.text,colors.sidebar);
+  const tooLow=Math.min(r1,r2,r3)<4.5;
   readability.textContent=tooLow?
-   'Low contrast: the chosen text may be hard to read. Try a lighter or darker text color.':
+   'Low contrast: the chosen text may be hard to read on the background, sidebar, or cards. Try a lighter or darker text color.':
    'Looking good! Your text is readable against the main background and cards.';
   readability.dataset.warning=tooLow?'true':'false';
  }
