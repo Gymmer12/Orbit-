@@ -135,3 +135,29 @@ html,body{background:#050b32;color:#eaf0ff;font-family:Inter,Segoe UI,Arial,sans
 @media(max-width:800px){.sidebar{width:190px}#home .homehero{padding-top:26px}#home .home-logo{width:160px;height:180px}#home .home-plus{top:150px}#home .quickgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:650px){.sidebar{position:fixed;inset:0 auto 0 0;width:220px;transform:translateX(-100%);transition:transform .2s}.sidebar.open{transform:translateX(0)}.topbar{height:43px}#home .homebody{padding:0 12px 32px}#home .homehero{min-height:245px}#home .home-logo{height:158px;width:145px}#home .home-plus{top:130px;left:calc(50% + 57px)}#home .motto{font-size:10px}.quickgrid,.gamegrid{grid-template-columns:1fr 1fr}#text .two{grid-template-columns:1fr}#text .two>.card:last-child{display:none}#text .pane{height:calc(100dvh - 43px)}#text .social-content{border-right:0}#text[data-channel="dm"] .social-content{grid-template-columns:125px minmax(0,1fr)}#text[data-channel="dm"] #dmDirectory{padding:5px}#text .channel-bar small{display:none}#text .accountbar input{max-width:unset!important;width:100%}#text .accountbar #authFields .row{display:flex;flex-wrap:wrap}}
 @media(max-width:390px){#home .quickgrid{grid-template-columns:1fr 1fr}#home .quick{min-height:78px;padding:9px}#text[data-channel="dm"] .social-content{grid-template-columns:108px minmax(0,1fr)}#text .channel-bar{padding:0 8px}#text .stack{padding:8px}}
+
+
+/* Account-first experience: never show the app before verified sign-in. */
+#appLayout[hidden],#authGate[hidden],#gateNameWrap[hidden]{display:none!important}
+#authGate{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;overflow:auto;padding:26px 16px;background:
+linear-gradient(180deg,rgba(5,9,40,.38),rgba(2,7,30,.88)),
+url("assets/orbit-home-poster.jpg") center/cover no-repeat,#050b34}
+.gate-card{width:min(440px,100%);background:linear-gradient(155deg,rgba(11,25,83,.96),rgba(7,13,53,.98));border:1px solid #5570c3;box-shadow:0 30px 80px #0009,0 0 42px #2552ca32;border-radius:16px;padding:30px 28px;color:#f2f6ff}
+.gate-logo{width:min(230px,100%);height:90px;object-fit:contain;display:block;margin:0 auto 8px;filter:drop-shadow(0 4px 14px #389cff88)}
+.gate-brand{text-align:center;font-size:24px;font-weight:900;letter-spacing:.05em;margin:0 0 4px}.gate-brand span{color:#b8caff}
+.gate-subtitle{text-align:center;color:#b6c8ef;font-size:12px;margin:0 0 23px;letter-spacing:.06em}
+.gate-switch{display:flex;gap:8px;margin:0 0 22px}
+.gate-switch button{flex:1;padding:10px 8px;border:1px solid #364d96;border-radius:8px;background:#091b59;color:#d7e5ff;font-weight:700}
+.gate-switch button[aria-pressed="true"]{background:linear-gradient(125deg,#3154c2,#5445a9);border-color:#91a5ef;color:#fff}
+.gate-field{display:grid;gap:6px;margin:11px 0;color:#cbd9fa;font-weight:650;font-size:12px}
+.gate-field input{width:100%;border:1px solid #4662aa;background:#07113c;color:#fff;border-radius:8px;padding:12px 13px;outline:none;font-size:14px}
+.gate-field input:focus{border-color:#8dbeff;box-shadow:0 0 0 2px #3266af77}
+.gate-submit{border:1px solid #93adff;background:linear-gradient(120deg,#2352cf,#6653c8);color:white;border-radius:8px;padding:12px 16px;font-weight:800;width:100%;margin:12px 0 8px}
+.gate-submit:hover{filter:brightness(1.12)}.gate-submit:disabled{opacity:.55;cursor:wait}
+.gate-message{font-size:12px;color:#c7dafa;min-height:22px;line-height:1.6;margin:9px 0 0;overflow-wrap:anywhere}
+.gate-message[data-error="true"]{color:#ffb6bf}
+.gate-privacy{border-top:1px solid #263b84;padding-top:15px;margin:18px 0 0;font-size:11px;color:#a8bce5;line-height:1.6}
+#text #authFields{display:none!important} /* The main sign-in is now the entry screen. */
+#sidebarSignout{margin-left:auto;background:transparent;border:1px solid #3856a4;color:#c0d5ff;border-radius:6px;font-size:10px;padding:7px 8px}
+#sidebarSignout:hover{background:#243d94}
+@media(max-width:470px){.gate-card{padding:22px 18px}.gate-logo{height:76px}}
