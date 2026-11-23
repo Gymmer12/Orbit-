@@ -89,15 +89,17 @@ function paletteTextOnAccent(accent){
 function applySitePalette(colors){
  const app=$('appLayout');if(!app)return;
  const active=normalizePalette(colors);
- if(!active){
-  delete app.dataset.sitePalette;
-  for(const key of PALETTE_KEYS)app.style.removeProperty('--oc-'+key);
-  app.style.removeProperty('--oc-accent-ink');
-  return;
+ for(const target of [app,document.documentElement]){
+  if(!active){
+   delete target.dataset.sitePalette;
+   for(const key of PALETTE_KEYS)target.style.removeProperty('--oc-'+key);
+   target.style.removeProperty('--oc-accent-ink');
+  }else{
+   target.dataset.sitePalette='custom';
+   for(const key of PALETTE_KEYS)target.style.setProperty('--oc-'+key,active[key]);
+   target.style.setProperty('--oc-accent-ink',paletteTextOnAccent(active.accent));
+  }
  }
- app.dataset.sitePalette='custom';
- for(const key of PALETTE_KEYS)app.style.setProperty('--oc-'+key,active[key]);
- app.style.setProperty('--oc-accent-ink',paletteTextOnAccent(active.accent));
 }
 function renderPaletteState(){
  const colors=draftPalette||PALETTE_DEFAULT;
@@ -113,9 +115,10 @@ function renderPaletteState(){
   mini.style.setProperty('--pv-accent-ink',paletteTextOnAccent(colors.accent));
  }
  const diff=!paletteEqual(draftPalette,savedPalette);
- const save=$('paletteSave'),undo=$('paletteUndo');
+ const save=$('paletteSave'),undo=$('paletteUndo'),reset=$('paletteReset');
  if(save)save.disabled=!diff||savingPalette;
  if(undo)undo.disabled=!diff||savingPalette;
+ if(reset)reset.disabled=savingPalette||(!draftPalette&&!savedPalette);
  for(const button of $('palettePresets')?.querySelectorAll('[data-palette-preset]')||[]){
   const selected=paletteEqual(draftPalette,PALETTE_PRESETS.find(p=>p.id===button.dataset.palettePreset)?.colors);
   button.classList.toggle('selected',selected);
