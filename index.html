@@ -166,12 +166,21 @@ const config=window.ORBIT_CONFIG||{},connected=!!(config.url&&config.anonKey&&wi
 let db=null,user=null,current='general',selected=null,people=[],blocked=new Set(),refreshTimer=null;let memberRoster=[],presenceMap=new Map(),modIds=new Set(),isStaff=false,dmListOpen=false,editingAnnouncement=null,memberRefreshBusy=false;
 try{if(connected)db=window.supabase.createClient(config.url,config.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})}catch(e){console.warn('Supabase not initialized',e)}
 
-let verified=false,gateMode='login',memberApproved=false,adminApproved=false,reviewApplicant=null,activeApplication=null,approvalBusy=false;
+let verified=false,gateMode='login',memberApproved=false,adminApproved=false,reviewApplicant=null,activeApplication=null,approvalBusy=false,bannedAccount=false;
 
 function safeText(target,message){$(target).textContent=message}
 async function checkMembership(){
- memberApproved=false;adminApproved=false;activeApplication=null;
+ memberApproved=false;adminApproved=false;activeApplication=null;bannedAccount=false;
  if(!db||!user){syncGate();return false}
+ const banResult=await db.from('orbit_bans').select('user_id,reason').eq('user_id',user.id).maybeSingle();
+ if(banResult.error){gateMessage('Unable to verify account access right now.',true);syncGate();return false}
+ if(banResult.data){
+  bannedAccount=true;
+  $('banReasonDisplay').textContent='Reason: '+(banResult.data.reason||'Violation of ORBIT + rules');
+  syncGate();
+  updateComposer();
+  return false;
+ }
  const result=await db.from('orbit_admins').select('user_id').eq('user_id',user.id).maybeSingle();
  if(result.error){gateMessage('Unable to check administrator permissions. Try again later.',true);syncGate();return false}
  adminApproved=!!result.data;
@@ -258,7 +267,8 @@ $('submitApplication').onclick=async()=>{
 $('applicantSend').onclick=()=>sendVerification(user?.id,$('applicantMessageText').value,'approvalFeedback','applicantMessageText');
 $('approvalRefresh').onclick=()=>authUI();
 $('approvalSignout').onclick=()=>db?.auth.signOut();
-$('adminButton').onclick=async()=>{if(!adminApproved)return;$('adminPanel').hidden=false;reviewApplicant=null;safeText('adminSelectedTitle','Select an applicant');safeText('adminSelectedEmail','');$('adminMessages').replaceChildren();await adminRefresh();await refreshModeratorsAdmin()};
+$('banLogout').onclick=()=>db?.auth.signOut();
+$('adminButton').onclick=async()=>{if(!adminApproved)return;$('adminPanel').hidden=false;reviewApplicant=null;safeText('adminSelectedTitle','Select an applicant');safeText('adminSelectedEmail','');$('adminMessages').replaceChildren();await adminRefresh();await refreshModeratorsAdmin();await refreshBansAdmin()};
 $('adminClose').onclick=()=>{$('adminPanel').hidden=true};
 $('adminSend').onclick=()=>sendVerification(reviewApplicant,$('adminReply').value,'adminFeedback','adminReply');
 async function decideApplication(newStatus){
@@ -270,6 +280,56 @@ async function decideApplication(newStatus){
 }
 $('adminApprove').onclick=()=>decideApplication('approved');
 $('adminReject').onclick=()=>decideApplication('rejected');
+
+
+async function refreshBansAdmin(){
+ if(!db||!adminApproved||!user)return;
+ const [applications,bans]=await Promise.all([
+  db.from('orbit_applications').select('user_id,nickname,first_name,last_name,status').order('created_at',{ascending:false}).limit(250),
+  db.from('orbit_bans').select('user_id,reason,created_at').order('created_at',{ascending:false}).limit(250)
+ ]);
+ if(applications.error||bans.error){$('banStatus').textContent=(applications.error||bans.error).message;return}
+ const bannedSet=new Set((bans.data||[]).map(x=>x.user_id));
+ const approved=(applications.data||[]).filter(x=>x.user_id!==user.id&&!bannedSet.has(x.user_id));
+ const picker=$('banTarget'),selectedValue=picker.value;picker.replaceChildren();
+ const empty=document.createElement('option');empty.value='';empty.textContent=approved.length?'Select a registered account':'No eligible accounts';picker.append(empty);
+ approved.forEach(a=>{
+   const item=document.createElement('option');item.value=a.user_id;item.textContent=a.nickname+' ('+a.status+')';picker.append(item)
+ });
+ if(approved.some(a=>a.user_id===selectedValue))picker.value=selectedValue;
+ const list=$('banList');list.replaceChildren();
+ if(!(bans.data||[]).length){
+  const p=document.createElement('p');p.textContent='No banned accounts.';list.append(p);return
+ }
+ (bans.data||[]).forEach(b=>{
+  const app=(applications.data||[]).find(x=>x.user_id===b.user_id);
+  const line=document.createElement('div');line.className='ban-list-item';
+  const info=document.createElement('div');
+  const name=document.createElement('strong');name.textContent=app?.nickname||'Banned member';
+  const reason=document.createElement('small');reason.textContent=b.reason;
+  info.append(name,reason);
+  const unban=document.createElement('button');unban.type='button';unban.textContent='Unban';
+  unban.onclick=async()=>{
+   if(!confirm('Restore ORBIT + access for '+(app?.nickname||'this account')+'?'))return;
+   const {error}=await db.from('orbit_bans').delete().eq('user_id',b.user_id);
+   $('banStatus').textContent=error?error.message:'Ban removed. The member can return if their signup is approved.';
+   if(!error){await refreshBansAdmin();await refreshMemberRail()}
+  };
+  line.append(info,unban);list.append(line);
+ });
+}
+$('banAdd').onclick=async()=>{
+ if(!db||!user||!adminApproved)return;
+ const id=$('banTarget').value,reason=$('banReason').value.trim();
+ if(!id){$('banStatus').textContent='Choose an account to ban.';return}
+ if(!reason){$('banStatus').textContent='Enter a reason so the person understands the ban.';return}
+ if(!confirm('Ban this account from ORBIT +? They will lose access to messages and cannot send new ones.'))return;
+ const btn=$('banAdd');btn.disabled=true;
+ const {error}=await db.from('orbit_bans').insert({user_id:id,banned_by:user.id,reason:reason.slice(0,220)});
+ btn.disabled=false;
+ $('banStatus').textContent=error?error.message:'Account banned. Messages are blocked for this account.';
+ if(!error){$('banReason').value='';await refreshBansAdmin();await refreshMemberRail()}
+};
 
 function gateMessage(message,isError=false){$('gateMessage').textContent=message;$('gateMessage').dataset.error=isError?'true':'false'}
 function setGateMode(mode){
@@ -286,11 +346,12 @@ function setGateMode(mode){
   gateMessage(signup?'Enter your name once. It will be saved to your account, while other players see only your nickname.':'Welcome back! Enter your ORBIT + account details.');
 }
 function syncGate(){
-  const isSignedIn=Boolean(db&&verified&&user&&memberApproved);
+  const isSignedIn=Boolean(db&&verified&&user&&memberApproved&&!bannedAccount);
   $('appLayout').hidden=!isSignedIn;
   $('appLayout').inert=!isSignedIn;
   $('authGate').hidden=Boolean(db&&verified&&user);
-  $('approvalGate').hidden=!(db&&verified&&user&&!memberApproved);
+  $('approvalGate').hidden=!(db&&verified&&user&&!memberApproved&&!bannedAccount);
+  $('banGate').hidden=!(db&&verified&&user&&bannedAccount);
   $('adminButton').classList.toggle('ready',isSignedIn&&adminApproved);
   if(!isSignedIn)$('adminPanel').hidden=true;
   if(isSignedIn){
@@ -344,6 +405,23 @@ $('gateForm').addEventListener('submit',async event=>{
 function show(id,on){$(id).classList.toggle('hide',!on)}
 function status(s){$('authStatus').textContent=s}
 function error(e){status(e&&e.message?e.message:String(e||'Unknown error'))}
+
+function updateComposer(){
+ const entry=$('message'),send=$('post');
+ if(!entry||!send)return;
+ const allowed=!!(db&&user&&memberApproved&&!bannedAccount&&current!=='announcements'&&(current!=='dm'||selected));
+ send.disabled=!allowed||!entry.value.trim();
+ entry.style.height='auto';
+ entry.style.height=Math.min(134,Math.max(38,entry.scrollHeight))+'px';
+}
+$('message').addEventListener('input',updateComposer);
+$('message').addEventListener('keydown',event=>{
+ if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing){
+  event.preventDefault();
+  if(!$('post').disabled)$('post').click();
+ }
+});
+
 function openSocial(channel,recipientId=null){
  if(!['general','announcements','dm'].includes(channel))channel='general';
  const wasDm=current==='dm';
@@ -372,6 +450,7 @@ function openSocial(channel,recipientId=null){
  show('composer',channel!=='announcements');
  $('announcementsActions').classList.toggle('staff-visible',channel==='announcements'&&isStaff);
  $('poststatus').textContent='';
+ updateComposer();
  if(window.innerWidth<650)$('sidebar').classList.remove('open');
  if(!db||!memberApproved)return;
  if(channel==='announcements')loadAnnouncements();
@@ -580,6 +659,7 @@ async function authUI(){
     return;
   }
   if(user&&memberApproved){
+    updateComposer();
     $('sessionStatus').textContent='Signed in as '+(user.user_metadata?.nickname||user.email?.split('@')[0]||'Player');
     show('authFields',false);show('signout',true);show('nickname',false);
     $('connectionStatus').textContent='Shared chat is available to signed-in members.';
@@ -608,8 +688,8 @@ $('post').onclick=async()=>{
  const send=$('post');send.disabled=true;
  const {error:e}=await db.from(table).insert(payload);
  send.disabled=false;
- if(e){$('poststatus').textContent='Could not send: '+e.message;return}
- $('message').value='';$('poststatus').textContent='Sent';
+ if(e){$('poststatus').textContent='Could not send: '+e.message;updateComposer();return}
+ $('message').value='';$('poststatus').textContent='Sent';updateComposer();
  await loadMessages();
 };
 $('blockUser').onclick=async()=>{if(!db||!selected||!requireUser())return;if(!confirm('Block this user? They will disappear from your directory and won’t be able to send you new messages.'))return;let r=await db.from('blocks').insert({owner_id:user.id,blocked_id:selected});if(r.error)error(r.error);else{selected=null;show('dmActions',false);await refreshMemberRail();await loadMessages()}};
@@ -632,12 +712,18 @@ if(db){
   let ticks=0;
   refreshTimer=setInterval(async()=>{
     if(!db||!user)return;
+    if(ticks%2===0){
+      const previouslyApproved=memberApproved;
+      const active=await checkMembership();
+      if(previouslyApproved&&!active)return;
+      if(!previouslyApproved&&active){await authUI();return}
+    }
     if(!memberApproved){const approved=await checkMembership();if(approved)await authUI();return}
     try{
       if(!document.hidden&&ticks%3===0)await touchPresence();
       await loadMessages();
       if(ticks%2===0)await refreshMemberRail();
-      if(adminApproved&&!$('adminPanel').hidden&&ticks%3===0){await adminRefresh();await refreshModeratorsAdmin()}
+      if(adminApproved&&!$('adminPanel').hidden&&ticks%3===0){await adminRefresh();await refreshModeratorsAdmin();await refreshBansAdmin()}
       ticks++;
     }catch(e){console.warn('Messaging refresh issue',e.message)}
   },8000);
