@@ -114,3 +114,14 @@ using(owner_id=(select auth.uid()) and private.orbit_is_member());
 drop policy if exists reports_submit on public.reports;
 create policy reports_submit on public.reports for insert to authenticated
 with check(reporter_id=(select auth.uid()) and private.orbit_is_member());
+
+-- Explicit API grants for signed-in members; Row Level Security above still protects rows.
+grant select,insert,update on public.profiles to authenticated;
+grant select,insert on public.general_messages to authenticated;
+grant select on public.announcements to authenticated;
+grant select,insert on public.direct_messages to authenticated;
+grant select,insert,delete on public.blocks to authenticated;
+grant insert on public.reports to authenticated;
+grant usage,select on sequence public.general_messages_id_seq to authenticated;
+grant usage,select on sequence public.direct_messages_id_seq to authenticated;
+grant usage,select on sequence public.reports_id_seq to authenticated;
