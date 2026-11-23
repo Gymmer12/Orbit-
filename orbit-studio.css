@@ -166,11 +166,18 @@
   position:absolute;
   right:-9px;
   bottom:12%;
-  font-size:33px;
+  font-family:"Arial Rounded MT Bold","Arial Black",Arial,sans-serif;
+  font-size:37px;
   font-weight:900;
   line-height:1;
-  color:var(--home-accent,#b2ccff);
-  text-shadow:0 0 12px #5a91ff,0 3px 12px #030729;
+  /* Match the metallic-white-to-blue-and-lavender gradient in the Orbit wordmark. */
+  background:linear-gradient(180deg,#fff 3%,#f5f9ff 24%,#cce2ff 46%,#7fc9ff 68%,#8fa8fc 84%,#b58fea 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  -webkit-text-fill-color:transparent;
+  text-shadow:none;
+  filter:drop-shadow(0 1px 1px #28418d55) drop-shadow(0 0 7px #729dff85);
   pointer-events:none;
 }
 .orbit-home-hero .home-slogan{
@@ -192,6 +199,6 @@
 @media(max-width:650px){
   .orbit-home-hero{padding:20px 12px 19px!important}
   .orbit-home-hero .home-brandmark{width:min(202px,61vw)}
-  .orbit-home-hero .home-brand-plus{right:-7px;font-size:28px}
+  .orbit-home-hero .home-brand-plus{right:-7px;font-size:32px}
   .orbit-home-hero .home-slogan{font-size:10px;letter-spacing:.16em}
 }
