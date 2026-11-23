@@ -23,7 +23,35 @@
 </style><link rel="stylesheet" href="orbit-classic.css">
 </head>
 <body>
-<div class="layout">
+<div id="authGate" role="region" aria-label="ORBIT + account sign-in">
+  <section class="gate-card">
+    <img class="gate-logo" src="assets/orbit-logo-wide.png" alt="Orbit logo">
+    <h1 class="gate-brand">ORBIT <span>+</span></h1>
+    <p class="gate-subtitle">STAY IN THE LOOP.</p>
+    <div class="gate-switch" role="group" aria-label="Sign in or register">
+      <button type="button" id="gateLoginTab" aria-pressed="true">Log in</button>
+      <button type="button" id="gateSignupTab" aria-pressed="false">Sign up</button>
+    </div>
+    <form id="gateForm">
+      <label class="gate-field" id="gateNameWrap" hidden>
+        Public nickname
+        <input id="gateNickname" name="nickname" type="text" autocomplete="nickname" minlength="2" maxlength="24" placeholder="Pick a nickname">
+      </label>
+      <label class="gate-field">
+        School email address
+        <input id="gateEmail" name="email" type="email" autocomplete="username" maxlength="254" placeholder="24jamesh@tesdk12.net" required>
+      </label>
+      <label class="gate-field">
+        Password
+        <input id="gatePassword" name="password" type="password" autocomplete="current-password" minlength="8" placeholder="Your ORBIT + password" required>
+      </label>
+      <button class="gate-submit" id="gateSubmit" type="submit">Log in to ORBIT +</button>
+    </form>
+    <p id="gateMessage" class="gate-message" role="status" aria-live="polite">Checking your saved sign-in…</p>
+    <p class="gate-privacy">School email registration only. Use a separate password, not your school password. Your email is not shown to other players. Already signed in? You’ll go straight to ORBIT +.</p>
+  </section>
+</div>
+<div class="layout" id="appLayout" hidden inert>
 <aside class="sidebar" id="sidebar">
 <div class="identity"><div class="brand original-mark"><img src="assets/orbit-logo-wide.png" alt="Orbit" /><span class="plus-mark" aria-label="Plus">+</span></div></div>
 <nav class="sidenav" aria-label="Navigation">
@@ -41,7 +69,7 @@
 <div class="navheading">COLLECTIBLES</div>
 <button class="navlink" data-view="shop"><span class="glyph">◇</span> Orbit Shop</button>
 </nav>
-<div class="profile"><div class="avatar">O+</div><div><div class="name">ORBIT + Player</div><div class="status">● Ready to explore</div></div></div>
+<div class="profile"><div class="avatar">O+</div><div><div class="name" id="profileName">ORBIT + Player</div><div class="status">● Ready to explore</div></div><button id="sidebarSignout" type="button" title="Sign out of ORBIT +">Sign out</button></div>
 </aside>
 <div class="content" id="content"><div class="stars"></div>
 <header class="topbar"><div class="row"><button class="mobilemenu" id="menu" aria-label="Open navigation">☰</button><strong id="pagetitle">⌂ &nbsp; Home</strong><span class="hint">Stay in the Loop.</span></div><div class="coins" id="wallet">◈ 0 Orbits</div></header>
@@ -101,7 +129,72 @@ showQuestion();showWord();persist();
 const $=id=>document.getElementById(id);
 const config=window.ORBIT_CONFIG||{},connected=!!(config.url&&config.anonKey&&window.supabase);
 let db=null,user=null,current='general',selected=null,people=[],blocked=new Set(),refreshTimer=null;
-try{if(connected)db=window.supabase.createClient(config.url,config.anonKey)}catch(e){console.warn('Supabase not initialized',e)}
+try{if(connected)db=window.supabase.createClient(config.url,config.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})}catch(e){console.warn('Supabase not initialized',e)}
+
+let verified=false,gateMode='login';
+function gateMessage(message,isError=false){$('gateMessage').textContent=message;$('gateMessage').dataset.error=isError?'true':'false'}
+function setGateMode(mode){
+  gateMode=mode;
+  const signup=mode==='signup';
+  $('gateNameWrap').hidden=!signup;
+  $('gateNickname').required=signup;
+  $('gatePassword').autocomplete=signup?'new-password':'current-password';
+  $('gateSubmit').textContent=signup?'Create ORBIT + account':'Log in to ORBIT +';
+  $('gateLoginTab').setAttribute('aria-pressed',String(!signup));
+  $('gateSignupTab').setAttribute('aria-pressed',String(signup));
+  gateMessage(signup?'Use your school email and create a unique password.':'Welcome back! Enter your ORBIT + account details.');
+}
+function syncGate(){
+  const isSignedIn=Boolean(db&&verified&&user);
+  $('appLayout').hidden=!isSignedIn;
+  $('appLayout').inert=!isSignedIn;
+  $('authGate').hidden=isSignedIn;
+  if(isSignedIn){
+    $('profileName').textContent=(user.user_metadata?.nickname||user.email?.split('@')[0]||'ORBIT + Player').slice(0,24);
+  }
+}
+$('gateLoginTab').addEventListener('click',()=>setGateMode('login'));
+$('gateSignupTab').addEventListener('click',()=>setGateMode('signup'));
+$('sidebarSignout').addEventListener('click',()=>{$('signout').click()});
+$('gateForm').addEventListener('submit',async event=>{
+  event.preventDefault();
+  if(!db){gateMessage('Account service is unavailable. Try refreshing or ask the site owner.',true);return}
+  const email=$('gateEmail').value.trim().toLowerCase(),password=$('gatePassword').value;
+  const signup=gateMode==='signup';
+  const nickname=$('gateNickname').value.trim();
+  if(signup){
+    if(!/^[0-9]{2}[a-z]{2,}@tesdk12[.]net$/i.test(email)){
+      gateMessage('Please use your school email, like 24jamesh@tesdk12.net.',true);return
+    }
+    if(nickname.length<2){gateMessage('Choose a nickname at least 2 characters long.',true);return}
+    if(password.length<8){gateMessage('Use a password with at least 8 characters.',true);return}
+  }
+  const submit=$('gateSubmit');
+  submit.disabled=true;
+  gateMessage(signup?'Creating account…':'Signing in…');
+  try{
+    if(signup){
+      const {data,error}=await db.auth.signUp({
+        email,password,
+        options:{data:{nickname},emailRedirectTo:window.location.origin+window.location.pathname}
+      });
+      if(error)throw error;
+      if(data?.session&&data?.user){
+        user=data.user;verified=true;await authUI();
+      }else{
+        gateMessage('Check your school inbox for a confirmation link, then return here. If necessary, select Log in.');
+      }
+    }else{
+      const {data,error}=await db.auth.signInWithPassword({email,password});
+      if(error)throw error;
+      if(data?.user){
+        user=data.user;verified=true;await authUI();
+      }else gateMessage('Unable to verify your session. Please try again.',true);
+    }
+  }catch(e){gateMessage(e?.message||'Unable to sign in. Please try again.',true)}
+  finally{submit.disabled=false}
+});
+
 function show(id,on){$(id).classList.toggle('hide',!on)}
 function status(s){$('authStatus').textContent=s}
 function error(e){status(e&&e.message?e.message:String(e||'Unknown error'))}
@@ -128,7 +221,28 @@ async function loadMessages(){if(!user){note('Log in to see messages.');return}i
 let {data,error:e}=await q;if(e){error(e);note('Unable to load messages. Check your database setup.');return}renderMsgs(data||[])}
 async function reload(){if(!db){preview();return}if(!user){note('Register or log in to use shared chat.');return}if(current==='dm')await directory();await loadMessages()}
 async function ensureProfile(){if(!user)return;const old=await db.from('profiles').select('id').eq('id',user.id).maybeSingle();if(old.error){error(old.error);return}if(!old.data){let nickname=(user.user_metadata?.nickname||'Player-'+user.id.slice(0,6)).slice(0,24);const r=await db.from('profiles').insert({id:user.id,nickname,discoverable:false});if(r.error)error(r.error)}}
-async function authUI(){if(!db){$('connectionStatus').textContent='Database not connected. Configure config.js to enable multiplayer.';show('authFields',false);return}if(user){$('sessionStatus').textContent='Signed in as '+(user.user_metadata?.nickname||user.email?.split('@')[0]||'Player');show('authFields',false);show('signout',true);show('nickname',false);$('connectionStatus').textContent='Shared chat enabled. Only opted-in user profiles are listed.';await ensureProfile();await reload();await refreshMemberRail()}else{$('sessionStatus').textContent='Sign in or create an account';show('authFields',true);show('signout',false);show('nickname',false);refreshMemberRail();$('connectionStatus').textContent='Accounts require confirmed email when enabled in Supabase.';note('Sign in to view messages.')} }
+async function authUI(){
+  syncGate();
+  if(!db){
+    $('connectionStatus').textContent='Database not connected.';
+    show('authFields',false);
+    gateMessage('Account service is not configured. Please contact the ORBIT + administrator.',true);
+    return;
+  }
+  if(user){
+    $('sessionStatus').textContent='Signed in as '+(user.user_metadata?.nickname||user.email?.split('@')[0]||'Player');
+    show('authFields',false);show('signout',true);show('nickname',false);
+    $('connectionStatus').textContent='Shared chat is available to signed-in members.';
+    await ensureProfile();await reload();await refreshMemberRail();
+  }else{
+    $('sessionStatus').textContent='Not signed in';
+    show('authFields',false);show('signout',false);show('nickname',false);
+    refreshMemberRail();
+    $('connectionStatus').textContent='Sign in to view messages.';
+    note('Sign in to view messages.');
+    gateMessage('Log in or sign up with your school email to continue.');
+  }
+}
 $('signup').onclick=async()=>{if(!db)return;let email=$('authEmail').value.trim(),password=$('authPassword').value,nickname=$('authNickname').value.trim();if(!/^[0-9]{2}[a-z]{2,}@tesdk12\.net$/i.test(email)){status('Use your school email in the format 24jamesh@tesdk12.net (graduation year, last name, first initial).');return}if(!nickname||nickname.length<2){status('Choose a nickname with at least 2 characters.');return}if(password.length<8){status('Choose a password at least 8 characters long.');return}const r=await db.auth.signUp({email,password,options:{data:{nickname}}});if(r.error)error(r.error);else status('Check your email for a confirmation link, then log in. Never share your password.')};
 $('signin').onclick=async()=>{if(!db)return;const r=await db.auth.signInWithPassword({email:$('authEmail').value.trim(),password:$('authPassword').value});if(r.error)error(r.error);else status('Signed in.')};
 $('signout').onclick=async()=>{if(db){await db.auth.signOut();status('Signed out.')}};
@@ -136,6 +250,24 @@ $('directoryOptIn').onchange=async()=>{if(!requireUser())return;const r=await db
 $('post').onclick=async()=>{let body=$('message').value.trim();if(!body)return;if(!db){if(current!=='general')return;let nickname=$('nickname').value.trim();if(!nickname){$('poststatus').textContent='Enter a nickname.';return}let s={};try{s=JSON.parse(localStorage.getItem('orbit-plus-starter-v1')||'{}')}catch(e){}s.messages=Array.isArray(s.messages)?s.messages:[];s.messages.push({name:nickname,text:body,time:new Date().toISOString()});localStorage.setItem('orbit-plus-starter-v1',JSON.stringify(s));$('message').value='';preview();return}if(!requireUser())return;if(current==='announcements')return;if(current==='dm'&&!selected){$('poststatus').textContent='Select a recipient first.';return}let table=current==='dm'?'direct_messages':'general_messages';let profile=await db.from('profiles').select('nickname').eq('id',user.id).single();if(profile.error){error(profile.error);return}let row={sender_id:user.id,nickname:profile.data.nickname,body};if(current==='dm')row.recipient_id=selected;const r=await db.from(table).insert(row);if(r.error)error(r.error);else{$('message').value='';$('poststatus').textContent='Sent';await loadMessages()}};
 $('blockUser').onclick=async()=>{if(!db||!selected||!requireUser())return;if(!confirm('Block this user? They will disappear from your directory and won’t be able to send you new messages.'))return;let r=await db.from('blocks').insert({owner_id:user.id,blocked_id:selected});if(r.error)error(r.error);else{selected=null;show('dmActions',false);await directory();await loadMessages()}};
 $('reportUser').onclick=async()=>{if(!db||!selected||!requireUser())return;const reason=prompt('Briefly describe the problem (no private information):');if(!reason||!reason.trim())return;let r=await db.from('reports').insert({reporter_id:user.id,reported_id:selected,reason:reason.slice(0,300)});status(r.error?'Report could not be submitted: '+r.error.message:'Report submitted to the site administrator.')};
-if(db){db.auth.getUser().then(async x=>{user=x.data?.user||null;await authUI()});db.auth.onAuthStateChange((_event,session)=>{user=session?.user||null;setTimeout(()=>authUI(),0)});refreshTimer=setInterval(()=>{if(user)loadMessages()},6000)}else{authUI();preview()}
+if(db){
+  db.auth.onAuthStateChange((event,session)=>{
+    if(event==='INITIAL_SESSION'&&!verified)return;
+    user=session?.user||null;
+    if(verified)setTimeout(()=>authUI(),0);
+  });
+  db.auth.getUser().then(async ({data,error})=>{
+    user=error?null:data?.user||null;
+    verified=true;
+    await authUI();
+    if(error)gateMessage('Could not restore the saved login. Please sign in again.',true);
+  }).catch(e=>{
+    user=null;verified=true;syncGate();
+    gateMessage('Could not connect to authentication: '+(e?.message||'network error'),true);
+  });
+  refreshTimer=setInterval(()=>{if(user)loadMessages()},6000);
+}else{
+  verified=true;syncGate();authUI();
+}
 })();
 </script></body></html>
