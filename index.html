@@ -24,6 +24,7 @@
 <link rel="stylesheet" href="orbit-community.css">
 <link rel="stylesheet" href="orbit-studio.css">
 <link rel="stylesheet" href="orbit-palette.css">
+<link rel="stylesheet" href="orbit-member-settings.css">
 </head>
 <body>
 <div id="authGate" role="region" aria-label="ORBIT + account sign-in">
@@ -116,6 +117,14 @@
    <p id="adminFeedback" class="approval-status" role="status"></p>
   </div></div>
 </section></div>
+<div id="memberProfileModal" class="member-profile-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="memberProfileHeading">
+<div class="member-profile-sheet">
+ <button type="button" id="memberProfileClose" class="member-profile-close" aria-label="Close profile">×</button>
+ <div class="member-profile-banner"><div id="memberProfileAvatar" class="orbit-avatar member-profile-avatar">🪐</div>
+  <h2 id="memberProfileHeading">Member</h2><p id="memberProfileStatus">Offline</p></div>
+ <div class="member-profile-info"><h3>About</h3><p id="memberProfileBio">No bio yet.</p></div>
+ <button type="button" id="memberProfileMessage" class="settings-primary">Message this member</button>
+</div></div>
 <div class="layout" id="appLayout" hidden inert>
 <aside class="sidebar" id="sidebar">
 <div class="identity"><div class="brand original-mark"><img src="assets/orbit-logo-wide.png" alt="Orbit" /><span class="plus-mark" aria-label="Plus">+</span></div></div>
@@ -129,9 +138,10 @@
 <div class="sidebar-dm-list" id="dmDirectory" hidden><div class="sidebar-dm-list-head">Approved members</div><div id="peopleList" role="list"></div></div>
 <div class="navheading">PERSONALIZE</div>
 <button class="navlink" id="studioNav" type="button"><span class="glyph">✦</span> Orbit Studio <span class="free-tag">FREE</span></button>
+<button class="navlink" id="settingsNav" type="button"><span class="glyph">⚙</span> Settings</button>
 <button class="navlink" id="adminButton" type="button"><span class="glyph">✓</span> Approvals</button>
 </nav>
-<div class="profile"><button type="button" class="avatar orbit-avatar" id="sidebarAvatar" aria-label="Customize your profile in Orbit Studio" title="Customize your profile">O+</button><div><div class="name" id="profileName">ORBIT + Player</div><div class="status">● Ready to explore</div></div><button id="sidebarSignout" type="button" title="Sign out of ORBIT +">Sign out</button></div>
+<div class="profile"><button type="button" class="avatar orbit-avatar" id="sidebarAvatar" aria-label="Customize your profile in Orbit Studio" title="Customize your profile">O+</button><button id="sidebarProfileButton" class="sidebar-profile-detail" type="button" title="Open your settings"><span class="name" id="profileName">ORBIT + Player</span><span class="status" id="sidebarStatus"><span class="settings-presence-dot online"></span> Online</span></button><button id="sidebarSignout" type="button" title="Sign out of ORBIT +">Sign out</button></div>
 </aside>
 <div class="content" id="content"><div class="stars"></div>
 <header class="topbar"><div class="row"><button class="mobilemenu" id="menu" aria-label="Open navigation">☰</button><strong id="pagetitle"># &nbsp; Chat</strong><span class="hint">Stay in the Loop. Keep it simple.</span></div></header>
@@ -224,6 +234,85 @@
   </div>
  </div>
 </section>
+<section class="view" id="settings" aria-label="Member settings">
+<div class="settings-scroll">
+ <header class="settings-hero">
+  <div class="settings-kicker"><span class="settings-kicker-icon">⚙</span> YOUR ORBIT + ACCOUNT</div>
+  <h1>Settings <span>✦</span></h1>
+  <p>Make your profile yours. Set your availability, share a little about yourself, and control your account.</p>
+ </header>
+ <div class="settings-shell">
+  <nav class="settings-rail" aria-label="Settings categories">
+   <button type="button" class="settings-tab active" data-settings-tab="account"><span>◉</span> My Account</button>
+   <button type="button" class="settings-tab" data-settings-tab="presence"><span>◉</span> Presence & Status</button>
+   <button type="button" class="settings-tab" data-settings-tab="profile"><span>◉</span> About Me</button>
+   <button type="button" class="settings-tab" data-settings-tab="appearance"><span>✦</span> Appearance</button>
+   <button type="button" class="settings-tab" data-settings-tab="notifications"><span>◌</span> Notifications</button>
+   <button type="button" class="settings-tab" data-settings-tab="security"><span>⌁</span> Security</button>
+  </nav>
+  <div class="settings-panels">
+   <div class="settings-panel active" data-settings-panel="account">
+    <div class="settings-panel-heading"><h2>My Account</h2><p>Your ORBIT + identity and profile preview</p></div>
+    <div class="settings-account-banner"><div id="settingsAvatar" class="orbit-avatar settings-avatar">🪐</div>
+      <div class="settings-account-info"><strong id="settingsDisplayName">Member</strong><span id="settingsPreviewStatus">● Online</span><small id="settingsAccountRole">ORBIT + Member</small></div>
+      <button type="button" id="settingsEditAvatar" class="settings-secondary">Edit avatar</button>
+    </div>
+    <div class="settings-row"><div><b>Display name</b><p>Your approved ORBIT + nickname</p></div><strong id="settingsNameValue">Member</strong></div>
+    <div class="settings-row"><div><b>School email</b><p>Private to your account and the administrator</p></div><strong id="settingsEmailValue">—</strong></div>
+    <div class="settings-row"><div><b>Account access</b><p>Administrator approval required to use ORBIT +</p></div><strong>Approved member</strong></div>
+    <div class="settings-info">Your public profile shows your nickname, avatar, availability, and bio. Your school email and password are never shown to other members.</div>
+   </div>
+   <div class="settings-panel" data-settings-panel="presence">
+    <div class="settings-panel-heading"><h2>Presence & Status</h2><p>Let friends know when you're available, just like in Alan's ORBIT.</p></div>
+    <div class="settings-status-options" role="radiogroup" aria-label="Choose your availability">
+     <label class="settings-status-choice"><input type="radio" name="settingsPresence" value="online" checked><span class="settings-presence-dot online"></span><span><b>Online</b><small>Available to chat</small></span></label>
+     <label class="settings-status-choice"><input type="radio" name="settingsPresence" value="idle"><span class="settings-presence-dot idle"></span><span><b>Idle</b><small>Away for a little while</small></span></label>
+     <label class="settings-status-choice"><input type="radio" name="settingsPresence" value="dnd"><span class="settings-presence-dot dnd"></span><span><b>Do Not Disturb</b><small>Busy — suppress browser notifications</small></span></label>
+     <label class="settings-status-choice"><input type="radio" name="settingsPresence" value="invisible"><span class="settings-presence-dot invisible"></span><span><b>Invisible</b><small>Appear offline while still using ORBIT +</small></span></label>
+    </div>
+    <label for="settingsCustomStatus" class="settings-form-label">Custom status <small>(up to 80 characters)</small></label>
+    <input id="settingsCustomStatus" class="settings-input" type="text" maxlength="80" placeholder="e.g. Doing homework 📚, At soccer practice ⚽" autocomplete="off">
+    <p class="settings-helper">Your availability and custom status appear to approved members. Invisible only hides your online indicator, not messages you send.</p>
+    <button type="button" id="settingsPresenceSave" class="settings-primary">Save status</button><p id="settingsPresenceFeedback" class="settings-feedback" role="status"></p>
+   </div>
+   <div class="settings-panel" data-settings-panel="profile">
+    <div class="settings-panel-heading"><h2>About Me</h2><p>Give your friends a little more to recognize you by.</p></div>
+    <label for="settingsBio" class="settings-form-label">Bio <small>(up to 190 characters)</small></label>
+    <textarea id="settingsBio" rows="4" maxlength="190" class="settings-textarea" placeholder="Tell your friends a little about yourself."></textarea>
+    <p class="settings-helper"><span id="settingsBioCount">0</span>/190 characters · Visible only to approved ORBIT + members</p>
+    <label for="settingsAvatarColor" class="settings-form-label">Default avatar background</label>
+    <div class="settings-color-row"><input type="color" id="settingsAvatarColor" value="#416ECB"><span>Used behind your avatar when you haven't uploaded a photo.</span></div>
+    <button type="button" id="settingsProfileSave" class="settings-primary">Save profile</button><p id="settingsProfileFeedback" class="settings-feedback" role="status"></p>
+   </div>
+   <div class="settings-panel" data-settings-panel="appearance">
+    <div class="settings-panel-heading"><h2>Appearance</h2><p>Everything in Orbit Studio is free.</p></div>
+    <div class="settings-studio-feature"><span class="settings-studio-glyph">✦</span>
+     <h3>Your entire Orbit, your style.</h3><p>Change your profile picture, animated avatar ring, display-name font, homepage, and whole-website colors.</p>
+     <button type="button" id="settingsOpenStudio" class="settings-primary">Open Orbit Studio →</button>
+    </div>
+   </div>
+   <div class="settings-panel" data-settings-panel="notifications">
+    <div class="settings-panel-heading"><h2>Notifications</h2><p>Choose what you want to hear about while ORBIT + is open in your browser.</p></div>
+    <label class="settings-toggle"><span><b>Direct Messages</b><small>Show a browser notification when someone sends you a message</small></span><input id="settingsNotifyDMs" type="checkbox"></label>
+    <label class="settings-toggle"><span><b>Group Chat</b><small>Also notify me about new messages in the public Chat</small></span><input id="settingsNotifyChat" type="checkbox"></label>
+    <div class="settings-info">Notifications work while the ORBIT + tab remains open, if your browser allows them. This isn't a background push-notification service.</div>
+    <button type="button" id="settingsEnableNotifications" class="settings-secondary">Allow browser notifications</button>
+    <button type="button" id="settingsNotificationsSave" class="settings-primary">Save preferences</button><p id="settingsNotificationsFeedback" class="settings-feedback" role="status"></p>
+   </div>
+   <div class="settings-panel" data-settings-panel="security">
+    <div class="settings-panel-heading"><h2>Security</h2><p>Protect your account and control your sessions.</p></div>
+    <label for="settingsNewPassword" class="settings-form-label">New ORBIT + password</label>
+    <input id="settingsNewPassword" class="settings-input" type="password" autocomplete="new-password" minlength="8" placeholder="At least 8 characters">
+    <label for="settingsConfirmPassword" class="settings-form-label">Confirm new password</label>
+    <input id="settingsConfirmPassword" class="settings-input" type="password" autocomplete="new-password" minlength="8" placeholder="Type the password again">
+    <p class="settings-helper">Never use or share your school-account password. Changing your ORBIT + password may require an additional verification step.</p>
+    <button type="button" id="settingsPasswordSave" class="settings-primary">Change password</button><p id="settingsSecurityFeedback" class="settings-feedback" role="status"></p>
+    <div class="settings-danger-zone"><b>Sign out</b><p>Leave ORBIT + on this device.</p><button type="button" id="settingsLogout" class="settings-secondary">Sign out of ORBIT +</button></div>
+   </div>
+  </div>
+ </div>
+</div>
+</section>
 <section class="view active" id="text" data-channel="general"><div class="channel-bar"><span><strong id="channelBarName"># chat</strong><small id="channelBarDesc">Just a place to chat and catch up.</small></span><span class="memberHint">● <span id="memberCount">0 online</span></span></div><div class="pane">
 <div class="social-header"><div><h1 class="pane-title" id="socialTitle"># Chat</h1><p class="pane-sub" id="socialDescription">Talk with other approved ORBIT + members.</p></div><div class="tag" id="socialChannelLabel">CHAT</div></div>
 <div id="accountBox" class="accountbar"><div class="row"><strong id="sessionStatus">Account connected to ORBIT +</strong><button class="control secondary hide" id="signout">Sign out</button></div><div id="authFields"><div class="row"><input class="field" style="max-width:220px" id="authNickname" maxlength="24" placeholder="Public nickname" aria-label="Public nickname"><input class="field" style="max-width:240px" type="email" id="authEmail" placeholder="School email (e.g. 24jamesh@tesdk12.net)" aria-label="School email address" inputmode="email" autocomplete="email"><input class="field" style="max-width:200px" type="password" id="authPassword" placeholder="Password" aria-label="Account password"></div><div class="row"><button class="control" id="signup">Register</button><button class="control secondary" id="signin">Log in</button></div></div><div id="authStatus" class="channel-note" aria-live="polite">ORBIT + registration uses @tesdk12.net school email addresses. Use a new password, not your school login password. Your email stays private.</div></div>
@@ -252,7 +341,7 @@
 </div></div>
 <script>
 document.getElementById('menu')?.addEventListener('click',()=>document.getElementById('sidebar')?.classList.toggle('open'));
-</script><script src="config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="orbit-studio.js"></script>
+</script><script src="config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="orbit-studio.js"></script><script src="orbit-member-settings.js"></script>
 <script>
 (function(){
 'use strict';
