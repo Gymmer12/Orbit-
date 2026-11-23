@@ -608,23 +608,27 @@ $('message').addEventListener('keydown',event=>{
 
 
 function activateView(viewId){
- if(!['home','studio','text'].includes(viewId))return;
+ if(!['home','studio','settings','text'].includes(viewId))return;
  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===viewId));
  $('homeNav').classList.toggle('active',viewId==='home');
  $('studioNav').classList.toggle('active',viewId==='studio');
+ $('settingsNav').classList.toggle('active',viewId==='settings');
  if(viewId!=='text'){
   document.querySelectorAll('[data-social]').forEach(link=>link.classList.remove('active'));
   $('dmDirectory').hidden=true;
   $('dmToggle').setAttribute('aria-expanded','false');
-  $('pagetitle').textContent=viewId==='home'?'⌂ Home':'✦ Orbit Studio';
+  $('pagetitle').textContent=viewId==='home'?'⌂ Home':viewId==='settings'?'⚙ Settings':'✦ Orbit Studio';
   $('sidebar').classList.remove('open');
  }
  if(viewId==='home'||viewId==='studio')window.OrbitStudio?.updatePreview();
 }
 function openHome(){activateView('home')}
 function openStudio(){activateView('studio');window.OrbitStudio?.loadAll().then(()=>window.OrbitStudio?.updatePreview())}
+function openSettings(){activateView('settings');window.OrbitSettings?.load()}
 $('homeNav').addEventListener('click',openHome);
 $('studioNav').addEventListener('click',openStudio);
+$('settingsNav').addEventListener('click',openSettings);
+$('sidebarProfileButton').addEventListener('click',openSettings);
 $('sidebarAvatar').addEventListener('click',openStudio);
 $('homeChatButton').addEventListener('click',()=>openSocial('general'));
 $('homeChatLink').addEventListener('click',()=>openSocial('general'));
@@ -691,7 +695,14 @@ function renderMsgs(rows){
 function preview(){show('nickname',current==='general');if(current==='general'){const saved=JSON.parse(localStorage.getItem('orbit-plus-starter-v1')||'{}');renderMsgs((saved.messages||[]).map(x=>({nickname:x.name,body:x.text,created_at:x.time})));$('poststatus').textContent='Local-only preview: other users cannot see these messages.'}else note('Sign in to see registered members and private messages.')}
 function requireUser(){if(!user){status('Log in to use shared messages.');return false}return true}
 
-function onlineNow(id){const stamp=presenceMap.get(id);return !!stamp&&Date.now()-stamp<90000}
+function onlineNow(id){
+ const stamp=presenceMap.get(id),heartbeat=!!stamp&&Date.now()-stamp<90000;
+ const person=memberRoster.find(p=>p.id===id);
+ return window.OrbitSettings?.isVisibleOnline(person,heartbeat)??heartbeat;
+}
+function memberStatusKind(p,online){
+ return online?(['idle','dnd'].includes(p.member_status)?p.member_status:'online'):'offline';
+}
 async function touchPresence(){
  if(!db||!user||!memberApproved||document.hidden)return;
  const {error:e}=await db.from('orbit_presence').upsert({user_id:user.id},{onConflict:'user_id'});
@@ -705,7 +716,7 @@ function renderDirectory(){
  targets.forEach(p=>{
   const b=document.createElement('button');b.type='button';b.className='person'+(selected===p.id?' active':'');
   const av=document.createElement('span');av.className='memberAvatar';av.textContent=p.nickname.slice(0,1).toUpperCase();window.OrbitStudio?.decorateAvatar(av,p.id,p.nickname);
-  const dot=document.createElement('span');dot.className='member-status-dot'+(onlineNow(p.id)?' online':'');dot.title=onlineNow(p.id)?'Online':'Offline';
+  const dot=document.createElement('span');dot.className='member-status-dot '+memberStatusKind(p,onlineNow(p.id));dot.title=window.OrbitSettings?.displayStatus(p,onlineNow(p.id))||'Offline';
   const label=document.createElement('span');label.className='person-name';label.textContent=p.nickname;window.OrbitStudio?.decorateName(label,p.id);
   b.append(av,dot,label);
   b.onclick=()=>{selected=p.id;dmListOpen=true;openSocial('dm',p.id)};
@@ -717,11 +728,19 @@ function appendRosterGroup(box,label,rows,online){
  rows.forEach(p=>{
   const div=document.createElement('div');div.className='memberItem';
   const av=document.createElement('span');av.className='memberAvatar';av.textContent=p.nickname.slice(0,1).toUpperCase();window.OrbitStudio?.decorateAvatar(av,p.id,p.nickname);
-  const dot=document.createElement('span');dot.className='member-status-dot'+(online?' online':'');
+  const dot=document.createElement('span');dot.className='member-status-dot '+memberStatusKind(p,online);
   const column=document.createElement('span');column.className='member-info';
   const nm=document.createElement('span');nm.className='member-name';nm.textContent=p.nickname+(p.id===user.id?' (you)':'');window.OrbitStudio?.decorateName(nm,p.id);
-  const role=document.createElement('span');role.className='member-role';role.textContent=modIds.has(p.id)?'Moderator':(p.id===user.id&&adminApproved?'Administrator':online?'Online':'Offline');
-  column.append(nm,role);div.append(av,dot,column);box.append(div);
+  const role=document.createElement('span');role.className='member-role';
+  const rank=modIds.has(p.id)?'Moderator':(p.id===user.id&&adminApproved?'Admin':null);
+  const visibility=window.OrbitSettings?.displayText(p,online)|| (online?'Online':'Offline');
+  role.textContent=rank?rank+' · '+visibility:visibility;
+  column.append(nm,role);div.append(av,dot,column);
+  div.setAttribute('role','button');div.tabIndex=0;div.title='View '+p.nickname+' profile';
+  const inspect=()=>window.OrbitSettings?.openMember(p.id,onlineNow(p.id));
+  div.addEventListener('click',inspect);
+  div.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();inspect()}});
+  box.append(div);
  });
 }
 async function refreshMemberRail(){
@@ -731,7 +750,7 @@ async function refreshMemberRail(){
  memberRefreshBusy=true;
  try{
   const [profiles,presence,mods,blocks]=await Promise.all([
-   db.from('profiles').select('id,nickname').order('nickname').limit(250),
+   db.from('profiles').select('id,nickname,member_status,custom_status,bio,avatar_color').order('nickname').limit(250),
    db.from('orbit_presence').select('user_id,last_seen').limit(250),
    db.from('orbit_moderators').select('user_id'),
    db.from('blocks').select('blocked_id').eq('owner_id',user.id)
@@ -739,6 +758,7 @@ async function refreshMemberRail(){
   const failure=[profiles,presence,mods,blocks].find(x=>x.error);
   if(failure){box.textContent='Unable to load members: '+failure.error.message;return}
   memberRoster=profiles.data||[];
+  window.OrbitSettings?.setProfiles(memberRoster);
   await window.OrbitStudio?.loadAll();
   window.OrbitStudio?.setNickname(memberRoster.find(p=>p.id===user.id)?.nickname||user.user_metadata?.nickname||'Member');
   presenceMap=new Map((presence.data||[]).map(p=>[p.user_id,Date.parse(p.last_seen)]));
@@ -878,6 +898,12 @@ async function authUI(){
     $('connectionStatus').textContent='Shared chat is available to signed-in members.';
     await ensureProfile();
     await window.OrbitStudio?.init(db,user);
+    await window.OrbitSettings?.init(db,user,{
+      role:adminApproved?'ORBIT + Administrator':isStaff?'ORBIT + Moderator':'ORBIT + Member',
+      onUpdate:async()=>{await refreshMemberRail();if(current==='general'||current==='dm')await loadMessages()},
+      onMessage:id=>openSocial('dm',id),
+      onOpenStudio:openStudio
+    });
     window.OrbitStudio?.setOnUpdate(async()=>{
       await refreshMemberRail();await loadMessages();
       window.OrbitStudio?.updatePreview();
@@ -895,7 +921,7 @@ async function authUI(){
 }
 $('signup').onclick=async()=>{if(!db)return;let email=$('authEmail').value.trim(),password=$('authPassword').value,nickname=$('authNickname').value.trim();if(!/^[0-9]{2}[a-z]{2,}@tesdk12\.net$/i.test(email)){status('Use your school email in the format 24jamesh@tesdk12.net (graduation year, last name, first initial).');return}if(!nickname||nickname.length<2){status('Choose a nickname with at least 2 characters.');return}if(password.length<8){status('Choose a password at least 8 characters long.');return}const r=await db.auth.signUp({email,password,options:{data:{nickname}}});if(r.error)error(r.error);else status('Check your email for a confirmation link, then log in. Never share your password.')};
 $('signin').onclick=async()=>{if(!db)return;const r=await db.auth.signInWithPassword({email:$('authEmail').value.trim(),password:$('authPassword').value});if(r.error)error(r.error);else status('Signed in.')};
-$('signout').onclick=async()=>{if(db){if(user)await db.from('orbit_presence').delete().eq('user_id',user.id);await db.auth.signOut();lastPageUser=null;window.OrbitStudio?.clear();status('Signed out.')}};
+$('signout').onclick=async()=>{if(db){if(user)await db.from('orbit_presence').delete().eq('user_id',user.id);await db.auth.signOut();lastPageUser=null;window.OrbitStudio?.clear();window.OrbitSettings?.clear();status('Signed out.')}};
 $('post').onclick=async()=>{
  const body=$('message').value.trim();
  if(!db||!user||!memberApproved||!body||current==='announcements')return;
@@ -918,6 +944,7 @@ if(db){
   db.auth.onAuthStateChange((event,session)=>{
     if(event==='INITIAL_SESSION'&&!verified)return;
     user=session?.user||null;
+    if(!user){lastPageUser=null;window.OrbitSettings?.clear()}
     if(verified)setTimeout(()=>authUI(),0);
   });
   db.auth.getUser().then(async ({data,error})=>{
@@ -942,6 +969,7 @@ if(db){
     try{
       if(!document.hidden&&ticks%3===0)await touchPresence();
       await loadMessages();
+      await window.OrbitSettings?.pollNotifications();
       if(ticks%2===0)await refreshMemberRail();
       if(adminApproved&&!$('adminPanel').hidden&&ticks%3===0){await adminRefresh();await refreshModeratorsAdmin();await refreshBansAdmin()}
       ticks++;
