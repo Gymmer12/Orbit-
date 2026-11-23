@@ -657,29 +657,34 @@ $('message').addEventListener('keydown',event=>{
 
 
 function activateView(viewId){
- if(!['home','studio','settings','text'].includes(viewId))return;
+ if(!['home','studio','settings','text','games'].includes(viewId))return;
  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===viewId));
  $('homeNav').classList.toggle('active',viewId==='home');
  $('studioNav').classList.toggle('active',viewId==='studio');
  $('settingsNav').classList.toggle('active',viewId==='settings');
+ $('gamesNav').classList.toggle('active',viewId==='games');
+ if(viewId!=='games')window.OrbitArcade?.pause();
  if(viewId!=='text'){
   document.querySelectorAll('[data-social]').forEach(link=>link.classList.remove('active'));
   $('dmDirectory').hidden=true;
   $('dmToggle').setAttribute('aria-expanded','false');
-  $('pagetitle').textContent=viewId==='home'?'⌂ Home':viewId==='settings'?'⚙ Settings':'✦ Orbit Studio';
+  $('pagetitle').textContent=viewId==='home'?'⌂ Home':viewId==='settings'?'⚙ Settings':viewId==='games'?'✦ Games':'✦ Orbit Studio';
   $('sidebar').classList.remove('open');
  }
  if(viewId==='home'||viewId==='studio')window.OrbitStudio?.updatePreview();
 }
-function openHome(){activateView('home')}
+function openHome(){activateView('home');loadHomeAnnouncements()}
 function openStudio(){activateView('studio');window.OrbitStudio?.loadAll().then(()=>window.OrbitStudio?.updatePreview())}
 function openSettings(){activateView('settings');window.OrbitSettings?.load()}
+function openGames(){activateView('games');window.OrbitArcade?.open()}
 $('homeNav').addEventListener('click',openHome);
 $('studioNav').addEventListener('click',openStudio);
 $('settingsNav').addEventListener('click',openSettings);
+$('gamesNav').addEventListener('click',openGames);
 $('sidebarProfileButton').addEventListener('click',openSettings);
 $('sidebarAvatar').addEventListener('click',openStudio);
-$('homeChatButton').addEventListener('click',()=>openSocial('general'));
+$('homeAnnouncementAll').addEventListener('click',()=>openSocial('announcements'));
+$('homeGamesLink').addEventListener('click',openGames);
 $('homeChatLink').addEventListener('click',()=>openSocial('general'));
 $('homeAnnouncementsLink').addEventListener('click',()=>openSocial('announcements'));
 $('homeDMsLink').addEventListener('click',()=>openSocial('dm'));
@@ -830,6 +835,35 @@ async function refreshMemberRail(){
  }finally{memberRefreshBusy=false}
 }
 async function directory(){await refreshMemberRail()}
+async function loadHomeAnnouncements(){
+ const box=$('homeAnnouncementList');if(!box||!db||!user||!memberApproved)return;
+ const {data,error}=await db.from('announcements')
+  .select('id,title,body,nickname,pinned,created_at')
+  .order('pinned',{ascending:false}).order('created_at',{ascending:false}).limit(3);
+ box.replaceChildren();
+ if(error){
+  const p=document.createElement('p');p.className='home-announcement-empty';p.textContent='Announcements are temporarily unavailable.';
+  box.append(p);return;
+ }
+ if(!(data||[]).length){
+  const p=document.createElement('p');p.className='home-announcement-empty';p.textContent='No staff announcements yet. Check back for updates.';
+  box.append(p);return;
+ }
+ for(const post of data){
+  const b=document.createElement('button');b.type='button';b.className='home-announcement-item';
+  const row=document.createElement('div');row.className='home-announcement-item-head';
+  const title=document.createElement('strong');title.textContent=post.title||'Announcement';
+  const date=document.createElement('small');date.textContent=post.created_at?new Date(post.created_at).toLocaleDateString():'';
+  row.append(title);
+  if(post.pinned){const pin=document.createElement('span');pin.className='home-announcement-pin';pin.textContent='Pinned';row.append(pin)}
+  row.append(date);
+  const snippet=document.createElement('p');snippet.textContent=(post.body||'').replace(/\s+/g,' ').slice(0,250);
+  b.append(row,snippet);
+  b.addEventListener('click',()=>openSocial('announcements'));
+  box.append(b);
+ }
+}
+
 async function loadAnnouncements(){
  if(!db||!memberApproved||current!=='announcements')return;
  const {data,error:e}=await db.from('announcements').select('id,title,body,nickname,author_id,pinned,created_at,updated_at').order('pinned',{ascending:false}).order('created_at',{ascending:false}).limit(100);
@@ -881,7 +915,7 @@ $('announcementSave').onclick=async()=>{
  if(e){$('announcementsStatus').textContent=e.message;return}
  $('announcementEditor').hidden=true;editingAnnouncement=null;
  $('announcementsStatus').textContent='Announcement saved.';
- await loadAnnouncements();
+ await loadAnnouncements();await loadHomeAnnouncements();
 };
 async function loadMessages(){
  if(!db||!user||!memberApproved)return;
@@ -952,6 +986,8 @@ async function authUI(){
     $('connectionStatus').textContent='Shared chat is available to signed-in members.';
     await ensureProfile();
     await window.OrbitStudio?.init(db,user);
+    await window.OrbitArcade?.init(db,user);
+    await loadHomeAnnouncements();
     await window.OrbitSettings?.init(db,user,{
       role:adminApproved?'ORBIT + Administrator':isStaff?'ORBIT + Moderator':'ORBIT + Member',
       onUpdate:async()=>{await refreshMemberRail();if(current==='general'||current==='dm')await loadMessages()},
@@ -975,7 +1011,7 @@ async function authUI(){
 }
 $('signup').onclick=async()=>{if(!db)return;let email=$('authEmail').value.trim(),password=$('authPassword').value,nickname=$('authNickname').value.trim();if(!/^[0-9]{2}[a-z]{2,}@tesdk12\.net$/i.test(email)){status('Use your school email in the format 24jamesh@tesdk12.net (graduation year, last name, first initial).');return}if(!nickname||nickname.length<2){status('Choose a nickname with at least 2 characters.');return}if(password.length<8){status('Choose a password at least 8 characters long.');return}const r=await db.auth.signUp({email,password,options:{data:{nickname}}});if(r.error)error(r.error);else status('Check your email for a confirmation link, then log in. Never share your password.')};
 $('signin').onclick=async()=>{if(!db)return;const r=await db.auth.signInWithPassword({email:$('authEmail').value.trim(),password:$('authPassword').value});if(r.error)error(r.error);else status('Signed in.')};
-$('signout').onclick=async()=>{if(db){if(user)await db.from('orbit_presence').delete().eq('user_id',user.id);await db.auth.signOut();lastPageUser=null;window.OrbitStudio?.clear();window.OrbitSettings?.clear();status('Signed out.')}};
+$('signout').onclick=async()=>{if(db){if(user)await db.from('orbit_presence').delete().eq('user_id',user.id);await db.auth.signOut();lastPageUser=null;window.OrbitStudio?.clear();window.OrbitSettings?.clear();window.OrbitArcade?.clear();status('Signed out.')}};
 $('post').onclick=async()=>{
  const body=$('message').value.trim();
  if(!db||!user||!memberApproved||!body||current==='announcements')return;
@@ -998,7 +1034,7 @@ if(db){
   db.auth.onAuthStateChange((event,session)=>{
     if(event==='INITIAL_SESSION'&&!verified)return;
     user=session?.user||null;
-    if(!user){lastPageUser=null;window.OrbitSettings?.clear()}
+    if(!user){lastPageUser=null;window.OrbitSettings?.clear();window.OrbitArcade?.clear()}
     if(verified)setTimeout(()=>authUI(),0);
   });
   db.auth.getUser().then(async ({data,error})=>{
@@ -1024,6 +1060,7 @@ if(db){
       if(!document.hidden&&ticks%3===0)await touchPresence();
       await loadMessages();
       await window.OrbitSettings?.pollNotifications();
+      if(ticks%4===0&&$('home').classList.contains('active'))await loadHomeAnnouncements();
       if(ticks%2===0)await refreshMemberRail();
       if(adminApproved&&!$('adminPanel').hidden&&ticks%3===0){await adminRefresh();await refreshModeratorsAdmin();await refreshBansAdmin()}
       ticks++;
