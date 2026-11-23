@@ -93,3 +93,33 @@
 #text .two>.card:last-child>.tag,
 #text .two>.card:last-child>h3,
 #text .two>.card:last-child>p{display:none}
+
+/* Rounded composer inspired by mainstream messaging applications. Text-only. */
+#text #composer.chat-composer{display:flex;flex-direction:column;flex:0 0 auto;gap:6px!important;padding:12px 17px 9px!important;background:#07113c;border-top:1px solid #30458a;box-shadow:0 -6px 20px #01052245}
+#text .chat-composer input#nickname{display:none!important}
+#text .chat-composer .composer-shell{display:flex;align-items:flex-end;gap:9px;width:100%;padding:6px 7px 6px 17px;border:1px solid #3958b7;background:#122265;border-radius:21px;box-shadow:inset 0 1px 5px #060d3499,0 4px 15px #02072155;transition:border-color .16s,box-shadow .16s}
+#text .chat-composer .composer-shell:focus-within{border-color:#79a9ff;box-shadow:0 0 0 2px #4266c542,inset 0 1px 5px #060d3480}
+#text .chat-composer textarea#message{background:transparent!important;border:0!important;outline:0!important;box-shadow:none!important;width:100%;flex:1;height:38px;min-height:38px;max-height:134px;line-height:21px;resize:none;overflow-y:auto;padding:8px 0!important;border-radius:0;color:#f6f8ff;font-size:13px;font-family:inherit;scrollbar-width:thin}
+#text .chat-composer textarea#message::placeholder{color:#a3b9f1;opacity:1}
+#text .chat-composer .send-button{width:37px;height:37px;min-width:37px;min-height:37px;display:grid;place-items:center;border:1px solid #8ca7ff;background:linear-gradient(135deg,#3c73f0,#3851c0);border-radius:50%;color:#fff;cursor:pointer;box-shadow:0 1px 7px #0b195e;transition:transform .1s,filter .13s}
+#text .chat-composer .send-button:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.16)}
+#text .chat-composer .send-button:disabled{opacity:.44;cursor:default;filter:grayscale(.3);box-shadow:none}
+#text .chat-composer .composer-bottom{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px;color:#91a7d8;font-size:10px;padding:0 7px}
+#text .chat-composer .composer-bottom #composerHint{font-size:10px;color:#819acf;white-space:nowrap}
+#text .chat-composer #poststatus{font-size:11px;color:#c3d9ff;min-height:13px}
+#banGate[hidden]{display:none!important}
+#banGate{position:fixed;inset:0;z-index:1100;display:grid;place-items:center;overflow-y:auto;padding:20px;background:linear-gradient(145deg,#060a33ea,#1d153edc),url("assets/orbit-home-poster.jpg") center/cover}
+.ban-card{width:min(450px,100%);border:1px solid #6178c7;border-radius:15px;padding:29px;background:linear-gradient(145deg,#0d1d5bee,#090f3af5);text-align:center;color:#f3f7ff;box-shadow:0 30px 90px #0009}
+.ban-card h1{font-size:25px;margin:12px 0}.ban-card p{color:#c1cff1;font-size:13px;line-height:1.6}.ban-card .ban-reason{background:#211c4c;border:1px solid #6d5d9c;border-radius:9px;padding:12px;color:#e7e5fc}.ban-card .ban-logo{display:block;max-width:210px;width:100%;height:70px;object-fit:contain;margin:auto}.ban-card button{margin-top:10px}
+#adminPanel .ban-console{background:#0b1b53;border:1px solid #4965ad;border-radius:10px;padding:16px;margin:15px 0}
+#adminPanel .ban-console h3{font-size:16px;margin:0 0 8px}
+#adminPanel .ban-console p{font-size:11px;line-height:1.5;color:#c1d1f3}
+#adminPanel .ban-form{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin:11px 0}
+#adminPanel .ban-form select,#adminPanel .ban-form input{min-width:150px;flex:1;max-width:100%;padding:10px;background:#071139;border:1px solid #3d58a3;color:#fff;border-radius:7px;font:12px "Segoe UI",Arial,sans-serif}
+#adminPanel #banList{display:grid;gap:7px;margin:12px 0;max-height:280px;overflow-y:auto}
+#adminPanel .ban-list-item{display:flex;gap:10px;align-items:center;justify-content:space-between;border:1px solid #3c4986;background:#131d50;border-radius:8px;padding:10px}
+#adminPanel .ban-list-item strong{font-size:12px;color:#f7f8ff}
+#adminPanel .ban-list-item small{display:block;font-size:11px;color:#b4c4ef;line-height:1.45;margin-top:5px}
+#adminPanel .ban-list-item button{background:#263b91;border:1px solid #6178c4;border-radius:6px;color:#fff;padding:8px 10px;cursor:pointer;white-space:nowrap}
+#adminPanel #banStatus{font-size:12px;color:#c6d7fa;min-height:16px}
+@media(max-width:650px){#text #composer.chat-composer{padding:9px!important}#text .chat-composer .composer-shell{padding:4px 5px 4px 11px}#text .chat-composer .composer-bottom #composerHint{font-size:9px}#adminPanel .ban-form{flex-direction:column;align-items:stretch}}
