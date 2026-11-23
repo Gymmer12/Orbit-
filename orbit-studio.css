@@ -133,3 +133,65 @@
 @media(prefers-reduced-motion:reduce){
   .orbit-avatar::before{animation:none!important}
 }
+
+
+/* Homepage logo cleanup: the graphic already includes the word "orbit".
+   One brand mark, a modest + accent, one tagline, and readable welcome text. */
+.orbit-home-hero{
+  min-height:0!important;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:6px;
+  padding:24px 16px 22px!important;
+}
+.orbit-home-hero .home-brandmark{
+  position:relative;
+  display:block;
+  width:min(228px,58vw);
+  max-width:100%;
+  margin:0 auto 2px;
+  flex:none;
+}
+.orbit-home-hero .home-brandmark .home-studio-logo{
+  display:block;
+  width:100%;
+  height:auto;
+  max-height:255px;
+  margin:0!important;
+  object-fit:contain;
+}
+.orbit-home-hero .home-brand-plus{
+  position:absolute;
+  right:-9px;
+  bottom:12%;
+  font-size:33px;
+  font-weight:900;
+  line-height:1;
+  color:var(--home-accent,#b2ccff);
+  text-shadow:0 0 12px #5a91ff,0 3px 12px #030729;
+  pointer-events:none;
+}
+.orbit-home-hero .home-slogan{
+  margin:5px 0 0!important;
+  font-size:11px;
+  letter-spacing:.23em;
+  line-height:1.45;
+  max-width:100%;
+}
+.orbit-home-hero #homeGreeting{
+  display:block;
+  margin:9px auto 0!important;
+  max-width:min(600px,95%);
+  font-size:clamp(12px,1.5vw,15px);
+  line-height:1.55;
+  text-align:center;
+  overflow-wrap:anywhere;
+}
+@media(max-width:650px){
+  .orbit-home-hero{padding:20px 12px 19px!important}
+  .orbit-home-hero .home-brandmark{width:min(202px,61vw)}
+  .orbit-home-hero .home-brand-plus{right:-7px;font-size:28px}
+  .orbit-home-hero .home-slogan{font-size:10px;letter-spacing:.16em}
+}
