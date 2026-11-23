@@ -136,7 +136,7 @@ document.getElementById('menu')?.addEventListener('click',()=>document.getElemen
 'use strict';
 const $=id=>document.getElementById(id);
 const config=window.ORBIT_CONFIG||{},connected=!!(config.url&&config.anonKey&&window.supabase);
-let db=null,user=null,current='general',selected=null,people=[],blocked=new Set(),refreshTimer=null;
+let db=null,user=null,current='general',selected=null,people=[],blocked=new Set(),refreshTimer=null;let memberRoster=[],presenceMap=new Map(),modIds=new Set(),isStaff=false,dmListOpen=false,editingAnnouncement=null,memberRefreshBusy=false;
 try{if(connected)db=window.supabase.createClient(config.url,config.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})}catch(e){console.warn('Supabase not initialized',e)}
 
 let verified=false,gateMode='login',memberApproved=false,adminApproved=false,reviewApplicant=null,activeApplication=null,approvalBusy=false;
@@ -317,44 +317,232 @@ $('gateForm').addEventListener('submit',async event=>{
 function show(id,on){$(id).classList.toggle('hide',!on)}
 function status(s){$('authStatus').textContent=s}
 function error(e){status(e&&e.message?e.message:String(e||'Unknown error'))}
-function openSocial(channel){
- if(channel!=='dm')channel='general';
- current=channel;selected=null;
+function openSocial(channel,recipientId=null){
+ if(!['general','announcements','dm'].includes(channel))channel='general';
+ const wasDm=current==='dm';
+ if(recipientId)selected=recipientId;
+ current=channel;
+ if(channel==='dm')dmListOpen=!!recipientId||!wasDm?true:!dmListOpen;
+ else dmListOpen=false;
+ $('dmDirectory').hidden=!dmListOpen;
+ $('dmToggle').setAttribute('aria-expanded',String(dmListOpen));
  $('text').dataset.channel=channel;
  document.querySelectorAll('[data-social]').forEach(b=>b.classList.toggle('active',b.dataset.social===channel));
- $('pagetitle').textContent=channel==='dm'?'✉  Direct Messages':'#  Text';
- $('channelBarName').textContent=channel==='dm'?'✉ direct-messages':'# text';
- $('channelBarDesc').textContent=channel==='dm'?'One-on-one conversations':'Messages with your school community';
- $('socialTitle').textContent=channel==='dm'?'✉ Direct Messages':'# Text';
- $('socialDescription').textContent=channel==='dm'?'Choose a member to message privately.':'Keep in touch without extra distractions.';
- $('chatTitle').textContent=$('socialTitle').textContent;
- $('sidebarChannelTitle').textContent=channel==='dm'?'Direct Messages':'Text';
- $('socialChannelLabel').textContent=channel==='dm'?'DIRECT MESSAGES':'TEXT';
- $('sidebarChannelText').textContent=channel==='dm'?'Messages with another approved member.':'Messages for the ORBIT + community.';
+ const target=memberRoster.find(p=>p.id===selected);
+ const label=channel==='dm'?(target?'✉ '+target.nickname:'✉ Direct Messages'):channel==='announcements'?'📣 Announcements':'# Chat';
+ $('pagetitle').textContent=label;
+ $('channelBarName').textContent=channel==='dm'?'✉ direct-messages':channel==='announcements'?'# announcements':'# chat';
+ $('channelBarDesc').textContent=channel==='dm'?'Choose someone to message privately':channel==='announcements'?'Updates from ORBIT + staff':'Just a place to chat, hang out, and catch up';
+ $('socialTitle').textContent=label;
+ $('socialDescription').textContent=channel==='dm'?'Select a member from the sidebar.':channel==='announcements'?'Official updates from the administrator and moderators.':'Messages shared by approved members.';
+ $('chatTitle').textContent=label;
+ $('sidebarChannelTitle').textContent=channel==='dm'?'Direct Messages':channel==='announcements'?'Announcements':'Chat';
+ $('socialChannelLabel').textContent=channel==='dm'?'PRIVATE':channel==='announcements'?'ANNOUNCEMENTS':'CHAT';
+ $('chatBadge').textContent=channel==='dm'?'PRIVATE':channel==='announcements'?'STAFF POSTING':'GROUP CHAT';
+ $('sidebarChannelText').textContent=channel==='dm'?'Choose a member to start a private chat.':channel==='announcements'?'Only staff can create and edit announcements.':'Everyone approved can read and send messages.';
  $('message').placeholder=channel==='dm'?'Message this person...':'Type a message...';
- show('dmDirectory',channel==='dm');show('dmActions',false);show('composer',true);
- $('poststatus').textContent='';$('sidebar').classList.remove('open');
- if(db){reload();refreshMemberRail()}else preview();
+ show('dmActions',channel==='dm'&&!!selected);
+ show('composer',channel!=='announcements');
+ $('announcementsActions').classList.toggle('staff-visible',channel==='announcements'&&isStaff);
+ $('poststatus').textContent='';
+ if(window.innerWidth<650)$('sidebar').classList.remove('open');
+ if(!db||!memberApproved)return;
+ if(channel==='announcements')loadAnnouncements();
+ else loadMessages();
+ if(channel==='dm')renderDirectory();
 }
 document.querySelectorAll('[data-social]').forEach(b=>b.addEventListener('click',()=>openSocial(b.dataset.social)));
 function note(message){const box=$('messages');box.replaceChildren();let p=document.createElement('p');p.className='social-disabled';p.textContent=message;box.append(p)}
-function renderMsgs(rows){let box=$('messages');box.replaceChildren();if(!rows.length){note('No messages here yet.');return}rows.forEach(m=>{const d=document.createElement('div');d.className='msg';let avatar=document.createElement('div');avatar.className='bubbleavatar';avatar.textContent=(m.nickname||'P').slice(0,1).toUpperCase();let inner=document.createElement('div'),n=document.createElement('div');n.className='msgname';n.textContent=m.nickname||'Player';const time=document.createElement('span');time.className='msgtime';time.textContent=m.created_at?new Date(m.created_at).toLocaleString():'';n.append(time);const body=document.createElement('div');body.className='msgbody';body.textContent=m.body||'';inner.append(n,body);d.append(avatar,inner);box.append(d)});box.scrollTop=box.scrollHeight}
+function renderMsgs(rows){
+ const box=$('messages'),nearBottom=box.scrollHeight-box.clientHeight-box.scrollTop<110;
+ box.replaceChildren();
+ if(!rows.length){note(current==='dm'?'No direct messages yet. Say hello!':'No messages yet. Start the conversation.');return}
+ rows.forEach(m=>{
+  const d=document.createElement('div');d.className='msg';
+  const avatar=document.createElement('div');avatar.className='bubbleavatar';avatar.textContent=(m.nickname||'P').slice(0,1).toUpperCase();
+  const inner=document.createElement('div');inner.style.minWidth='0';
+  const name=document.createElement('div');name.className='msgname';name.textContent=m.nickname||'Member';
+  if(modIds.has(m.sender_id)){const tag=document.createElement('span');tag.className='msgtime';tag.textContent='MODERATOR';name.append(tag)}
+  else if(adminApproved&&m.sender_id===user?.id){const tag=document.createElement('span');tag.className='msgtime';tag.textContent='ADMIN';name.append(tag)}
+  const time=document.createElement('span');time.className='msgtime';time.textContent=m.created_at?new Date(m.created_at).toLocaleString():'';
+  name.append(time);
+  const body=document.createElement('div');body.className='msgbody';body.textContent=m.body||'';
+  inner.append(name,body);d.append(avatar,inner);box.append(d);
+ });
+ if(nearBottom)box.scrollTop=box.scrollHeight;
+}
 function preview(){show('nickname',current==='general');if(current==='general'){const saved=JSON.parse(localStorage.getItem('orbit-plus-starter-v1')||'{}');renderMsgs((saved.messages||[]).map(x=>({nickname:x.name,body:x.text,created_at:x.time})));$('poststatus').textContent='Local-only preview: other users cannot see these messages.'}else note('Sign in to see registered members and private messages.')}
 function requireUser(){if(!user){status('Log in to use shared messages.');return false}return true}
+
+function onlineNow(id){const stamp=presenceMap.get(id);return !!stamp&&Date.now()-stamp<90000}
+async function touchPresence(){
+ if(!db||!user||!memberApproved||document.hidden)return;
+ const {error:e}=await db.from('orbit_presence').upsert({user_id:user.id},{onConflict:'user_id'});
+ if(e)console.warn('Presence update did not succeed',e.message);
+}
+function renderDirectory(){
+ const list=$('peopleList');if(!list)return;
+ list.replaceChildren();
+ const targets=memberRoster.filter(p=>p.id!==user?.id&&!blocked.has(p.id)).sort((a,b)=>Number(onlineNow(b.id))-Number(onlineNow(a.id))||a.nickname.localeCompare(b.nickname));
+ if(!targets.length){const p=document.createElement('p');p.className='notice';p.textContent='No other approved members yet.';list.append(p);return}
+ targets.forEach(p=>{
+  const b=document.createElement('button');b.type='button';b.className='person'+(selected===p.id?' active':'');
+  const av=document.createElement('span');av.className='memberAvatar';av.textContent=p.nickname.slice(0,1).toUpperCase();
+  const dot=document.createElement('span');dot.className='member-status-dot'+(onlineNow(p.id)?' online':'');dot.title=onlineNow(p.id)?'Online':'Offline';
+  const label=document.createElement('span');label.className='person-name';label.textContent=p.nickname;
+  b.append(av,dot,label);
+  b.onclick=()=>{selected=p.id;dmListOpen=true;openSocial('dm',p.id)};
+  list.append(b);
+ });
+}
+function appendRosterGroup(box,label,rows,online){
+ const group=document.createElement('h3');group.className='member-group';group.textContent=label+' — '+rows.length;box.append(group);
+ rows.forEach(p=>{
+  const div=document.createElement('div');div.className='memberItem';
+  const av=document.createElement('span');av.className='memberAvatar';av.textContent=p.nickname.slice(0,1).toUpperCase();
+  const dot=document.createElement('span');dot.className='member-status-dot'+(online?' online':'');
+  const column=document.createElement('span');column.className='member-info';
+  const nm=document.createElement('span');nm.className='member-name';nm.textContent=p.nickname+(p.id===user.id?' (you)':'');
+  const role=document.createElement('span');role.className='member-role';role.textContent=modIds.has(p.id)?'Moderator':(p.id===user.id&&adminApproved?'Administrator':online?'Online':'Offline');
+  column.append(nm,role);div.append(av,dot,column);box.append(div);
+ });
+}
 async function refreshMemberRail(){
  const box=$('memberList');if(!box)return;
- box.replaceChildren();
- if(!db||!user){box.textContent='Sign in to view opted-in members.';return}
- const {data,error:e}=await db.from('profiles').select('id,nickname').eq('discoverable',true).order('nickname').limit(60);
- if(e){box.textContent='Unable to load members.';return}
- const rows=(data||[]).filter(p=>p.id!==user.id);
- if(!rows.length){box.textContent='No members have opted in yet.';return}
- rows.forEach(p=>{const d=document.createElement('div');d.className='memberItem';const avatar=document.createElement('span');avatar.className='memberAvatar';avatar.textContent=p.nickname.slice(0,1).toUpperCase();const name=document.createElement('span');name.textContent=p.nickname;d.append(avatar,name);box.append(d)});
+ if(!db||!user||!memberApproved){box.textContent='Sign in to see members.';return}
+ if(memberRefreshBusy)return;
+ memberRefreshBusy=true;
+ try{
+  const [profiles,presence,mods,blocks]=await Promise.all([
+   db.from('profiles').select('id,nickname').order('nickname').limit(250),
+   db.from('orbit_presence').select('user_id,last_seen').limit(250),
+   db.from('orbit_moderators').select('user_id'),
+   db.from('blocks').select('blocked_id').eq('owner_id',user.id)
+  ]);
+  const failure=[profiles,presence,mods,blocks].find(x=>x.error);
+  if(failure){box.textContent='Unable to load members: '+failure.error.message;return}
+  memberRoster=profiles.data||[];
+  presenceMap=new Map((presence.data||[]).map(p=>[p.user_id,Date.parse(p.last_seen)]));
+  modIds=new Set((mods.data||[]).map(m=>m.user_id));
+  blocked=new Set((blocks.data||[]).map(b=>b.blocked_id));
+  isStaff=adminApproved||modIds.has(user.id);
+  $('announcementsActions').classList.toggle('staff-visible',current==='announcements'&&isStaff);
+  box.replaceChildren();
+  const online=memberRoster.filter(p=>onlineNow(p.id)).sort((a,b)=>a.nickname.localeCompare(b.nickname));
+  const offline=memberRoster.filter(p=>!onlineNow(p.id)).sort((a,b)=>a.nickname.localeCompare(b.nickname));
+  appendRosterGroup(box,'ONLINE',online,true);
+  appendRosterGroup(box,'OFFLINE',offline,false);
+  $('memberCount').textContent=online.length+' online';
+  renderDirectory();
+ }finally{memberRefreshBusy=false}
 }
-async function directory(){if(!requireUser())return;let {data,error:e}=await db.from('profiles').select('id,nickname,discoverable').eq('discoverable',true).order('nickname');if(e){error(e);return}const bl=await db.from('blocks').select('blocked_id').eq('owner_id',user.id);blocked=new Set((bl.data||[]).map(b=>b.blocked_id));people=(data||[]).filter(p=>p.id!==user.id&&!blocked.has(p.id));const box=$('peopleList');box.replaceChildren();if(!people.length){box.textContent='No other opted-in registered users yet.';return}people.forEach(p=>{const b=document.createElement('button');b.className='person'+(selected===p.id?' active':'');b.textContent=p.nickname;b.onclick=()=>{selected=p.id;show('dmActions',true);$('chatTitle').textContent='✉ '+p.nickname;directory();loadMessages()};box.append(b)});const own=await db.from('profiles').select('discoverable').eq('id',user.id).maybeSingle();$('directoryOptIn').checked=own.data?.discoverable!==false}
-async function loadMessages(){if(!user){note('Log in to see messages.');return}if(current==='dm'&&!selected){note('Select a username from the directory to open a private conversation.');return}let q;if(current==='general')q=db.from('general_messages').select('id,nickname,body,created_at').order('created_at',{ascending:true}).limit(100);else q=db.from('direct_messages').select('id,sender_id,recipient_id,nickname,body,created_at').or('and(sender_id.eq.'+user.id+',recipient_id.eq.'+selected+'),and(sender_id.eq.'+selected+',recipient_id.eq.'+user.id+')').order('created_at',{ascending:true}).limit(100);
-let {data,error:e}=await q;if(e){error(e);note('Unable to load messages. Check your database setup.');return}renderMsgs(data||[])}
-async function reload(){if(!db){preview();return}if(!user){note('Register or log in to use shared chat.');return}if(current==='dm')await directory();await loadMessages()}
+async function directory(){await refreshMemberRail()}
+async function loadAnnouncements(){
+ if(!db||!memberApproved||current!=='announcements')return;
+ const {data,error:e}=await db.from('announcements').select('id,title,body,nickname,pinned,created_at,updated_at').order('pinned',{ascending:false}).order('created_at',{ascending:false}).limit(100);
+ const feed=$('announcementsFeed');feed.replaceChildren();
+ if(e){feed.textContent='Announcements could not load: '+e.message;return}
+ if(!(data||[]).length){feed.textContent='No announcements have been posted yet.';return}
+ for(const a of data){
+  const card=document.createElement('article');card.className='announce-card'+(a.pinned?' pinned':'');
+  const top=document.createElement('div');top.className='announce-top';
+  const name=document.createElement('span');name.className='announce-author';name.textContent=a.nickname||'ORBIT +';
+  const date=document.createElement('span');date.className='announce-meta';date.textContent=new Date(a.created_at).toLocaleString();
+  top.append(name,date);
+  if(a.pinned){const pin=document.createElement('span');pin.className='announce-pin';pin.textContent='Pinned';top.append(pin)}
+  const title=document.createElement('h3');title.textContent=a.title||'Announcement';
+  const body=document.createElement('p');body.textContent=a.body||'';
+  card.append(top,title,body);
+  if(a.updated_at&&Date.parse(a.updated_at)-Date.parse(a.created_at)>3000){const edited=document.createElement('span');edited.className='announce-meta';edited.textContent='Edited';card.append(edited)}
+  if(isStaff){
+   const edit=document.createElement('button');edit.type='button';edit.className='announce-action';edit.textContent='Edit';
+   edit.onclick=()=>openAnnouncementEditor(a);card.append(edit)
+  }
+  feed.append(card);
+ }
+}
+function openAnnouncementEditor(item=null){
+ if(!isStaff)return;
+ editingAnnouncement=item?.id??null;
+ $('announcementEditor').hidden=false;
+ $('announcementTitle').value=item?.title||'';
+ $('announcementText').value=item?.body||'';
+ $('announcementPinned').checked=!!item?.pinned;
+ $('announcementSave').textContent=item?'Save changes':'Publish announcement';
+ $('announcementsStatus').textContent='';
+ $('announcementTitle').focus();
+}
+$('announcementNew').onclick=()=>openAnnouncementEditor();
+$('announcementCancel').onclick=()=>{$('announcementEditor').hidden=true;editingAnnouncement=null;$('announcementsStatus').textContent=''};
+$('announcementSave').onclick=async()=>{
+ if(!db||!user||!isStaff)return;
+ const title=$('announcementTitle').value.trim(),body=$('announcementText').value.trim(),pinned=$('announcementPinned').checked;
+ if(!title||!body){$('announcementsStatus').textContent='Enter a title and a message.';return}
+ const btn=$('announcementSave');btn.disabled=true;
+ const payload={title,body,pinned};
+ const operation=editingAnnouncement?
+  db.from('announcements').update(payload).eq('id',editingAnnouncement):
+  db.from('announcements').insert({...payload,author_id:user.id,nickname:user.user_metadata?.nickname||'ORBIT + Staff'});
+ const {error:e}=await operation;
+ btn.disabled=false;
+ if(e){$('announcementsStatus').textContent=e.message;return}
+ $('announcementEditor').hidden=true;editingAnnouncement=null;
+ $('announcementsStatus').textContent='Announcement saved.';
+ await loadAnnouncements();
+};
+async function loadMessages(){
+ if(!db||!user||!memberApproved)return;
+ if(current==='announcements'){await loadAnnouncements();return}
+ if(current==='dm'&&!selected){note('Choose a member from Direct Messages in the sidebar.');return}
+ let q;
+ if(current==='general')q=db.from('general_messages').select('id,sender_id,nickname,body,created_at').order('created_at',{ascending:true}).limit(100);
+ else q=db.from('direct_messages').select('id,sender_id,recipient_id,nickname,body,created_at').or('and(sender_id.eq.'+user.id+',recipient_id.eq.'+selected+'),and(sender_id.eq.'+selected+',recipient_id.eq.'+user.id+')').order('created_at',{ascending:true}).limit(100);
+ const {data,error:e}=await q;
+ if(e){note('Unable to load messages: '+e.message);return}
+ renderMsgs(data||[]);
+}
+async function reload(){
+ if(!db||!user||!memberApproved)return;
+ if(current==='dm')await directory();
+ await loadMessages();
+}
+async function refreshModeratorsAdmin(){
+ if(!db||!adminApproved||!user)return;
+ const [roster,mods]=await Promise.all([
+  db.from('profiles').select('id,nickname').order('nickname').limit(250),
+  db.from('orbit_moderators').select('user_id')
+ ]);
+ const err=roster.error||mods.error;
+ if(err){$('moderatorStatus').textContent=err.message;return}
+ const moderatorSet=new Set((mods.data||[]).map(m=>m.user_id));
+ const candidates=(roster.data||[]).filter(p=>p.id!==user.id&&!moderatorSet.has(p.id));
+ const picker=$('moderatorPicker');picker.replaceChildren();
+ const first=document.createElement('option');first.value='';first.textContent=candidates.length?'Choose an approved member':'No eligible members';picker.append(first);
+ candidates.forEach(p=>{const op=document.createElement('option');op.value=p.id;op.textContent=p.nickname;picker.append(op)});
+ const list=$('moderatorList');list.replaceChildren();
+ if(!moderatorSet.size)list.textContent='No moderators assigned yet.';
+ moderatorSet.forEach(id=>{
+  const member=(roster.data||[]).find(p=>p.id===id);
+  const div=document.createElement('div');div.className='moderator-row';
+  const name=document.createElement('span');name.textContent=member?.nickname||'Moderator';
+  const revoke=document.createElement('button');revoke.type='button';revoke.textContent='Remove moderator';
+  revoke.onclick=async()=>{
+   if(!confirm('Remove moderator permissions from '+(member?.nickname||'this member')+'?'))return;
+   const {error:e}=await db.from('orbit_moderators').delete().eq('user_id',id);
+   $('moderatorStatus').textContent=e?e.message:'Moderator permissions removed.';
+   if(!e)await refreshModeratorsAdmin();
+  };
+  div.append(name,revoke);list.append(div);
+ });
+}
+$('moderatorGrant').onclick=async()=>{
+ if(!adminApproved||!db||!user)return;
+ const id=$('moderatorPicker').value;
+ if(!id){$('moderatorStatus').textContent='Choose a member first.';return}
+ const {error:e}=await db.from('orbit_moderators').insert({user_id:id,assigned_by:user.id});
+ $('moderatorStatus').textContent=e?e.message:'Moderator access granted.';
+ if(!e)await refreshModeratorsAdmin();
+};
 async function ensureProfile(){if(!user)return;const old=await db.from('profiles').select('id').eq('id',user.id).maybeSingle();if(old.error){error(old.error);return}if(!old.data){let nickname=(user.user_metadata?.nickname||'Player-'+user.id.slice(0,6)).slice(0,24);const r=await db.from('profiles').insert({id:user.id,nickname,discoverable:false});if(r.error)error(r.error)}}
 async function authUI(){
   await checkMembership();
