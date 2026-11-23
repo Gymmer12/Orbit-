@@ -24,7 +24,7 @@ Cosmos is a free virtual score token. It is **not Orbits**, and it cannot be pur
 | Snake | **50%** of apples, rounded down | 20 apples = 10 Cosmos |
 | Flappy Bird | **100%** of pipes passed | 10 pipes = 10 Cosmos |
 
-**Limits:** 30 Cosmos maximum per round, **60 Cosmos per day** total across games (UTC calendar day). The daily limit applies to rewards, not to the ability to play. The earned lifetime balance and personal-best scores are saved to the ORBIT + account in Supabase. Cosmos has **no spending or shop function yet**.
+**No earning cap:** No fixed Cosmos limit per round or per day. Game scores determine the Cosmos reward, subject to score validation and session rules. Lifetime balance, today's earnings and personal bests are saved to Supabase. Cosmos has no spending function; Orbit Studio remains free.
 
 ## Server rules and trust limitations
 - Each round starts through `orbit_start_game` and finishes through `orbit_finish_game`.
@@ -33,18 +33,22 @@ Cosmos is a free virtual score token. It is **not Orbits**, and it cannot be pur
 - Sessions under four seconds, abandoned sessions over 20 minutes and implausible scores are not awarded rewards. Duplicate claims fail. New games close unfinished prior rounds.
 - `orbit_game_runs` allows signed-in users to **read only their own** game records, and does not grant them direct INSERT/UPDATE/DELETE access.
 - **Important:** Game scores originate in browser JavaScript. The server enforces basic score-versus-duration limits, but this does not fully prevent cheating; do not use these scores or tokens for prizes with monetary value.
-- Daily earnings are capped to avoid encouraging endless play. Games have no betting, loot boxes, random rewards or paid upgrades.
+- Cosmos has no earning caps and no real-world value. Games have no betting, loot boxes, random rewards or paid upgrades; members can take breaks at any time.
 
 ## Deployment / source files
 - `index.html`: Games menu/page, home announcement cards, text changes, arcade initialization.
-- `orbit-arcade.js`: All 16 game engines, score UI, keyboard/touch controls and RPC calls.
-- `orbit-arcade.css`: Game styling, responsive buttons and announcement preview styling.
-- `orbit-arcade-cosmos.sql`: Game runs, row-level security, validated session start/finish and summary RPC.
+- `orbit-arcade.js`: Three original game engines and shared game control, fullscreen, scoring and RPC logic.
+- `orbit-arcade-extras.js`: 13 additional original puzzle and arcade game engines.
+- `orbit-leaderboard.js`: Cosmos and per-game rankings for approved members.
+- `orbit-arcade.css`: Base styles and announcement previews.
+- `orbit-arcade-v2.css`: Retro cartridge gallery, purple full-screen games and leaderboard.
+- `orbit-cosmos-arcade-migration.sql`: Historical Cosmos migration and 16-game setup.
+- `orbit-arcade-leaderboard-no-caps.sql`: Latest no-cap upgrade and secure rankings endpoint.
 - **No gaming assets were copied** from Alan's ORBIT; gameplay and graphics are generated from this site's original Canvas code.
 
 ## Tests performed
 - SQL transactions verified all three example conversions return exactly 10 Cosmos.
-- A 60/day cap test confirmed that a third successful round earns 0 after 60 Cosmos.
+- A no-cap test confirmed a member can earn 60 Cosmos in one round, 100 in another, and more than 60 in one day. Changes were rolled back.
 - Unapproved users cannot begin games. Direct client-side score inserts are forbidden.
 - Duplicate claims and obviously invalid scores are rejected.
 - SQL tests were rolled back, leaving no test rewards or game sessions.
@@ -59,4 +63,14 @@ They use ORBIT + original Canvas graphics and score systems. Maze Chase is an or
 
 The separate gallery of 29 imported third-party titles in Alan's repo has not been copied: third-party packages, ROMs, and other game assets require verified licensing/authorization. The source of truth for Cosmos is `orbit-cosmos-arcade-migration.sql`. The older `orbit-arcade-stardust.sql` is historical and must **not** be re-applied after migration.
 
-Existing balances are preserved under the renamed `cosmos` database column. The same free, nonredeemable daily earning cap applies across all sixteen cartridges.
+Existing balances are preserved under the renamed `cosmos` database column. No artificial daily or per-round Cosmos earning caps remain; server-side score validation still applies.
+
+## Leaderboard and full-screen Arcade
+
+The Leaderboard is available from the left sidebar and Home shortcuts. Approved members may compare their total Cosmos or their personal-best score for any of the 16 games. Up to 50 member nicknames appear, with a podium for the top three. School email addresses and legal names are not displayed. Banned and unapproved accounts are excluded from the ranked results.
+
+Selecting any cartridge opens a full-viewport game screen. The site requests browser fullscreen from that click and falls back to a full-viewport overlay where the native API is unavailable (including some iOS browsers). Back to Arcade or Escape exits, recording an ongoing round. The game screen has a large score HUD, Play, Pause and End controls, and on-screen movement buttons.
+
+The game catalogue has retro cartridge shells, a red Play indicator and a dark blue display, visually informed by Alan's games/index.html. Tetris follows the purple full-page feel and Hold/Next/Level/Lines HUD of his games/tetris.html, but uses original ORBIT + code. C or Shift holds a Tetris piece, Space hard-drops, and a ghost piece previews the landing position.
+
+Orbit Studio and all cosmetic customization remain entirely free: no Cosmos cost or real money. Leaderboards rely on browser-generated scores; anti-abuse checks reduce obvious fabricated scores but cannot guarantee fair competition. Do not attach monetary prizes to Cosmos or ranking positions. The live Render deployment still needs real browser/phone testing.
