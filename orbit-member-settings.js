@@ -245,7 +245,7 @@ function bindUI(){
  $('settingsPasswordSave')?.addEventListener('click',savePassword);
  $('settingsEditAvatar')?.addEventListener('click',()=>onOpenStudio?.());
  $('settingsOpenStudio')?.addEventListener('click',()=>onOpenStudio?.());
- $('settingsLogout')?.addEventListener('click',()=>client?.auth.signOut());
+ $('settingsLogout')?.addEventListener('click',()=>{const signout=$('signout');if(signout)signout.click();else client?.auth.signOut()});
  $('memberProfileClose')?.addEventListener('click',closeMember);
  $('memberProfileModal')?.addEventListener('click',e=>{if(e.target===$('memberProfileModal'))closeMember()});
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('memberProfileModal')?.hidden)closeMember()});
