@@ -83,3 +83,13 @@
 #moderatorStatus{font-size:11px;color:#b5d5ff;min-height:16px}
 @media(max-width:850px){#text .two{grid-template-columns:minmax(0,1fr) 165px}#text .member-name{max-width:90px}.sidebar{width:191px}}
 @media(max-width:650px){.sidebar{width:225px}#text .two{display:block}#text .two>.card:last-child{display:none}#text .social-content{height:100%}#text .pane{height:calc(100dvh - 83px)}#announcementsFeed{padding:10px}#text .social-content{border-right:0}#text .memberHint{display:none}}
+
+/* Keep the message area within the viewport below both headers. */
+#text .pane{height:calc(100dvh - 86px)!important;min-height:0}
+#text .social-content{min-height:0}
+#announcementsActions .announce-fields[hidden]{display:none!important}
+#announcementsFeed[hidden]{display:none!important}
+#text .two>.card:last-child>hr,
+#text .two>.card:last-child>.tag,
+#text .two>.card:last-child>h3,
+#text .two>.card:last-child>p{display:none}
