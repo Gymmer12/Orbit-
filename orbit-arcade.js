@@ -403,7 +403,7 @@ function control(name){
 }
 function handleKey(e){
  if(!isVisible()||!playing||paused||e.ctrlKey||e.altKey||e.metaKey)return;
- if(e.target?.closest?.('input,textarea,select,button,[contenteditable]'))return;
+ if(e.target?.closest?.('input,textarea,select,[contenteditable]'))return;
  const map={ArrowLeft:'left',a:'left',A:'left',ArrowRight:'right',d:'right',D:'right',
   ArrowUp:'rotate',w:'rotate',W:'rotate',ArrowDown:'down',s:'down',S:'down',' ':'drop'};
  if(EXTRAS?.RULES[game]&&EXTRAS.key(game,state,e.key,gameAPI())){e.preventDefault();draw();return}
