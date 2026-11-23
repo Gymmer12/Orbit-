@@ -8,6 +8,8 @@
 const $=id=>document.getElementById(id);
 const EXTRAS=window.OrbitArcadeExtras||null;
 const canvas=$('arcadeCanvas');
+const holdCanvas=$('arcadeHoldCanvas'),nextCanvas=$('arcadeNextCanvas');
+const holdCtx=holdCanvas?.getContext('2d'),nextCtx=nextCanvas?.getContext('2d');
 const ctx=canvas?.getContext('2d');
 const W=340,H=480;
 const RULES={
@@ -28,7 +30,7 @@ const PIECES=[
 ];
 let db=null,member=null,game='tetris',state=null,score=0,runId=null,
  playing=false,paused=false,requestId=0,lastTime=0,waiting=false,initialized=false;
-let wallet={total:0,today:0,daily_cap:60,best:Object.fromEntries(Object.keys(RULES).map(k=>[k,0]))};
+let wallet={total:0,today:0,daily_cap:null,best:Object.fromEntries(Object.keys(RULES).map(k=>[k,0]))};
 function setStatus(s){const p=$('arcadeStatus');if(p)p.textContent=s}
 function setOverlay(title,message){
  const box=$('arcadeOverlay');if(!box)return;
@@ -47,6 +49,7 @@ function updateWallet(){
  $('sidebarCosmosCount').textContent=Number(wallet.total||0).toLocaleString();
  $('arcadeEarnedToday').textContent=Number(wallet.today||0).toLocaleString();
  $('arcadeBest').textContent=Number(wallet.best?.[game]||0).toLocaleString();
+ $('arcadeHudCosmos').textContent=Number(wallet.total||0).toLocaleString();
  const list=$('arcadePersonalBests');
  list.replaceChildren();
  for(const key of Object.keys(RULES)){
@@ -61,7 +64,7 @@ async function loadSummary(){
  const {data,error}=await db.rpc('orbit_game_summary');
  if(error){setStatus('Cosmos balance unavailable: '+error.message);return}
  if(data&&typeof data==='object'){
-  wallet={total:Number(data.total||0),today:Number(data.today||0),daily_cap:60,best:data.best||wallet.best};
+  wallet={total:Number(data.total||0),today:Number(data.today||0),daily_cap:null,best:data.best||wallet.best};
   updateWallet();
  }
 }
@@ -86,7 +89,7 @@ function glowRect(x,y,w,h,color){
 function cloneMatrix(x){return x.map(row=>row.slice())}
 function tetrisCreate(){
  const board=Array.from({length:20},()=>Array(10).fill(0));
- const s={board,active:null,gravity:0,lines:0,bag:[]};
+ const s={board,active:null,gravity:0,lines:0,bag:[],queue:[],held:null,canHold:true};
  tetrisSpawn(s);
  return s;
 }
@@ -100,12 +103,24 @@ function tetrisNext(s){
  }
  return s.bag.pop();
 }
-function tetrisSpawn(s){
- const index=tetrisNext(s);
+function tetrisSpawn(s,forcedIndex=null){
+ while(s.queue.length<5)s.queue.push(tetrisNext(s));
+ const index=forcedIndex===null?s.queue.shift():forcedIndex;
+ while(s.queue.length<5)s.queue.push(tetrisNext(s));
  const matrix=cloneMatrix(PIECES[index]);
- s.active={m:matrix,x:Math.floor((10-matrix[0].length)/2),y:0};
+ s.active={index,m:matrix,x:Math.floor((10-matrix[0].length)/2),y:0};
+ s.gravity=0;
  if(tetrisCollision(s,s.active.x,s.active.y,matrix)){endGame('Blocks reached the top');return false}
  return true;
+}
+function tetrisHold(){
+ if(!playing||paused||!state?.active||!state.canHold)return;
+ const s=state,prior=s.active.index,held=s.held;
+ s.held=prior;
+ if(held===null)tetrisSpawn(s);
+ else tetrisSpawn(s,held);
+ s.canHold=false;
+ draw();
 }
 function tetrisCollision(s,x,y,matrix){
  for(let r=0;r<matrix.length;r++)for(let c=0;c<matrix[r].length;c++){
@@ -148,12 +163,13 @@ function tetrisLock(){
   state.lines+=cleared;
   setScore(score+([0,100,300,500,800][cleared]||0));
  }
+ state.canHold=true;
  tetrisSpawn(state);
 }
 function tetrisStep(dt){
  if(!playing||paused||!state?.active)return;
  state.gravity+=dt*1000;
- const delay=Math.max(125,660-Math.floor(state.lines/8)*60);
+ const delay=Math.max(90,660-Math.floor(state.lines/10)*62);
  if(state.gravity>=delay){
   state.gravity=0;
   if(!tetrisMove(0,1))tetrisLock();
@@ -163,6 +179,7 @@ function tetrisInput(key){
  if(key==='left')tetrisMove(-1,0);
  if(key==='right')tetrisMove(1,0);
  if(key==='rotate')tetrisRotate();
+ if(key==='hold')tetrisHold();
  if(key==='down'){if(tetrisMove(0,1))setScore(score+1);else tetrisLock()}
  if(key==='drop'){
   let moves=0;
@@ -171,26 +188,70 @@ function tetrisInput(key){
   tetrisLock();
  }
 }
+function tetrisPiecePreview(context,index,py){
+ if(!context||index===null||index===undefined)return;
+ const matrix=PIECES[index],blocks=[];
+ for(let y=0;y<matrix.length;y++)for(let x=0;x<matrix[y].length;x++)if(matrix[y][x])blocks.push({x,y,v:matrix[y][x]});
+ if(!blocks.length)return;
+ const minX=Math.min(...blocks.map(b=>b.x)),maxX=Math.max(...blocks.map(b=>b.x));
+ const minY=Math.min(...blocks.map(b=>b.y)),maxY=Math.max(...blocks.map(b=>b.y));
+ const size=Math.min(22,90/(maxX-minX+1));
+ const x0=(105-(maxX-minX+1)*size)/2,y0=py+(53-(maxY-minY+1)*size)/2;
+ blocks.forEach(b=>{
+  context.fillStyle=COLORS[b.v];
+  context.fillRect(x0+(b.x-minX)*size+1,y0+(b.y-minY)*size+1,size-2,size-2);
+  context.fillStyle='#fff8';
+  context.fillRect(x0+(b.x-minX)*size+2,y0+(b.y-minY)*size+2,size-4,3);
+ });
+}
+function tetrisDrawPreviews(){
+ const tetris=game==='tetris'&&state?.board;
+ $('arcadeTetrisLevel').textContent=tetris?String(Math.floor(state.lines/10)+1):'1';
+ $('arcadeTetrisLines').textContent=tetris?String(state.lines):'0';
+ if(holdCtx){
+  holdCtx.clearRect(0,0,105,110);holdCtx.fillStyle='#120d43';holdCtx.fillRect(0,0,105,110);
+  if(tetris)tetrisPiecePreview(holdCtx,state.held,25);
+ }
+ if(nextCtx){
+  nextCtx.clearRect(0,0,105,208);nextCtx.fillStyle='#120d43';nextCtx.fillRect(0,0,105,208);
+  if(tetris)state.queue.slice(0,3).forEach((index,i)=>tetrisPiecePreview(nextCtx,index,5+i*67));
+ }
+}
 function tetrisDraw(){
- paintBG('TETRIS');
  if(!ctx||!state)return;
- const unit=21,ox=65,oy=37;
- ctx.fillStyle='rgba(4,10,29,.93)';ctx.fillRect(ox-3,oy-3,216,426);
+ const g=ctx.createLinearGradient(0,0,340,600);
+ g.addColorStop(0,'#190e52');g.addColorStop(.7,'#110a3a');g.addColorStop(1,'#170d4d');
+ ctx.fillStyle=g;ctx.fillRect(0,0,340,600);
+ const unit=27,ox=35,oy=29;
+ ctx.fillStyle='#090529';ctx.fillRect(ox-5,oy-5,280,550);
+ ctx.strokeStyle='#8064df';ctx.lineWidth=3;ctx.strokeRect(ox-5,oy-5,280,550);
  for(let y=0;y<20;y++)for(let x=0;x<10;x++){
   const bx=ox+x*unit,by=oy+y*unit;
-  ctx.fillStyle='#13234e';ctx.fillRect(bx+1,by+1,unit-2,unit-2);
+  ctx.fillStyle=(x+y)%2===0?'#18103e':'#1b1245';
+  ctx.fillRect(bx+.5,by+.5,unit-1,unit-1);
   if(state.board[y][x])glowRect(bx,by,unit,unit,COLORS[state.board[y][x]]);
  }
  if(state.active){
   const a=state.active;
+  let ghostY=a.y;
+  while(!tetrisCollision(state,a.x,ghostY+1,a.m))ghostY++;
+  if(ghostY>a.y){
+   ctx.globalAlpha=.24;
+   for(let r=0;r<a.m.length;r++)for(let c=0;c<a.m[r].length;c++){
+    if(!a.m[r][c]||ghostY+r<0)continue;
+    ctx.fillStyle=COLORS[a.m[r][c]];ctx.fillRect(ox+(a.x+c)*unit+2,oy+(ghostY+r)*unit+2,unit-4,unit-4);
+   }
+   ctx.globalAlpha=1;
+  }
   for(let r=0;r<a.m.length;r++)for(let c=0;c<a.m[r].length;c++){
    if(!a.m[r][c])continue;
    const xx=a.x+c,yy=a.y+r;
    if(yy>=0)glowRect(ox+xx*unit,oy+yy*unit,unit,unit,COLORS[a.m[r][c]]);
   }
  }
- ctx.strokeStyle='#5576be';ctx.strokeRect(ox-3,oy-3,216,426);
+ tetrisDrawPreviews();
 }
+
 function randomStar(s){
  let star;let tries=0;
  do{star={x:Math.floor(Math.random()*17),y:Math.floor(Math.random()*19)};tries++}
@@ -350,9 +411,10 @@ async function endGame(reason){
   wallet.best={...wallet.best,[finishedGame]:Number(data.best||0)};
   updateWallet();
   const reward=Number(data.earned||0);
-  const summary=reward?'+'+reward+' Cosmos ✦':'0 Cosmos (daily limit reached or low score)';
+  const summary=reward?'+'+reward+' Cosmos ✦':'0 Cosmos (score below the earning threshold)';
   setOverlay('Round complete',final.toLocaleString()+' points · '+summary);
-  setStatus('Round saved. '+summary+'. You have earned '+wallet.today+' of 60 Cosmos today.');
+  setStatus('Round saved. '+summary+'. Earned today: '+wallet.today+' Cosmos.');
+  window.OrbitLeaderboard?.refresh();
  }catch(e){
   if(member?.id===owner)setStatus('Could not save the round: '+(e?.message||'network error'));
  }finally{
@@ -390,7 +452,7 @@ function chooseGame(next){
  }
  updateWallet();setControls();
  setOverlay(RULES[game].name,'Select Start game when you’re ready.');
- setStatus('You can earn up to 60 Cosmos per day, shared across all 16 games.');
+ setStatus('Cosmos is free to earn, with no daily or per-round earning cap.');
  draw();
 }
 function control(name){
@@ -443,14 +505,14 @@ async function init(client,person){
  if(member?.id===person.id&&db===client){updateWallet();return}
  if(playing){cancelAnimationFrame(requestId);playing=false;paused=false;runId=null}
  db=client;member=person;
- wallet={total:0,today:0,daily_cap:60,best:Object.fromEntries(Object.keys(RULES).map(k=>[k,0]))};
+ wallet={total:0,today:0,daily_cap:null,best:Object.fromEntries(Object.keys(RULES).map(k=>[k,0]))};
  updateWallet();chooseGame('tetris');await loadSummary();
 }
 function open(){if(!db||!member)return;draw();loadSummary()}
 function pause(){if(playing&&!paused)pauseGame()}
 function clear(){
  cancelAnimationFrame(requestId);db=null;member=null;runId=null;playing=false;paused=false;waiting=false;
- wallet={total:0,today:0,daily_cap:60,best:Object.fromEntries(Object.keys(RULES).map(k=>[k,0]))};
+ wallet={total:0,today:0,daily_cap:null,best:Object.fromEntries(Object.keys(RULES).map(k=>[k,0]))};
  updateWallet();if(initialized)chooseGame('tetris');
 }
 window.OrbitArcade={init,open,pause,clear,loadSummary};
