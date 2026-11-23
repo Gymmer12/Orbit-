@@ -1,0 +1,62 @@
+/* One clean title on ORBIT + Chat, Announcements, and Direct Messages.
+   Previous design displayed the same page name in the top bar, channel bar,
+   and conversation card. The single shared top bar now owns the page title. */
+.topbar .topbar-current{
+ min-width:0;
+ flex:1 1 auto;
+ flex-wrap:nowrap;
+ gap:11px;
+ overflow:hidden;
+}
+.topbar #pagetitle{
+ white-space:nowrap;
+ overflow:hidden;
+ text-overflow:ellipsis;
+ max-width:min(44vw,410px);
+ flex-shrink:1;
+}
+.topbar #topbarSubtitle{
+ white-space:nowrap;
+ overflow:hidden;
+ text-overflow:ellipsis;
+ flex:1 1 auto;
+ min-width:0;
+ font-size:11px;
+}
+.topbar .topbar-online{
+ display:flex;
+ align-items:center;
+ flex-shrink:0;
+ gap:5px;
+ color:#82ddb1;
+ font-size:11px;
+ font-weight:750;
+ white-space:nowrap;
+ margin-left:auto;
+}
+.topbar .topbar-online[hidden]{display:none!important}
+/* The channel bar and repeated conversation-card heading are gone,
+   so the conversation area now uses all remaining available height. */
+#text .pane{
+ height:calc(100dvh - 43px)!important;
+ max-height:calc(100dvh - 43px);
+ min-height:0;
+}
+#text .two{min-height:0;flex:1}
+#text .social-content{
+ min-height:0;
+}
+#text .social-content>#messages{
+ min-height:0;
+}
+@media(max-width:660px){
+ .topbar .topbar-current{gap:8px}
+ .topbar #pagetitle{max-width:55vw}
+ .topbar #topbarSubtitle{font-size:10px}
+ .topbar .topbar-online{font-size:10px}
+}
+@media(max-width:460px){
+ .topbar #topbarSubtitle{display:none}
+ .topbar #pagetitle{max-width:calc(100vw - 160px)}
+ .topbar .topbar-online{margin-left:6px}
+}
