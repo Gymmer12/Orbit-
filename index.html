@@ -180,6 +180,39 @@
     <p id="studioStatus" role="status" aria-live="polite"></p>
    </aside>
    <div class="studio-catalog">
+    <section class="studio-section palette-studio-section" aria-labelledby="paletteTitle">
+      <div class="studio-section-heading">
+        <div><h2 id="paletteTitle">Whole website colors <span class="palette-star">✦</span></h2>
+          <p>Make your own color combination for ORBIT +. Tap a swatch to open the color picker. Your changes appear instantly.</p>
+        </div><span>ALL FREE</span>
+      </div>
+      <div class="palette-presets-header">Quick combinations</div>
+      <div class="palette-presets" id="palettePresets" aria-label="Preset website palettes"></div>
+      <div class="palette-layout">
+        <div class="palette-fields" id="paletteFields">
+          <label class="palette-field" for="paletteBackground"><span class="palette-label">Background</span><span class="palette-input-row"><input id="paletteBackground" type="color" data-palette-key="background" value="#050B2F" aria-label="Background color"><span id="paletteBackgroundHex" class="palette-hex">#050B2F</span></span></label>
+          <label class="palette-field" for="paletteSidebar"><span class="palette-label">Sidebar</span><span class="palette-input-row"><input id="paletteSidebar" type="color" data-palette-key="sidebar" value="#071B62" aria-label="Sidebar color"><span id="paletteSidebarHex" class="palette-hex">#071B62</span></span></label>
+          <label class="palette-field" for="paletteSurface"><span class="palette-label">Cards & chat</span><span class="palette-input-row"><input id="paletteSurface" type="color" data-palette-key="surface" value="#101D52" aria-label="Cards and chat color"><span id="paletteSurfaceHex" class="palette-hex">#101D52</span></span></label>
+          <label class="palette-field" for="paletteAccent"><span class="palette-label">Buttons & highlights</span><span class="palette-input-row"><input id="paletteAccent" type="color" data-palette-key="accent" value="#5E93FF" aria-label="Buttons and highlights color"><span id="paletteAccentHex" class="palette-hex">#5E93FF</span></span></label>
+          <label class="palette-field" for="paletteText"><span class="palette-label">Text</span><span class="palette-input-row"><input id="paletteText" type="color" data-palette-key="text" value="#F2F6FF" aria-label="Main text color"><span id="paletteTextHex" class="palette-hex">#F2F6FF</span></span></label>
+          <label class="palette-field" for="paletteBorder"><span class="palette-label">Borders</span><span class="palette-input-row"><input id="paletteBorder" type="color" data-palette-key="border" value="#3B569F" aria-label="Border color"><span id="paletteBorderHex" class="palette-hex">#3B569F</span></span></label>
+        </div>
+        <div class="palette-live-preview" aria-label="Theme color preview">
+          <div class="palette-preview-title"><span class="palette-dot"></span> LIVE PREVIEW <small>Your own look</small></div>
+          <div class="palette-preview-window" id="paletteMiniPreview">
+            <div class="palette-preview-side"><b>ORBIT +</b><span>⌂ Home</span><span># Chat</span><span>✉ Messages</span></div>
+            <div class="palette-preview-main"><div class="palette-preview-head"># Chat <span>● Online</span></div><div class="palette-preview-message">Your colors. Your Orbit.</div><div class="palette-preview-composer"><span>Write a message...</span><b>➤</b></div></div>
+          </div>
+          <p class="palette-contrast-note" id="paletteContrast" aria-live="polite">Choose text colors that remain easy to read.</p>
+        </div>
+      </div>
+      <div class="palette-actions">
+        <button id="paletteSave" type="button" class="palette-primary" disabled>Save my palette</button>
+        <button id="paletteUndo" type="button" class="palette-secondary" disabled>Undo changes</button>
+        <button id="paletteReset" type="button" class="palette-secondary">Original ORBIT + colors</button>
+      </div>
+      <p id="paletteStatus" class="palette-status" role="status" aria-live="polite"></p>
+    </section>
     <section class="studio-section"><div class="studio-section-heading"><div><h2>Profile picture</h2><p>Choose a starter avatar or upload your own.</p></div><span>FREE</span></div><div class="studio-options studio-avatar-options" id="studioAvatarOptions"></div></section>
     <section class="studio-section"><div class="studio-section-heading"><div><h2>Avatar rings</h2><p>Frames and glowing effects everyone can see around your profile picture.</p></div><span>FREE</span></div><div class="studio-options studio-ring-options" id="studioRingOptions"></div></section>
     <section class="studio-section"><div class="studio-section-heading"><div><h2>Display-name fonts</h2><p>Your name's font appears for other members in chats and the member list.</p></div><span>FREE</span></div><div class="studio-options" id="studioFontOptions"></div></section>
