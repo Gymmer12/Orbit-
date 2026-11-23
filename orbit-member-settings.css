@@ -308,3 +308,11 @@ html[data-site-palette=custom] .member-profile-sheet #memberProfileMessage{backg
 @media(prefers-reduced-motion:reduce){
  #settings *{scroll-behavior:auto}
 }
+
+/* Each member's own avatar shade comes from their public profile; rings still
+   use the separately chosen Orbit Studio style. Uploaded photos cover this. */
+.orbit-avatar{
+ background:radial-gradient(circle at 25% 18%,
+  color-mix(in srgb,var(--member-avatar-color,#416ECB) 59%,#ffffff),
+  var(--member-avatar-color,#416ECB) 77%)!important;
+}
