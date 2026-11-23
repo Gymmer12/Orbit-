@@ -25,6 +25,7 @@
 <link rel="stylesheet" href="orbit-studio.css">
 <link rel="stylesheet" href="orbit-palette.css">
 <link rel="stylesheet" href="orbit-member-settings.css">
+<link rel="stylesheet" href="orbit-arcade.css">
 </head>
 <body>
 <div id="authGate" role="region" aria-label="ORBIT + account sign-in">
@@ -136,6 +137,9 @@
 <button class="navlink" data-social="announcements" type="button"><span class="glyph">📣</span> Announcements</button>
 <button class="navlink" id="dmToggle" data-social="dm" aria-expanded="false" aria-controls="dmDirectory" type="button"><span class="glyph">✉</span> Direct Messages <span class="chevron">▾</span></button>
 <div class="sidebar-dm-list" id="dmDirectory" hidden><div class="sidebar-dm-list-head">Approved members</div><div id="peopleList" role="list"></div></div>
+<div class="navheading">ARCADE</div>
+<button class="navlink" id="gamesNav" type="button"><span class="glyph">✦</span> Games <span class="arcade-nav-label">3</span></button>
+<div class="arcade-nav-balance" id="sidebarStardust" title="Free game tokens">✦ <span id="sidebarStardustCount">0</span> Stardust</div>
 <div class="navheading">PERSONALIZE</div>
 <button class="navlink" id="studioNav" type="button"><span class="glyph">✦</span> Orbit Studio <span class="free-tag">FREE</span></button>
 <button class="navlink" id="settingsNav" type="button"><span class="glyph">⚙</span> Settings</button>
@@ -155,20 +159,65 @@
   <p id="homeGreeting">Welcome to your circle.</p>
  </div>
  <div class="home-studio-content">
-  <div class="home-featured">
-   <div><span class="home-eyebrow">YOUR SPACE • YOUR PEOPLE</span>
-   <h2>Stay connected, without distractions.</h2>
-   <p>Catch up with your friends, read announcements, and make ORBIT + feel like yours.</p></div>
-   <button type="button" id="homeChatButton">Open Chat <span aria-hidden="true">→</span></button>
-  </div>
+  <section class="home-featured home-announcements" aria-labelledby="homeAnnouncementHeading">
+    <header class="home-announcements-head">
+      <div><span class="home-eyebrow">LATEST FROM ORBIT + STAFF</span>
+        <h2 id="homeAnnouncementHeading">Announcements</h2>
+        <p>Official updates from the Admin and Moderators</p>
+      </div>
+      <button id="homeAnnouncementAll" type="button">View all <span aria-hidden="true">→</span></button>
+    </header>
+    <div id="homeAnnouncementList" class="home-announcement-list" aria-live="polite">
+      <p class="home-announcement-empty">Loading announcements…</p>
+    </div>
+  </section>
   <h3 class="home-quick-heading">Quick links</h3>
   <div class="home-feature-grid">
    <button type="button" id="homeChatLink" class="home-feature-card"><span class="feature-icon">#</span><b>Chat</b><small>Talk with everyone</small></button>
    <button type="button" id="homeAnnouncementsLink" class="home-feature-card"><span class="feature-icon">📣</span><b>Announcements</b><small>Updates from staff</small></button>
    <button type="button" id="homeDMsLink" class="home-feature-card"><span class="feature-icon">✉</span><b>Direct Messages</b><small>One-on-one conversations</small></button>
    <button type="button" id="homeStudioLink" class="home-feature-card"><span class="feature-icon">✦</span><b>Orbit Studio</b><small>All customization is free</small></button>
+   <button type="button" id="homeGamesLink" class="home-feature-card"><span class="feature-icon">🎮</span><b>Games</b><small>Play & earn Stardust</small></button>
   </div>
-  <p class="home-tail">MORE CONNECTIONS <span>·</span> MORE MOMENTS <span>·</span> ONE ORBIT +</p>
+  <p class="home-tail">MORE CONNECTIONS <span>·</span> LESS DISTRACTIONS <span>·</span> ONE ORBIT +</p>
+ </div>
+</section>
+<section class="view" id="games" aria-label="ORBIT + Arcade">
+ <div class="arcade-scroll">
+  <header class="arcade-hero"><div class="arcade-eyebrow">✦ ORBIT + MINI GAMES</div>
+   <div class="arcade-hero-top"><div><h1>Orbit Arcade <span>✦</span></h1>
+   <p>Three classic games. Earn free Stardust from your scores, and play at your own pace.</p></div>
+   <div class="arcade-wallet" aria-label="Your Stardust"><span>YOUR STARDUST</span><strong>✦ <span id="arcadeBalance">0</span></strong><small><span id="arcadeEarnedToday">0</span> / 60 earned today</small></div></div>
+  </header>
+  <div class="arcade-catalog" id="arcadeCatalog" aria-label="Choose a game">
+   <button type="button" class="arcade-game-card selected" data-arcade-game="tetris" aria-pressed="true"><span class="arcade-card-art tetris-art" aria-hidden="true">▦</span><span class="arcade-card-text"><b>Tetris</b><small>Stack blocks, clear lines</small><em>2% score → Stardust</em></span></button>
+   <button type="button" class="arcade-game-card" data-arcade-game="snake" aria-pressed="false"><span class="arcade-card-art snake-art" aria-hidden="true">〰</span><span class="arcade-card-text"><b>Snake</b><small>Collect stars, avoid walls</small><em>50% score → Stardust</em></span></button>
+   <button type="button" class="arcade-game-card" data-arcade-game="flappy" aria-pressed="false"><span class="arcade-card-art flappy-art" aria-hidden="true">🐦</span><span class="arcade-card-text"><b>Flappy Bird</b><small>Fly between obstacles</small><em>100% score → Stardust</em></span></button>
+  </div>
+  <div class="arcade-play-layout">
+   <div class="arcade-stage-wrap">
+    <div class="arcade-stage-bar"><strong id="arcadeCurrentName">Tetris</strong><span>Score <b id="arcadeScore">0</b></span><span>Best <b id="arcadeBest">0</b></span></div>
+    <div class="arcade-canvas-wrap"><canvas id="arcadeCanvas" width="340" height="480" aria-label="Arcade game display">Your browser needs Canvas to play this game.</canvas>
+      <div id="arcadeOverlay" class="arcade-overlay"><strong id="arcadeOverlayHeading">Ready to play?</strong><p id="arcadeOverlayMessage">Choose Start game to begin.</p></div>
+    </div>
+    <div class="arcade-control-bar"><button id="arcadeStart" type="button">Start game</button><button id="arcadePause" type="button" disabled>Pause</button><button id="arcadeStop" type="button" disabled>End round</button></div>
+    <div class="arcade-touch-controls" aria-label="On-screen game controls">
+     <button type="button" data-arcade-input="left" aria-label="Move left">←</button>
+     <button type="button" data-arcade-input="rotate" aria-label="Rotate block or flap">↻ / ↑</button>
+     <button type="button" data-arcade-input="right" aria-label="Move right">→</button>
+     <button type="button" data-arcade-input="down" aria-label="Move down">↓</button>
+    </div>
+   </div>
+   <aside class="arcade-info">
+    <div class="arcade-info-card"><h2 id="arcadeInfoTitle">How to play Tetris</h2><p id="arcadeInstructions">Move blocks with ← →, rotate with ↑, and drop with ↓ or Space.</p>
+     <h3>Stardust rate</h3><p id="arcadeConversion">2% of your Tetris score. A score of 500 earns 10 Stardust.</p>
+     <p class="arcade-note">Stardust is a free, virtual ORBIT + token. It can't be purchased, transferred, or redeemed for money.</p>
+    </div>
+    <div class="arcade-info-card"><h2>Your best scores</h2><div id="arcadePersonalBests" class="arcade-best-list"><p>No scores yet.</p></div></div>
+    <div class="arcade-info-card arcade-wellbeing"><h2>Keep it balanced</h2><p>Games are optional. Daily Stardust earnings are limited to 60, and there's no reward for playing endlessly.</p></div>
+    <p id="arcadeStatus" class="arcade-status" role="status" aria-live="polite"></p>
+   </aside>
+  </div>
  </div>
 </section>
 <section class="view" id="studio" aria-label="Free appearance customization">
@@ -341,7 +390,7 @@
 </div></div>
 <script>
 document.getElementById('menu')?.addEventListener('click',()=>document.getElementById('sidebar')?.classList.toggle('open'));
-</script><script src="config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="orbit-studio.js"></script><script src="orbit-member-settings.js"></script>
+</script><script src="config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="orbit-studio.js"></script><script src="orbit-member-settings.js"></script><script src="orbit-arcade.js"></script>
 <script>
 (function(){
 'use strict';
