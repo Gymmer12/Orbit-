@@ -242,7 +242,7 @@ async function init(db,user){
  }
  await loadAll(true);
 }
-function setNickname(nick){if(typeof nick==='string'&&nick.trim()){currentNick=nick.trim();updatePreview()}}
+function setNickname(nick){if(typeof nick==='string'&&nick.trim()){currentNick=nick.trim();const sidebarName=$('profileName');if(sidebarName)sidebarName.textContent=currentNick;updatePreview()}}
 function clear(){client=null;me=null;appearance.clear();signed.clear();loadedAt=0;currentNick='ORBIT + Member';}
 window.OrbitStudio={init,loadAll,get,decorateAvatar,decorateName,updatePreview,setNickname,clear,setOnUpdate(fn){onUpdate=typeof fn==='function'?fn:null},renderAllOptions};
 })();
