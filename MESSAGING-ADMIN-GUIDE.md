@@ -27,3 +27,23 @@ The moderator role is stored in `public.orbit_moderators` and enforced by Supaba
 
 ## Deployment
 Changes were committed on the main branch of `Gymmer12/Orbit-`. Render should deploy the static site automatically if auto-deploy is enabled.
+
+## Ban and unban an account
+1. Sign into ORBIT + with the administrator account and open **Approvals**.
+2. Scroll to **Ban or unban accounts**.
+3. Choose a registered account, enter a brief explanation, and click **Ban account**.
+4. The account loses database access to Chat, Direct Messages, Announcements, presence, and applicant verification chat. They see an Account suspended screen when logged in.
+5. To restore access, select **Unban** from the list. A user's existing approval status is preserved.
+
+Only the administrator can ban or unban users; moderators cannot. You cannot ban yourself or another administrator through this interface. Bans do not delete old messages or permanently revoke Supabase authentication, but database row-level security immediately denies membership features. The website checks current ban status regularly; a banned member may need to refresh or wait briefly for the ban screen to appear. Their existing session remains usable only for signing out and seeing the ban reason.
+
+## Message box and language rules
+- The bottom composer is a rounded, text-only messaging field with a send arrow.
+- Press **Enter** to send and **Shift+Enter** for a new line. Longer messages wrap automatically.
+- A Supabase database trigger prevents new messages containing common profanity and abusive slurs, including some deliberately punctuated spellings.
+- The filter applies to general Chat, DMs, private applicant verification chat, announcement titles/bodies, and new or changed public nicknames. Staff are subject to the same language rules.
+- The sender receives a request-to-rewrite error if a message is rejected. Filtering is imperfect: it may miss creative variants or flag harmless contexts. Keep reviewing user reports and adjust the filter as needed.
+- The filter does not automatically delete historic messages or block words typed outside these fields.
+
+## Password protection
+Supabase's Security Advisor currently warns that **Leaked Password Protection** is disabled. Consider enabling it under Supabase Authentication password security settings before inviting more members.
