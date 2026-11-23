@@ -28,7 +28,7 @@
    color-mix(in srgb,var(--home-tint,#4767DF) var(--home-tint-amount,0%),transparent)),
   var(--home-art,url("assets/orbit-home-poster.jpg"))!important;
  background-repeat:no-repeat!important;
- background-position:center,center,center!important;
+ background-position:center,center,center;
  background-size:cover!important;
 }
 /* Artwork drifts almost imperceptibly while orbital decorations stay separate. */
