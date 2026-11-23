@@ -271,6 +271,7 @@
     <select id="leaderboardGame" aria-label="Choose a game or Cosmos balance"><option value="cosmos">✦ Total Cosmos</option></select>
     <button type="button" id="leaderboardRefresh">↻ Refresh</button>
    </div>
+   <div class="leaderboard-privacy-row"><span>Only members who choose to appear are listed.</span><button id="leaderboardManagePrivacy" type="button">Manage my visibility</button></div>
    <div id="leaderboardPodium" class="leaderboard-podium" aria-label="Top three players"></div>
    <div class="leaderboard-list-header"><span>RANK</span><span>PLAYER</span><span id="leaderboardScoreLabel">COSMOS</span></div>
    <div id="leaderboardRows" class="leaderboard-rows" role="list"><p class="leaderboard-empty">Loading rankings…</p></div>
@@ -390,6 +391,7 @@
     <p class="settings-helper"><span id="settingsBioCount">0</span>/190 characters · Visible only to approved ORBIT + members</p>
     <label for="settingsAvatarColor" class="settings-form-label">Default avatar background</label>
     <div class="settings-color-row"><input type="color" id="settingsAvatarColor" value="#416ECB"><span>Used behind your avatar when you haven't uploaded a photo.</span></div>
+    <label class="settings-toggle" for="settingsLeaderboardVisible"><span><b>Show me on the Leaderboard</b><small>Let approved ORBIT + members see your nickname and game scores. Off by default.</small></span><input id="settingsLeaderboardVisible" type="checkbox"></label>
     <button type="button" id="settingsProfileSave" class="settings-primary">Save profile</button><p id="settingsProfileFeedback" class="settings-feedback" role="status"></p>
    </div>
    <div class="settings-panel" data-settings-panel="appearance">
@@ -871,7 +873,7 @@ async function refreshMemberRail(){
  memberRefreshBusy=true;
  try{
   const [profiles,presence,mods,blocks]=await Promise.all([
-   db.from('profiles').select('id,nickname,member_status,custom_status,bio,avatar_color').order('nickname').limit(250),
+   db.from('profiles').select('id,nickname,member_status,custom_status,bio,avatar_color,leaderboard_visible').order('nickname').limit(250),
    db.from('orbit_presence').select('user_id,last_seen').limit(250),
    db.from('orbit_moderators').select('user_id'),
    db.from('blocks').select('blocked_id').eq('owner_id',user.id)
