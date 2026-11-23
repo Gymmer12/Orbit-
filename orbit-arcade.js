@@ -361,6 +361,33 @@ function draw(){
  if(EXTRAS?.RULES[game])EXTRAS.draw(game,state,ctx);
 }
 function gameAPI(){return {add:n=>{if(Number.isFinite(n)&&n>0)setScore(score+n)},end:reason=>endGame(reason)}}
+
+function nativeFullscreen(){
+ const surface=$('games');
+ if(surface?.requestFullscreen&&!document.fullscreenElement){
+  try{const result=surface.requestFullscreen();result?.catch?.(()=>{})}catch(e){}
+ }
+}
+function enterGame(){
+ const surface=$('games');if(!surface||!db||!member)return;
+ surface.dataset.activeGame=game;
+ surface.classList.add('arcade-immersive');
+ $('arcadeImmersiveName').textContent=RULES[game].name;
+ // A CSS viewport overlay remains full-screen even where the native API is blocked.
+ nativeFullscreen();
+ draw();
+}
+function leaveGame(){
+ const surface=$('games');if(!surface?.classList.contains('arcade-immersive'))return;
+ if(playing)endGame('Round ended');
+ else if(!waiting){setOverlay(RULES[game].name,'Choose a cartridge to play again.')}
+ surface.classList.remove('arcade-immersive');
+ delete surface.dataset.activeGame;
+ if(document.fullscreenElement===surface&&document.exitFullscreen){
+  try{const result=document.exitFullscreen();result?.catch?.(()=>{})}catch(e){}
+ }
+}
+
 function setControls(){
  const start=$('arcadeStart'),pause=$('arcadePause'),stop=$('arcadeStop');
  start.disabled=waiting||playing;
@@ -438,7 +465,9 @@ async function startGame(){
 function chooseGame(next){
  if(!Object.prototype.hasOwnProperty.call(RULES,next))return;
  if(playing||waiting){setStatus('Finish the current round before switching games.');return}
- game=next;score=0;runId=null;state=next==='tetris'?tetrisCreate():next==='snake'?snakeCreate():next==='flappy'?flappyCreate():EXTRAS?.create(next);
+ game=next;score=0;runId=null;
+ canvas.height=next==='tetris'?600:480;
+ state=next==='tetris'?tetrisCreate():next==='snake'?snakeCreate():next==='flappy'?flappyCreate():EXTRAS?.create(next);
  $('arcadeCurrentName').textContent=RULES[game].name;
  $('arcadeInfoTitle').textContent='How to play '+RULES[game].name;
  $('arcadeInstructions').textContent=RULES[game].instructions;
@@ -454,6 +483,7 @@ function chooseGame(next){
  setOverlay(RULES[game].name,'Select Start game when you’re ready.');
  setStatus('Cosmos is free to earn, with no daily or per-round earning cap.');
  draw();
+ return true;
 }
 function control(name){
  if(!playing||paused||!isVisible())return;
@@ -464,10 +494,11 @@ function control(name){
  draw();
 }
 function handleKey(e){
+ if(e.key==='Escape'&&$('games')?.classList.contains('arcade-immersive')){e.preventDefault();leaveGame();return}
  if(!isVisible()||!playing||paused||e.ctrlKey||e.altKey||e.metaKey)return;
  if(e.target?.closest?.('input,textarea,select,[contenteditable]'))return;
  const map={ArrowLeft:'left',a:'left',A:'left',ArrowRight:'right',d:'right',D:'right',
-  ArrowUp:'rotate',w:'rotate',W:'rotate',ArrowDown:'down',s:'down',S:'down',' ':'drop'};
+  ArrowUp:'rotate',w:'rotate',W:'rotate',ArrowDown:'down',s:'down',S:'down',' ':'drop',c:'hold',C:'hold',Shift:'hold'};
  if(EXTRAS?.RULES[game]&&EXTRAS.key(game,state,e.key,gameAPI())){e.preventDefault();draw();return}
  const key=map[e.key];if(!key)return;
  e.preventDefault();
@@ -476,7 +507,9 @@ function handleKey(e){
 }
 function bind(){
  if(initialized)return;initialized=true;
- document.querySelectorAll('[data-arcade-game]').forEach(button=>button.addEventListener('click',()=>chooseGame(button.dataset.arcadeGame)));
+ document.querySelectorAll('[data-arcade-game]').forEach(button=>button.addEventListener('click',()=>{if(chooseGame(button.dataset.arcadeGame))enterGame()}));
+ $('arcadeBack').addEventListener('click',leaveGame);
+ $('arcadeNativeFullscreen').addEventListener('click',nativeFullscreen);
  $('arcadeStart').addEventListener('click',startGame);
  $('arcadePause').addEventListener('click',togglePause);
  $('arcadeStop').addEventListener('click',()=>endGame('Round ended'));
@@ -497,6 +530,7 @@ function bind(){
 });
  document.addEventListener('keydown',handleKey);
  document.addEventListener('visibilitychange',()=>{if(document.hidden&&playing&&!paused)pauseGame()});
+ document.addEventListener('fullscreenchange',()=>{const btn=$('arcadeNativeFullscreen');if(btn)btn.textContent=document.fullscreenElement?'⛶ Exit browser fullscreen':'⛶ Full screen'});
  chooseGame('tetris');
 }
 async function init(client,person){
@@ -508,12 +542,13 @@ async function init(client,person){
  wallet={total:0,today:0,daily_cap:null,best:Object.fromEntries(Object.keys(RULES).map(k=>[k,0]))};
  updateWallet();chooseGame('tetris');await loadSummary();
 }
-function open(){if(!db||!member)return;draw();loadSummary()}
+function open(){if(!db||!member)return;leaveGame();draw();loadSummary()}
 function pause(){if(playing&&!paused)pauseGame()}
 function clear(){
+ leaveGame();
  cancelAnimationFrame(requestId);db=null;member=null;runId=null;playing=false;paused=false;waiting=false;
  wallet={total:0,today:0,daily_cap:null,best:Object.fromEntries(Object.keys(RULES).map(k=>[k,0]))};
  updateWallet();if(initialized)chooseGame('tetris');
 }
-window.OrbitArcade={init,open,pause,clear,loadSummary};
+window.OrbitArcade={init,open,pause,close:leaveGame,clear,loadSummary};
 })();
