@@ -260,7 +260,7 @@ if(db){
     user=error?null:data?.user||null;
     verified=true;
     await authUI();
-    if(error)gateMessage('Could not restore the saved login. Please sign in again.',true);
+    if(error&&!/auth session missing|session not found|session_not_found/i.test((error.message||'')+' '+(error.code||''))){gateMessage('Could not restore the saved login. Please sign in again.',true);}
   }).catch(e=>{
     user=null;verified=true;syncGate();
     gateMessage('Could not connect to authentication: '+(e?.message||'network error'),true);
