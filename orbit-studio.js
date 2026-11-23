@@ -4,7 +4,7 @@
 'use strict';
 const $=id=>document.getElementById(id);
 const BUCKET='orbit-member-avatars';
-const DEFAULT={home_theme:'classic',avatar_style:'planet',avatar_ring:'orbit',name_font:'default',avatar_path:''};
+const DEFAULT={home_theme:'classic',avatar_style:'planet',avatar_ring:'orbit',name_font:'default',avatar_path:'',site_palette:{}};
 const CATALOG={
  avatar_style:[
   {id:'planet',label:'Orbit',icon:'🪐'},
@@ -40,6 +40,172 @@ const CATALOG={
   {id:'nebula',label:'Deep Nebula'}
  ]
 };
+
+const PALETTE_DEFAULT={
+ background:'#050B2F',sidebar:'#071B62',surface:'#101D52',
+ accent:'#5E93FF',text:'#F2F6FF',border:'#3B569F'
+};
+const PALETTE_KEYS=Object.keys(PALETTE_DEFAULT);
+const PALETTE_PRESETS=[
+ {id:'classic',label:'Classic Orbit',colors:{...PALETTE_DEFAULT}},
+ {id:'aurora',label:'Aurora',colors:{background:'#061E2B',sidebar:'#0B3B46',surface:'#103641',accent:'#5DE8C7',text:'#EDFFFA',border:'#347A87'}},
+ {id:'sunset',label:'Solar Sunset',colors:{background:'#281522',sidebar:'#562B44',surface:'#42283B',accent:'#FFC278',text:'#FFF1E8',border:'#915C71'}},
+ {id:'rose',label:'Rose Nebula',colors:{background:'#221530',sidebar:'#44255B',surface:'#39234F',accent:'#EEA0F5',text:'#FFF1FF',border:'#85519B'}},
+ {id:'arctic',label:'Arctic',colors:{background:'#0E293A',sidebar:'#174760',surface:'#1A3D51',accent:'#96E4FA',text:'#F0FAFF',border:'#497B99'}},
+ {id:'midnight',label:'Midnight',colors:{background:'#030615',sidebar:'#0A1237',surface:'#0C1534',accent:'#8E9EFF',text:'#EDF0FF',border:'#2D4279'}},
+ {id:'daylight',label:'Daylight',colors:{background:'#E9F1FF',sidebar:'#CCDFFF',surface:'#FFFFFF',accent:'#2851C2',text:'#152641',border:'#A3B8D9'}}
+];
+let savedPalette=null, draftPalette=null, savingPalette=false;
+function normalizePalette(candidate){
+ if(!candidate||typeof candidate!=='object'||Array.isArray(candidate))return null;
+ if(Object.keys(candidate).length===0)return null;
+ if(Object.keys(candidate).length!==PALETTE_KEYS.length)return null;
+ const result={};
+ for(const key of PALETTE_KEYS){
+  const value=candidate[key];
+  if(typeof value!=='string'||!/^#[0-9a-f]{6}$/i.test(value))return null;
+  result[key]=value.toUpperCase();
+ }
+ return result;
+}
+function clonePalette(value){return value?{...value}:null}
+function paletteEqual(a,b){
+ if(!a&&!b)return true;
+ if(!a||!b)return false;
+ return PALETTE_KEYS.every(key=>a[key]===b[key]);
+}
+function paletteLuminance(hex){
+ const parts=[1,3,5].map(n=>parseInt(hex.slice(n,n+2),16)/255)
+  .map(x=>x<=0.04045?x/12.92:Math.pow((x+0.055)/1.055,2.4));
+ return parts[0]*0.2126+parts[1]*0.7152+parts[2]*0.0722;
+}
+function paletteContrast(a,b){
+ const x=paletteLuminance(a),y=paletteLuminance(b);
+ return (Math.max(x,y)+0.05)/(Math.min(x,y)+0.05);
+}
+function paletteTextOnAccent(accent){
+ return paletteContrast('#FFFFFF',accent)>paletteContrast('#111827',accent)?'#FFFFFF':'#111827';
+}
+function applySitePalette(colors){
+ const app=$('appLayout');if(!app)return;
+ const active=normalizePalette(colors);
+ if(!active){
+  delete app.dataset.sitePalette;
+  for(const key of PALETTE_KEYS)app.style.removeProperty('--oc-'+key);
+  app.style.removeProperty('--oc-accent-ink');
+  return;
+ }
+ app.dataset.sitePalette='custom';
+ for(const key of PALETTE_KEYS)app.style.setProperty('--oc-'+key,active[key]);
+ app.style.setProperty('--oc-accent-ink',paletteTextOnAccent(active.accent));
+}
+function renderPaletteState(){
+ const colors=draftPalette||PALETTE_DEFAULT;
+ for(const key of PALETTE_KEYS){
+  const input=$('palette'+key[0].toUpperCase()+key.slice(1));
+  const label=$('palette'+key[0].toUpperCase()+key.slice(1)+'Hex');
+  if(input&&input.value.toUpperCase()!==colors[key])input.value=colors[key];
+  if(label)label.textContent=colors[key];
+ }
+ const mini=$('paletteMiniPreview');
+ if(mini){
+  for(const key of PALETTE_KEYS)mini.style.setProperty('--pv-'+key,colors[key]);
+  mini.style.setProperty('--pv-accent-ink',paletteTextOnAccent(colors.accent));
+ }
+ const diff=!paletteEqual(draftPalette,savedPalette);
+ const save=$('paletteSave'),undo=$('paletteUndo');
+ if(save)save.disabled=!diff||savingPalette;
+ if(undo)undo.disabled=!diff||savingPalette;
+ for(const button of $('palettePresets')?.querySelectorAll('[data-palette-preset]')||[]){
+  const selected=paletteEqual(draftPalette,PALETTE_PRESETS.find(p=>p.id===button.dataset.palettePreset)?.colors);
+  button.classList.toggle('selected',selected);
+  button.setAttribute('aria-pressed',String(selected));
+ }
+ const readability=$('paletteContrast');
+ if(readability){
+  const r1=paletteContrast(colors.text,colors.background);
+  const r2=paletteContrast(colors.text,colors.surface);
+  const tooLow=Math.min(r1,r2)<4.5;
+  readability.textContent=tooLow?
+   'Low contrast: the chosen text may be hard to read. Try a lighter or darker text color.':
+   'Looking good! Your text is readable against the main background and cards.';
+  readability.dataset.warning=tooLow?'true':'false';
+ }
+}
+function editPalette(key,value){
+ if(!PALETTE_KEYS.includes(key)||!/^#[0-9a-f]{6}$/i.test(value))return;
+ draftPalette={...(draftPalette||PALETTE_DEFAULT),[key]:value.toUpperCase()};
+ applySitePalette(draftPalette);
+ renderPaletteState();
+ const status=$('paletteStatus');if(status)status.textContent='Previewing your colors. Click Save my palette to keep them.';
+}
+function renderPalettePresets(){
+ const box=$('palettePresets');if(!box)return;
+ box.replaceChildren();
+ for(const preset of PALETTE_PRESETS){
+  const btn=document.createElement('button');btn.type='button';btn.className='palette-preset';
+  btn.dataset.palettePreset=preset.id;
+  const dots=document.createElement('span');dots.className='palette-preset-dots';
+  for(const key of ['sidebar','surface','accent']){
+   const dot=document.createElement('span');dot.style.backgroundColor=preset.colors[key];dots.append(dot)
+  }
+  const name=document.createElement('span');name.textContent=preset.label;
+  btn.append(dots,name);
+  btn.onclick=()=>{
+   draftPalette={...preset.colors};
+   applySitePalette(draftPalette);renderPaletteState();
+   const note=$('paletteStatus');if(note)note.textContent='Previewing '+preset.label+'. Choose Save my palette to keep it.';
+  };
+  box.append(btn);
+ }
+}
+function syncSitePalette(){
+ if(!me)return;
+ const next=normalizePalette(get(me.id).site_palette);
+ const hasUnsaved=!paletteEqual(draftPalette,savedPalette);
+ savedPalette=clonePalette(next);
+ if(!hasUnsaved)draftPalette=clonePalette(next);
+ applySitePalette(draftPalette);
+ renderPaletteState();
+}
+async function saveSitePalette(){
+ if(!client||!me||savingPalette)return;
+ const value=normalizePalette(draftPalette);
+ savingPalette=true;renderPaletteState();
+ const message=$('paletteStatus');
+ if(message)message.textContent='Saving your palette…';
+ try{
+  const {data,error}=await client.from('orbit_appearance')
+   .update({site_palette:value||{}}).eq('user_id',me.id)
+   .select('site_palette').single();
+  if(error)throw error;
+  appearance.set(me.id,{...get(me.id),site_palette:data.site_palette||{}});
+  savedPalette=clonePalette(value);
+  draftPalette=clonePalette(value);
+  if(message)message.textContent=value?'Saved! Your colors will be restored when you return.':'Original ORBIT + colors restored.';
+ }catch(e){
+  if(message)message.textContent='Unable to save your palette: '+e.message;
+ }
+ finally{savingPalette=false;renderPaletteState()}
+}
+function bindPaletteUI(){
+ renderPalettePresets();
+ for(const input of document.querySelectorAll('#paletteFields input[data-palette-key]')){
+  input.addEventListener('input',()=>editPalette(input.dataset.paletteKey,input.value));
+ }
+ $('paletteSave')?.addEventListener('click',saveSitePalette);
+ $('paletteUndo')?.addEventListener('click',()=>{
+  draftPalette=clonePalette(savedPalette);
+  applySitePalette(draftPalette);renderPaletteState();
+  $('paletteStatus').textContent='Unsaved changes discarded.';
+ });
+ $('paletteReset')?.addEventListener('click',()=>{
+  draftPalette=null;applySitePalette(null);renderPaletteState();
+  saveSitePalette();
+ });
+ renderPaletteState();
+}
+
 let client=null,me=null,currentNick='ORBIT + Member',appearance=new Map(),signed=new Map(),loadedAt=0,busy=null,onUpdate=null,ready=false,initializing=null;
 const allowed=(type,id)=>CATALOG[type].some(x=>x.id===id);
 function status(text,isError=false){
@@ -109,9 +275,10 @@ async function loadAll(force=false){
  if(busy)return busy;
  if(!force&&Date.now()-loadedAt<55000)return;
  busy=(async()=>{
-  const {data,error}=await client.from('orbit_appearance').select('user_id,home_theme,avatar_style,avatar_ring,name_font,avatar_path').limit(250);
+  const {data,error}=await client.from('orbit_appearance').select('user_id,home_theme,avatar_style,avatar_ring,name_font,avatar_path,site_palette').limit(250);
   if(error)throw error;
   appearance=new Map((data||[]).map(row=>[row.user_id,{...DEFAULT,...row}]));
+  syncSitePalette();
   const uploads=(data||[]).filter(p=>p.avatar_path);
   await Promise.all(uploads.map(async p=>{
    const existing=signed.get(p.user_id);
@@ -224,7 +391,7 @@ async function removePhoto(){
  status('Photo removed. Your selected free avatar is shown instead.');
 }
 function bindUI(){
- if(ready)return;ready=true;renderAllOptions();
+ if(ready)return;ready=true;renderAllOptions();bindPaletteUI();
  $('studioUploadFile')?.addEventListener('change',e=>upload(e.target.files?.[0]));
  $('studioRemovePhoto')?.addEventListener('click',removePhoto);
 }
@@ -233,7 +400,7 @@ async function init(db,user){
  bindUI();
  client=db;
  if(me?.id===user.id){updatePreview();return}
- me=user;loadedAt=0;appearance.clear();signed.clear();currentNick=user.user_metadata?.nickname||'ORBIT + Member';
+ me=user;loadedAt=0;appearance.clear();signed.clear();savedPalette=null;draftPalette=null;applySitePalette(null);currentNick=user.user_metadata?.nickname||'ORBIT + Member';
  const {data,error}=await client.from('orbit_appearance').select('user_id').eq('user_id',user.id).maybeSingle();
  if(error){status('Could not check appearance settings: '+error.message,true);return}
  if(!data){
@@ -243,6 +410,6 @@ async function init(db,user){
  await loadAll(true);
 }
 function setNickname(nick){if(typeof nick==='string'&&nick.trim()){currentNick=nick.trim();const sidebarName=$('profileName');if(sidebarName)sidebarName.textContent=currentNick;updatePreview()}}
-function clear(){client=null;me=null;appearance.clear();signed.clear();loadedAt=0;currentNick='ORBIT + Member';}
+function clear(){client=null;me=null;appearance.clear();signed.clear();loadedAt=0;currentNick='ORBIT + Member';savedPalette=null;draftPalette=null;applySitePalette(null);renderPaletteState()}
 window.OrbitStudio={init,loadAll,get,decorateAvatar,decorateName,updatePreview,setNickname,clear,setOnUpdate(fn){onUpdate=typeof fn==='function'?fn:null},renderAllOptions};
 })();
