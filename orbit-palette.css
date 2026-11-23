@@ -1,0 +1,196 @@
+/* ORBIT + custom six-color palettes.
+   This stylesheet loads after the classic, community and Studio styles.
+   The original design is untouched until a member chooses custom colors.
+   All colors are saved on the user's own appearance record. */
+:root{color-scheme:dark}
+.palette-star{color:#9baaff;font-size:13px}
+.palette-studio-section{border-color:#5a69c0!important;background:linear-gradient(140deg,#13265bdd,#0a123e) !important;box-shadow:0 8px 25px #01091c70!important}
+.palette-presets-header{color:#a8c5fd;font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;margin:3px 0 9px}
+.palette-presets{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 20px}
+.palette-preset{display:grid;justify-items:center;gap:9px;min-width:0;padding:10px 5px;border:1px solid #44569d;border-radius:9px;background:linear-gradient(145deg,#0d1f57,#132258);color:#e2ecff;cursor:pointer;font-size:10px;font-weight:700}
+.palette-preset:hover{border-color:#8aabf7;background:#233778}
+.palette-preset.selected{border:2px solid #83baff;background:#1e3179;box-shadow:0 0 0 2px #80b5ff2e}
+.palette-preset-dots{display:flex;justify-content:center;align-items:center;gap:0;padding-left:7px;min-height:29px}
+.palette-preset-dots span{display:block;flex:none;width:27px;height:27px;border:2px solid #f6faff55;border-radius:50%;margin-left:-8px;box-shadow:0 3px 6px #0005}
+.palette-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(195px,.85fr);gap:16px;align-items:start}
+.palette-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.palette-field{display:grid;gap:7px;border:1px solid #3c508d;background:#091642a8;border-radius:9px;padding:11px;min-width:0;cursor:pointer}
+.palette-field:focus-within{border-color:#91bcff;box-shadow:0 0 0 2px #7daaff4b}
+.palette-label{color:#cad9fa;font-size:11px;font-weight:800;line-height:1.4}
+.palette-input-row{display:flex;align-items:center;gap:9px;min-width:0}
+.palette-field input[type=color]{-webkit-appearance:none;appearance:none;border:1px solid #819bdf;border-radius:7px;background:transparent;width:40px;height:40px;padding:3px;min-width:40px;cursor:pointer}
+.palette-field input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+.palette-field input[type=color]::-webkit-color-swatch{border:none;border-radius:4px}
+.palette-field input[type=color]::-moz-color-swatch{border:none;border-radius:4px}
+.palette-hex{font:700 11px Consolas,"Courier New",monospace;color:#e9efff;letter-spacing:-.025em;overflow:hidden;text-overflow:ellipsis}
+.palette-live-preview{background:#091642d8;border:1px solid #3c548f;border-radius:11px;overflow:hidden;padding:11px}
+.palette-preview-title{font-size:10px;color:#add3ff;letter-spacing:.09em;font-weight:900;display:flex;align-items:center;gap:6px;margin:2px 0 12px}
+.palette-preview-title .palette-dot{height:7px;width:7px;border-radius:50%;background:#77efc0;box-shadow:0 0 9px #46efa9}
+.palette-preview-title small{margin-left:auto;font-size:9px;font-weight:500;letter-spacing:0;color:#98addf}
+.palette-preview-window{display:grid;grid-template-columns:76px minmax(0,1fr);height:152px;border:1px solid var(--pv-border,#3B569F);border-radius:8px;overflow:hidden;background:var(--pv-background,#050B2F);box-shadow:0 10px 15px #01082770}
+.palette-preview-side{display:flex;flex-direction:column;gap:10px;padding:10px 7px;background:var(--pv-sidebar,#071B62);font-size:8px;color:var(--pv-text,#F2F6FF)}
+.palette-preview-side b{font-size:9px;margin-bottom:7px;white-space:nowrap}
+.palette-preview-main{background:var(--pv-background,#050B2F);color:var(--pv-text,#F2F6FF);display:flex;flex-direction:column;min-width:0;padding:0 7px}
+.palette-preview-head{padding:10px 1px;border-bottom:1px solid var(--pv-border,#3B569F);font-size:9px;font-weight:800;display:flex;justify-content:space-between;gap:5px}
+.palette-preview-head span{font-size:7px;white-space:nowrap}
+.palette-preview-message{background:var(--pv-surface,#101D52);border:1px solid var(--pv-border,#3B569F);padding:10px 6px;border-radius:6px;font-size:8px;margin:15px 0 5px}
+.palette-preview-composer{margin-top:auto;margin-bottom:9px;background:var(--pv-surface,#101D52);border:1px solid var(--pv-border,#3B569F);border-radius:18px;display:flex;align-items:center;justify-content:space-between;padding:5px 5px 5px 8px;font-size:7px;gap:5px;white-space:nowrap}
+.palette-preview-composer b{width:19px;height:19px;display:grid;place-items:center;border-radius:50%;background:var(--pv-accent,#5E93FF);color:var(--pv-accent-ink,#111827)}
+.palette-contrast-note{font-size:10px;color:#9ac0f7;line-height:1.5;margin:10px 2px 3px}
+.palette-contrast-note[data-warning=true]{color:#ffd19a}
+.palette-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:16px}
+.palette-actions button{padding:10px 13px;font-size:11px;font-weight:800;cursor:pointer;border-radius:8px}
+.palette-actions button:disabled{opacity:.4;cursor:default}
+.palette-primary{color:#fff;background:#2b59d0;border:1px solid #759cf4}
+.palette-secondary{color:#d1dff9;background:#101f50;border:1px solid #435d97}
+.palette-actions button:hover:not(:disabled){filter:brightness(1.15)}
+.palette-status{color:#a9d0ff;min-height:18px;margin:12px 0 0;font-size:11px;line-height:1.5}
+/* Use the six chosen colors throughout signed-in ORBIT +.
+   Set a readable foreground on accent-colored buttons automatically. */
+#appLayout[data-site-palette=custom]{
+ color:var(--oc-text)!important;
+ background:var(--oc-background)!important;
+ --oc-muted:color-mix(in srgb,var(--oc-text) 72%,var(--oc-background));
+ --oc-soft:color-mix(in srgb,var(--oc-surface) 86%,var(--oc-background));
+ --oc-strong:color-mix(in srgb,var(--oc-accent) 36%,var(--oc-surface));
+ --oc-active:color-mix(in srgb,var(--oc-accent) 26%,var(--oc-surface));
+ --oc-shadow:color-mix(in srgb,var(--oc-background) 70%,transparent);
+}
+#appLayout[data-site-palette=custom] .sidebar,
+#appLayout[data-site-palette=custom] .identity,
+#appLayout[data-site-palette=custom] .sidebar .profile,
+#appLayout[data-site-palette=custom] .sidebar-dm-list{background:var(--oc-sidebar)!important;color:var(--oc-text)!important;border-color:var(--oc-border)!important}
+#appLayout[data-site-palette=custom] .sidebar .identity .plus-mark{color:var(--oc-accent)!important}
+#appLayout[data-site-palette=custom] .navheading,
+#appLayout[data-site-palette=custom] .sidebar-dm-list-head{color:var(--oc-muted)!important}
+#appLayout[data-site-palette=custom] .navlink,
+#appLayout[data-site-palette=custom] .person,
+#appLayout[data-site-palette=custom] .sidebar .name,
+#appLayout[data-site-palette=custom] .sidebar .status{color:var(--oc-text)!important}
+#appLayout[data-site-palette=custom] .navlink:hover:not(.active),
+#appLayout[data-site-palette=custom] .person:hover{background:var(--oc-active)!important}
+#appLayout[data-site-palette=custom] .navlink.active,
+#appLayout[data-site-palette=custom] .person.active{background:var(--oc-accent)!important;color:var(--oc-accent-ink)!important;border-color:var(--oc-border)!important;box-shadow:inset 3px 0 var(--oc-text)!important}
+#appLayout[data-site-palette=custom] .navlink.active *,
+#appLayout[data-site-palette=custom] .person.active *{color:inherit!important}
+#appLayout[data-site-palette=custom] .free-tag{background:var(--oc-surface);color:var(--oc-text);border-color:var(--oc-border)}
+#appLayout[data-site-palette=custom] .content,
+#appLayout[data-site-palette=custom] #text,
+#appLayout[data-site-palette=custom] #studio,
+#appLayout[data-site-palette=custom] .view:not(#home){
+ background:var(--oc-background)!important;color:var(--oc-text)!important}
+#appLayout[data-site-palette=custom] .topbar,
+#appLayout[data-site-palette=custom] .channel-bar,
+#appLayout[data-site-palette=custom] #text .social-content>.row:first-child{
+ background:var(--oc-sidebar)!important;color:var(--oc-text)!important;border-color:var(--oc-border)!important}
+#appLayout[data-site-palette=custom] .topbar strong,
+#appLayout[data-site-palette=custom] .channel-bar strong,
+#appLayout[data-site-palette=custom] .social-content h3,
+#appLayout[data-site-palette=custom] .topbar .hint{color:var(--oc-text)!important}
+#appLayout[data-site-palette=custom] #text .social-content,
+#appLayout[data-site-palette=custom] #text .messagefeed,
+#appLayout[data-site-palette=custom] #text .two{background:var(--oc-background)!important;color:var(--oc-text)!important;border-color:var(--oc-border)!important}
+#appLayout[data-site-palette=custom] #text .msg,
+#appLayout[data-site-palette=custom] #text .msg:nth-child(even){background:transparent!important;color:var(--oc-text)!important;border-color:var(--oc-border)!important}
+#appLayout[data-site-palette=custom] #text .msg:hover{background:var(--oc-soft)!important}
+#appLayout[data-site-palette=custom] #text .msgbody,
+#appLayout[data-site-palette=custom] .member-name,
+#appLayout[data-site-palette=custom] .member-group,
+#appLayout[data-site-palette=custom] .member-role,
+#appLayout[data-site-palette=custom] .members-title{color:var(--oc-text)!important}
+#appLayout[data-site-palette=custom] .msgname,
+#appLayout[data-site-palette=custom] .memberHint{color:var(--oc-accent)!important}
+#appLayout[data-site-palette=custom] .msgtime,
+#appLayout[data-site-palette=custom] .notice,
+#appLayout[data-site-palette=custom] .channel-note{color:var(--oc-muted)!important}
+#appLayout[data-site-palette=custom] #text .two>.card:last-child,
+#appLayout[data-site-palette=custom] .card,
+#appLayout[data-site-palette=custom] .memberItem,
+#appLayout[data-site-palette=custom] #text #composer.chat-composer,
+#appLayout[data-site-palette=custom] #dmActions{
+ background:var(--oc-surface)!important;color:var(--oc-text)!important;border-color:var(--oc-border)!important}
+#appLayout[data-site-palette=custom] .memberItem:hover{background:var(--oc-active)!important}
+#appLayout[data-site-palette=custom] #text #composer .composer-shell,
+#appLayout[data-site-palette=custom] #text #composer textarea,
+#appLayout[data-site-palette=custom] #text .field,
+#appLayout[data-site-palette=custom] #text .accountbar input,
+#appLayout[data-site-palette=custom] #announcementEditor input,
+#appLayout[data-site-palette=custom] #announcementEditor textarea,
+#appLayout[data-site-palette=custom] .studio-section input{
+ background:var(--oc-soft)!important;color:var(--oc-text)!important;border-color:var(--oc-border)!important}
+#appLayout[data-site-palette=custom] #text .composer-shell:focus-within{border-color:var(--oc-accent)!important;box-shadow:0 0 0 2px var(--oc-strong)!important}
+#appLayout[data-site-palette=custom] #text #composer textarea{background:transparent!important;border:0!important}
+#appLayout[data-site-palette=custom] #text #composer textarea::placeholder{color:var(--oc-muted)!important}
+#appLayout[data-site-palette=custom] .control:not(.secondary),
+#appLayout[data-site-palette=custom] #text .send-button,
+#appLayout[data-site-palette=custom] .studio-file-button,
+#appLayout[data-site-palette=custom] .palette-primary,
+#appLayout[data-site-palette=custom] #home .home-featured button{
+ background:var(--oc-accent)!important;color:var(--oc-accent-ink)!important;border-color:var(--oc-border)!important}
+#appLayout[data-site-palette=custom] .control.secondary,
+#appLayout[data-site-palette=custom] .studio-minor-button,
+#appLayout[data-site-palette=custom] .announce-action,
+#appLayout[data-site-palette=custom] .palette-secondary{background:var(--oc-soft)!important;color:var(--oc-text)!important;border-color:var(--oc-border)!important}
+#appLayout[data-site-palette=custom] #announcementsFeed{background:var(--oc-background)!important}
+#appLayout[data-site-palette=custom] .announce-card,
+#appLayout[data-site-palette=custom] .announce-card.pinned,
+#appLayout[data-site-palette=custom] #announcementsActions{background:var(--oc-surface)!important;border-color:var(--oc-border)!important}
+#appLayout[data-site-palette=custom] .announce-card h3,
+#appLayout[data-site-palette=custom] .announce-card p,
+#appLayout[data-site-palette=custom] .announce-author{color:var(--oc-text)!important}
+#appLayout[data-site-palette=custom] .announce-meta{color:var(--oc-muted)!important}
+#appLayout[data-site-palette=custom] #studio .studio-hero,
+#appLayout[data-site-palette=custom] #studio .studio-section,
+#appLayout[data-site-palette=custom] #studio .studio-preview-card,
+#appLayout[data-site-palette=custom] #studio .studio-preview-bg,
+#appLayout[data-site-palette=custom] .palette-live-preview{
+ background:var(--oc-surface)!important;color:var(--oc-text)!important;border-color:var(--oc-border)!important}
+#appLayout[data-site-palette=custom] #studio .studio-section h2,
+#appLayout[data-site-palette=custom] #studio .studio-hero h1,
+#appLayout[data-site-palette=custom] #studio .studio-preview-card h2,
+#appLayout[data-site-palette=custom] #studio .studio-section p,
+#appLayout[data-site-palette=custom] #studio .studio-hero p,
+#appLayout[data-site-palette=custom] #studio .studio-preview-card p{color:var(--oc-text)!important}
+#appLayout[data-site-palette=custom] #studio .studio-option,
+#appLayout[data-site-palette=custom] #studio .palette-preset,
+#appLayout[data-site-palette=custom] #studio .palette-field{background:var(--oc-soft)!important;color:var(--oc-text)!important;border-color:var(--oc-border)!important}
+#appLayout[data-site-palette=custom] #studio .studio-option.selected,
+#appLayout[data-site-palette=custom] #studio .palette-preset.selected{border-color:var(--oc-accent)!important;box-shadow:0 0 0 2px var(--oc-strong)!important}
+#appLayout[data-site-palette=custom] #studio .palette-label,
+#appLayout[data-site-palette=custom] #studio .palette-hex,
+#appLayout[data-site-palette=custom] #studio .palette-presets-header,
+#appLayout[data-site-palette=custom] #studio .palette-status,
+#appLayout[data-site-palette=custom] #studio .palette-contrast-note{color:var(--oc-text)!important}
+#appLayout[data-site-palette=custom] #studio .palette-preview-window,
+#appLayout[data-site-palette=custom] #studio .palette-preview-side,
+#appLayout[data-site-palette=custom] #studio .palette-preview-main,
+#appLayout[data-site-palette=custom] #studio .palette-preview-message,
+#appLayout[data-site-palette=custom] #studio .palette-preview-composer{
+ /* Keep the mini-demo bound to the draft swatches, not the live layout. */
+ background-color:revert-layer;
+}
+#appLayout[data-site-palette=custom] #home{
+ --home-accent:var(--oc-accent);
+ --home-card:color-mix(in srgb,var(--oc-surface) 89%,transparent);
+ background-color:var(--oc-background)!important;
+ background-image:linear-gradient(105deg,color-mix(in srgb,var(--oc-background) 88%,transparent),color-mix(in srgb,var(--oc-accent) 24%,transparent)),url("assets/orbit-home-poster.jpg")!important;
+ color:var(--oc-text)!important;
+}
+#appLayout[data-site-palette=custom] #home .home-featured,
+#appLayout[data-site-palette=custom] #home .home-feature-card{
+ background:var(--oc-surface)!important;color:var(--oc-text)!important;border-color:var(--oc-border)!important}
+#appLayout[data-site-palette=custom] #home h1,
+#appLayout[data-site-palette=custom] #home h2,
+#appLayout[data-site-palette=custom] #home h3,
+#appLayout[data-site-palette=custom] #home p,
+#appLayout[data-site-palette=custom] #home .home-feature-card b,
+#appLayout[data-site-palette=custom] #home .home-feature-card small,
+#appLayout[data-site-palette=custom] #home .home-slogan,
+#appLayout[data-site-palette=custom] #home .home-eyebrow,
+#appLayout[data-site-palette=custom] #home .feature-icon{color:var(--oc-text)!important}
+#appLayout[data-site-palette=custom] #home .feature-icon,
+#appLayout[data-site-palette=custom] #home .home-eyebrow{color:var(--oc-accent)!important}
+#appLayout[data-site-palette=custom] .footer{background:var(--oc-background)!important;color:var(--oc-muted)!important}
+@media(max-width:1050px){.palette-presets{grid-template-columns:repeat(3,minmax(0,1fr))}.palette-layout{grid-template-columns:1fr}}
+@media(max-width:520px){.palette-presets{grid-template-columns:repeat(2,minmax(0,1fr))}.palette-fields{grid-template-columns:1fr 1fr}.palette-layout{gap:10px}.palette-field{padding:9px}.palette-preview-window{height:135px}.palette-actions button{flex:1}}
+@media(max-width:375px){.palette-fields{grid-template-columns:1fr}.palette-field{grid-template-columns:minmax(0,1fr) 95px;align-items:center}.palette-input-row{justify-content:end}}
