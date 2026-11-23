@@ -28,6 +28,7 @@
 <link rel="stylesheet" href="orbit-arcade.css">
 <link rel="stylesheet" href="orbit-arcade-v2.css">
 <link rel="stylesheet" href="orbit-chat-cleanup.css">
+<link rel="stylesheet" href="orbit-home-custom.css">
 </head>
 <body>
 <div id="authGate" role="region" aria-label="ORBIT + account sign-in">
@@ -130,7 +131,7 @@
 </div></div>
 <div class="layout" id="appLayout" hidden inert>
 <aside class="sidebar" id="sidebar">
-<div class="identity"><div class="brand original-mark"><img src="assets/orbit-logo-wide.png" alt="Orbit" /><span class="plus-mark" aria-label="Plus">+</span></div></div>
+<div class="identity"><button class="brand-home-button" type="button" id="orbitLogoHome" title="Go to Home and refresh ORBIT +" aria-label="Return to Home and refresh ORBIT +"><span class="brand original-mark"><img src="assets/orbit-logo-wide.png" alt="Orbit +" /><span class="plus-mark" aria-hidden="true">+</span></span></button></div>
 <nav class="sidenav" aria-label="Navigation">
 <div class="navheading">ORBIT +</div>
 <button class="navlink" type="button" id="homeNav"><span class="glyph">⌂</span> Home</button>
@@ -153,6 +154,13 @@
 <div class="content" id="content"><div class="stars"></div>
 <header class="topbar"><div class="row topbar-current"><button class="mobilemenu" id="menu" aria-label="Open navigation">☰</button><strong id="pagetitle"># Chat</strong><span class="hint" id="topbarSubtitle">Talk with approved members</span></div><span class="topbar-online" id="topbarOnline" hidden>● <span id="memberCount">0 online</span></span></header>
 <section class="view" id="home" aria-label="ORBIT + homepage">
+ <div class="home-cosmos-motion" aria-hidden="true">
+  <span class="home-motion-stars home-motion-stars-back"></span>
+  <span class="home-motion-stars home-motion-stars-front"></span>
+  <span class="home-motion-orbit home-motion-orbit-one"><span class="home-motion-planet home-motion-planet-one"></span></span>
+  <span class="home-motion-orbit home-motion-orbit-two"><span class="home-motion-planet home-motion-planet-two"></span></span>
+  <span class="home-motion-comet"></span>
+ </div>
  <div class="orbit-home-hero">
   <div class="home-brandmark">
    <img src="assets/orbit-logo.png" alt="Orbit + logo" class="home-studio-logo">
@@ -162,6 +170,7 @@
   <p id="homeGreeting">Welcome to your circle.</p>
  </div>
  <div class="home-studio-content">
+  <div class="home-personalize-row"><span>Make your corner of the cosmos your own.</span><button type="button" id="homeCustomizeButton"><span aria-hidden="true">✦</span> Customize Home</button></div>
   <section class="home-featured home-announcements" aria-labelledby="homeAnnouncementHeading">
     <header class="home-announcements-head">
       <div><span class="home-eyebrow">LATEST FROM ORBIT + STAFF</span>
@@ -339,7 +348,24 @@
     <section class="studio-section"><div class="studio-section-heading"><div><h2>Profile picture</h2><p>Choose a starter avatar or upload your own.</p></div><span>FREE</span></div><div class="studio-options studio-avatar-options" id="studioAvatarOptions"></div></section>
     <section class="studio-section"><div class="studio-section-heading"><div><h2>Avatar rings</h2><p>Frames and glowing effects everyone can see around your profile picture.</p></div><span>FREE</span></div><div class="studio-options studio-ring-options" id="studioRingOptions"></div></section>
     <section class="studio-section"><div class="studio-section-heading"><div><h2>Display-name fonts</h2><p>Your name's font appears for other members in chats and the member list.</p></div><span>FREE</span></div><div class="studio-options" id="studioFontOptions"></div></section>
-    <section class="studio-section"><div class="studio-section-heading"><div><h2>Home themes</h2><p>Choose the colors you see on your home screen.</p></div><span>FREE</span></div><div class="studio-options studio-theme-options" id="studioThemeOptions"></div></section>
+    <section class="studio-section"><div class="studio-section-heading"><div><h2>Home themes</h2><p>Choose a ready-made color combination for your home screen.</p></div><span>FREE</span></div><div class="studio-options studio-theme-options" id="studioThemeOptions"></div></section>
+    <section class="studio-section studio-home-editor" id="studioHomeBackgroundSettings"><div class="studio-section-heading"><div><h2>Home background & motion</h2><p>Change the scene, recolor the classic Orbit art, and decide whether your space moves.</p></div><span>FREE</span></div>
+     <div class="home-editor-preview" id="homeEditorPreview"><span class="home-editor-preview-logo">✦ ORBIT +</span><span class="home-editor-preview-caption">YOUR PERSONAL HOME</span><span class="home-editor-preview-planet" aria-hidden="true"></span></div>
+     <div class="home-editor-label">Choose a background</div>
+     <div class="home-editor-backgrounds" id="homeBackgroundChoices" role="group" aria-label="Homepage background">
+      <button type="button" class="home-background-choice" data-home-choice="original" aria-pressed="true"><span class="home-background-swatch home-bg-original"></span><strong>Original Orbit</strong><small>The classic space scene</small></button>
+      <button type="button" class="home-background-choice" data-home-choice="space" aria-pressed="false"><span class="home-background-swatch home-bg-space"></span><strong>Deep Space</strong><small>A different cosmic backdrop</small></button>
+      <button type="button" class="home-background-choice" data-home-choice="starfield" aria-pressed="false"><span class="home-background-swatch home-bg-starfield"></span><strong>Starlight</strong><small>A calm field of stars</small></button>
+      <button type="button" class="home-background-choice" data-home-choice="gradient" aria-pressed="false"><span class="home-background-swatch home-bg-gradient"></span><strong>Cosmic Gradient</strong><small>Soft atmospheric colors</small></button>
+     </div>
+     <div class="home-editor-controls">
+       <label class="home-editor-field" for="homeTintColor"><strong>Recolor your background</strong><small>Choose any color. Set strength to 0% to keep the original look.</small><span class="home-editor-color-row"><input type="color" id="homeTintColor" value="#4767DF"><output id="homeTintHex" for="homeTintColor">#4767DF</output></span></label>
+       <label class="home-editor-field" for="homeTintStrength"><strong>Tint strength <output id="homeTintStrengthValue" for="homeTintStrength">0%</output></strong><input type="range" id="homeTintStrength" min="0" max="75" value="0" step="5"><small>Higher values blend more of your chosen color into the artwork.</small></label>
+     </div>
+     <label class="home-editor-motion"><span><strong>Animate my home</strong><small>Let stars shimmer, planets drift and orbital rings rotate. Reduced-motion device settings are respected.</small></span><input type="checkbox" id="homeMotionEnabled" checked></label>
+     <div class="home-editor-actions"><button type="button" id="homeSaveSettings" class="home-editor-save">Save my home</button><button type="button" id="homeUndoSettings" class="home-editor-secondary">Undo changes</button><button type="button" id="homeResetSettings" class="home-editor-secondary">Restore original scene</button></div>
+     <p id="homeEditorStatus" class="home-editor-status" role="status" aria-live="polite">Your home design is saved privately to your account.</p>
+    </section>
    </div>
   </div>
  </div>
@@ -450,7 +476,7 @@
 </div></div>
 <script>
 document.getElementById('menu')?.addEventListener('click',()=>document.getElementById('sidebar')?.classList.toggle('open'));
-</script><script src="config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="orbit-studio.js"></script><script src="orbit-member-settings.js"></script><script src="orbit-arcade-extras.js"></script><script src="orbit-arcade.js"></script><script src="orbit-leaderboard.js"></script>
+</script><script src="config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="orbit-studio.js"></script><script src="orbit-home-custom.js"></script><script src="orbit-member-settings.js"></script><script src="orbit-arcade-extras.js"></script><script src="orbit-arcade.js"></script><script src="orbit-leaderboard.js"></script>
 <script>
 (function(){
 'use strict';
@@ -737,11 +763,14 @@ function activateView(viewId){
  if(viewId==='home'||viewId==='studio')window.OrbitStudio?.updatePreview();
 }
 function openHome(){activateView('home');loadHomeAnnouncements()}
+function customizeHome(){openStudio();$('studioHomeBackgroundSettings')?.scrollIntoView({behavior:window.matchMedia?.('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'})}
 function openStudio(){activateView('studio');window.OrbitStudio?.loadAll().then(()=>window.OrbitStudio?.updatePreview())}
 function openSettings(){activateView('settings');window.OrbitSettings?.load()}
 function openGames(){activateView('games');window.OrbitArcade?.open()}
 function openLeaderboard(){activateView('leaderboard');window.OrbitLeaderboard?.open()}
 $('homeNav').addEventListener('click',openHome);
+$('homeCustomizeButton').addEventListener('click',customizeHome);
+$('orbitLogoHome').addEventListener('click',()=>window.location.reload());
 $('studioNav').addEventListener('click',openStudio);
 $('settingsNav').addEventListener('click',openSettings);
 $('gamesNav').addEventListener('click',openGames);
@@ -1047,6 +1076,7 @@ async function authUI(){
     $('connectionStatus').textContent='Shared chat is available to signed-in members.';
     await ensureProfile();
     await window.OrbitStudio?.init(db,user);
+    await window.OrbitHomeCustomization?.init(db,user);
     await window.OrbitArcade?.init(db,user);
     await window.OrbitLeaderboard?.init(db,user);
     await loadHomeAnnouncements();
@@ -1073,7 +1103,7 @@ async function authUI(){
 }
 $('signup').onclick=async()=>{if(!db)return;let email=$('authEmail').value.trim(),password=$('authPassword').value,nickname=$('authNickname').value.trim();if(!/^[0-9]{2}[a-z]{2,}@tesdk12\.net$/i.test(email)){status('Use your school email in the format 24jamesh@tesdk12.net (graduation year, last name, first initial).');return}if(!nickname||nickname.length<2){status('Choose a nickname with at least 2 characters.');return}if(password.length<8){status('Choose a password at least 8 characters long.');return}const r=await db.auth.signUp({email,password,options:{data:{nickname}}});if(r.error)error(r.error);else status('Check your email for a confirmation link, then log in. Never share your password.')};
 $('signin').onclick=async()=>{if(!db)return;const r=await db.auth.signInWithPassword({email:$('authEmail').value.trim(),password:$('authPassword').value});if(r.error)error(r.error);else status('Signed in.')};
-$('signout').onclick=async()=>{if(db){if(user)await db.from('orbit_presence').delete().eq('user_id',user.id);await db.auth.signOut();lastPageUser=null;window.OrbitStudio?.clear();window.OrbitSettings?.clear();window.OrbitArcade?.clear();window.OrbitLeaderboard?.clear();status('Signed out.')}};
+$('signout').onclick=async()=>{if(db){if(user)await db.from('orbit_presence').delete().eq('user_id',user.id);await db.auth.signOut();lastPageUser=null;window.OrbitStudio?.clear();window.OrbitHomeCustomization?.clear();window.OrbitSettings?.clear();window.OrbitArcade?.clear();window.OrbitLeaderboard?.clear();status('Signed out.')}};
 $('post').onclick=async()=>{
  const body=$('message').value.trim();
  if(!db||!user||!memberApproved||!body||current==='announcements')return;
@@ -1096,7 +1126,7 @@ if(db){
   db.auth.onAuthStateChange((event,session)=>{
     if(event==='INITIAL_SESSION'&&!verified)return;
     user=session?.user||null;
-    if(!user){lastPageUser=null;window.OrbitSettings?.clear();window.OrbitArcade?.clear();window.OrbitLeaderboard?.clear()}
+    if(!user){lastPageUser=null;window.OrbitHomeCustomization?.clear();window.OrbitSettings?.clear();window.OrbitArcade?.clear();window.OrbitLeaderboard?.clear()}
     if(verified)setTimeout(()=>authUI(),0);
   });
   db.auth.getUser().then(async ({data,error})=>{
