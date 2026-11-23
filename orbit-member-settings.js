@@ -130,6 +130,9 @@ async function savePresence(){
  busy=false;btn.disabled=false;
  if(error){setFeedback('settingsPresenceFeedback',error.message,true);return}
  own={...DEFAULT,...data};publicProfiles.set(user.id,own);
+ // Invisible should not leave a recent online heartbeat discoverable.
+ if(choice==='invisible')await client.from('orbit_presence').delete().eq('user_id',user.id);
+ else if(!document.hidden)await client.from('orbit_presence').upsert({user_id:user.id},{onConflict:'user_id'});
  fillForm();setFeedback('settingsPresenceFeedback','Status saved! Your friends will see the update.');
  if(onUpdate)await onUpdate();
 }
@@ -265,5 +268,5 @@ function clear(){
  closeMember();
  const sidebar=$('sidebarStatus');if(sidebar)sidebar.textContent='Offline';
 }
-window.OrbitSettings={init,load,selectTab,setProfiles,memberColor,isVisibleOnline,displayStatus,displayText,openMember,pollNotifications,clear};
+window.OrbitSettings={init,load,selectTab,setProfiles,memberColor,isVisibleOnline,displayStatus,displayText,openMember,pollNotifications,clear,myStatus(){return own?.member_status||'online'}};
 })();
