@@ -81,11 +81,11 @@ begin
    -- Long/abandoned tabs get no rewards, though the local game can still be fun.
    v_max_score:=0;
  elsif v_run.game='tetris' then
-   v_max_score:=pg_catalog.least(12000,pg_catalog.greatest(1000,pg_catalog.floor(v_duration*90)::integer));
+   v_max_score:=least(12000,greatest(1000,pg_catalog.floor(v_duration*90)::integer));
  elsif v_run.game='snake' then
-   v_max_score:=pg_catalog.least(150,pg_catalog.floor(v_duration*3)::integer+3);
+   v_max_score:=least(150,pg_catalog.floor(v_duration*3)::integer+3);
  else
-   v_max_score:=pg_catalog.least(150,pg_catalog.floor(v_duration*2)::integer+3);
+   v_max_score:=least(150,pg_catalog.floor(v_duration*2)::integer+3);
  end if;
  -- Reject obviously implausible scores. Arcade scores are client-generated:
  -- this reduces trivial score spoofing, but does NOT make scores tamper-proof.
@@ -95,11 +95,11 @@ begin
   when 'snake' then p_score/2          -- 20 apples = 10 Stardust (50%)
   when 'flappy' then p_score           -- 10 pipes = 10 Stardust (100%)
   else 0 end;
- v_reward:=pg_catalog.least(30,v_reward);
+ v_reward:=least(30,v_reward);
  select coalesce(sum(stardust),0) into v_today
  from public.orbit_game_runs
  where user_id=v_user and finished_at >= pg_catalog.date_trunc('day',now() at time zone 'UTC') at time zone 'UTC';
- v_awarded:=pg_catalog.least(v_reward,pg_catalog.greatest(0,60-v_today));
+ v_awarded:=least(v_reward,greatest(0,60-v_today));
  update public.orbit_game_runs set score=p_score,stardust=v_awarded,finished_at=now()
  where id=p_run_id;
  select coalesce(sum(stardust),0) into v_total from public.orbit_game_runs where user_id=v_user;
