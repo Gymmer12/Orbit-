@@ -130,7 +130,7 @@
 <button class="navlink" id="studioNav" type="button"><span class="glyph">✦</span> Orbit Studio <span class="free-tag">FREE</span></button>
 <button class="navlink" id="adminButton" type="button"><span class="glyph">✓</span> Approvals</button>
 </nav>
-<div class="profile"><div class="avatar orbit-avatar" id="sidebarAvatar">O+</div><div><div class="name" id="profileName">ORBIT + Player</div><div class="status">● Ready to explore</div></div><button id="sidebarSignout" type="button" title="Sign out of ORBIT +">Sign out</button></div>
+<div class="profile"><button type="button" class="avatar orbit-avatar" id="sidebarAvatar" aria-label="Customize your profile in Orbit Studio" title="Customize your profile">O+</button><div><div class="name" id="profileName">ORBIT + Player</div><div class="status">● Ready to explore</div></div><button id="sidebarSignout" type="button" title="Sign out of ORBIT +">Sign out</button></div>
 </aside>
 <div class="content" id="content"><div class="stars"></div>
 <header class="topbar"><div class="row"><button class="mobilemenu" id="menu" aria-label="Open navigation">☰</button><strong id="pagetitle"># &nbsp; Chat</strong><span class="hint">Stay in the Loop. Keep it simple.</span></div></header>
@@ -500,6 +500,7 @@ function openHome(){activateView('home')}
 function openStudio(){activateView('studio');window.OrbitStudio?.loadAll().then(()=>window.OrbitStudio?.updatePreview())}
 $('homeNav').addEventListener('click',openHome);
 $('studioNav').addEventListener('click',openStudio);
+$('sidebarAvatar').addEventListener('click',openStudio);
 $('homeChatButton').addEventListener('click',()=>openSocial('general'));
 $('homeChatLink').addEventListener('click',()=>openSocial('general'));
 $('homeAnnouncementsLink').addEventListener('click',()=>openSocial('announcements'));
