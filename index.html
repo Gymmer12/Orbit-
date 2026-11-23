@@ -60,6 +60,15 @@
   </section>
 </div>
 
+<div id="banGate" hidden role="region" aria-label="Account suspended">
+  <section class="ban-card">
+    <img src="assets/orbit-logo-wide.png" alt="ORBIT +" class="ban-logo">
+    <h1>Account suspended</h1>
+    <p>Your ORBIT + account has been banned by the administrator. Messaging, announcements, and member lists are no longer accessible.</p>
+    <p id="banReasonDisplay" class="ban-reason"></p>
+    <button id="banLogout" class="control" type="button">Sign out</button>
+  </section>
+</div>
 <div id="approvalGate" hidden role="region" aria-label="Account approval waiting room">
 <section class="approval-card">
  <div class="tag">ORBIT + ACCOUNT REVIEW</div><h2 id="approvalHeading">Pending Approval</h2>
@@ -86,7 +95,18 @@
 <p>Only the administrator can assign moderators. Moderators can create and edit announcements, but cannot approve members or appoint other moderators.</p>
 <div class="mod-actions"><select id="moderatorPicker" aria-label="Select an approved member"><option value="">Choose an approved member</option></select><button class="approval-btn" id="moderatorGrant" type="button">Make Moderator</button></div>
 <div id="moderatorList"></div><p role="status" id="moderatorStatus"></p></section>
- <div class="admin-columns"><div class="admin-list" id="adminApplicantList"></div>
+ <section class="ban-console" id="banConsole">
+  <h3>Ban or unban accounts</h3>
+  <p>Only you, the administrator, can ban members. A ban immediately prevents their account from accessing messaging. The account stays registered, so you can reverse a ban later.</p>
+  <div class="ban-form">
+    <select id="banTarget" aria-label="Select account to ban"><option value="">Choose a member</option></select>
+    <input id="banReason" type="text" maxlength="220" placeholder="Reason for ban (shown to member)" aria-label="Reason for ban">
+    <button id="banAdd" type="button" class="approval-btn">Ban account</button>
+  </div>
+  <div id="banList" class="ban-list"></div>
+  <p id="banStatus" role="status" aria-live="polite"></p>
+</section>
+<div class="admin-columns"><div class="admin-list" id="adminApplicantList"></div>
   <div><h3 id="adminSelectedTitle">Select an applicant</h3><p class="notice" id="adminSelectedEmail"></p>
    <div class="approval-chat" id="adminMessages"></div>
    <div class="approval-row"><textarea id="adminReply" rows="2" maxlength="600" placeholder="Private reply" aria-label="Private reply"></textarea><button id="adminSend" class="approval-btn">Send</button></div>
@@ -124,8 +144,15 @@
 </div><p id="announcementsStatus" role="status"></p></div>
 <div id="messages" class="messagefeed"></div>
 <div id="dmActions" class="social-actions hide"><button class="control secondary" id="blockUser">Block user</button><button class="control secondary" id="reportUser">Report conversation</button></div>
-<div id="composer" class="stack"><input id="nickname" class="field" placeholder="Nickname (local demo only)" maxlength="24" aria-label="Nickname"><textarea id="message" class="field" placeholder="Type a message..." maxlength="400" aria-label="Message"></textarea><div class="row"><button id="post" class="control">Send message ➤</button><span id="poststatus" class="feedback" aria-live="polite"></span></div></div></div>
-<div class="card"><div class="members-title">MEMBERS <span style="color:#9fb8f4">• Approved</span></div><div class="members-list" id="memberList"><span class="notice">Sign in to view registered members who opted into the directory.</span></div><hr style="border:0;border-top:1px solid #273979;margin:12px 0"><span class="tag">ORBIT + Text</span><h3 id="sidebarChannelTitle">Chat</h3><p id="sidebarChannelText">A place for approved members to message each other.</p><p class="notice">Direct messages are visible only to their participants. Blocking and reporting are available.</p><p class="notice" id="connectionStatus">Messaging for approved members.</p></div></div></div></section>
+<div id="composer" class="chat-composer">
+  <input id="nickname" class="field" placeholder="Nickname" maxlength="24" aria-label="Nickname" hidden>
+  <div class="composer-shell">
+    <textarea id="message" rows="1" maxlength="400" placeholder="Message #chat" aria-label="Write a message"></textarea>
+    <button id="post" type="button" class="send-button" disabled aria-label="Send message" title="Send message"><svg aria-hidden="true" viewBox="0 0 24 24" width="21" height="21" fill="none"><path d="M4 12h15m-7-7 7 7-7 7" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  </div>
+  <div class="composer-bottom"><span id="poststatus" class="feedback" role="status" aria-live="polite"></span><span id="composerHint">Enter to send · Shift + Enter for new line</span></div>
+</div></div>
+<div class="card"><div class="members-title">MEMBERS <span style="color:#9fb8f4">• Approved</span></div><div class="members-list" id="memberList"><span class="notice">Sign in to view registered members who opted into the directory.</span></div><hr style="border:0;border-top:1px solid #273979;margin:12px 0"><span class="tag">ORBIT + Chat</span><h3 id="sidebarChannelTitle">Chat</h3><p id="sidebarChannelText">A place for approved members to message each other.</p><p class="notice">Direct messages are visible only to their participants. Blocking and reporting are available.</p><p class="notice" id="connectionStatus">Messaging for approved members.</p></div></div></div></section>
 <div class="footer">ORBIT + • Messaging only • New members are approved by an administrator.</div>
 </div></div>
 <script>
