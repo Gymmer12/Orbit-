@@ -26,6 +26,7 @@
 <link rel="stylesheet" href="orbit-palette.css">
 <link rel="stylesheet" href="orbit-member-settings.css">
 <link rel="stylesheet" href="orbit-arcade.css">
+<link rel="stylesheet" href="orbit-arcade-v2.css">
 </head>
 <body>
 <div id="authGate" role="region" aria-label="ORBIT + account sign-in">
@@ -139,6 +140,7 @@
 <div class="sidebar-dm-list" id="dmDirectory" hidden><div class="sidebar-dm-list-head">Approved members</div><div id="peopleList" role="list"></div></div>
 <div class="navheading">ARCADE</div>
 <button class="navlink" id="gamesNav" type="button"><span class="glyph">✦</span> Games <span class="arcade-nav-label">16</span></button>
+<button class="navlink" id="leaderboardNav" type="button"><span class="glyph">♛</span> Leaderboard</button>
 <div class="arcade-nav-balance" id="sidebarCosmos" title="Free game tokens">✦ <span id="sidebarCosmosCount">0</span> Cosmos</div>
 <div class="navheading">PERSONALIZE</div>
 <button class="navlink" id="studioNav" type="button"><span class="glyph">✦</span> Orbit Studio <span class="free-tag">FREE</span></button>
@@ -178,6 +180,7 @@
    <button type="button" id="homeDMsLink" class="home-feature-card"><span class="feature-icon">✉</span><b>Direct Messages</b><small>One-on-one conversations</small></button>
    <button type="button" id="homeStudioLink" class="home-feature-card"><span class="feature-icon">✦</span><b>Orbit Studio</b><small>All customization is free</small></button>
    <button type="button" id="homeGamesLink" class="home-feature-card"><span class="feature-icon">🎮</span><b>Games</b><small>Play & earn Cosmos</small></button>
+   <button type="button" id="homeLeaderboardLink" class="home-feature-card"><span class="feature-icon">♛</span><b>Leaderboard</b><small>See the top scores</small></button>
   </div>
   <p class="home-tail">MORE CONNECTIONS <span>·</span> LESS DISTRACTIONS <span>·</span> ONE ORBIT +</p>
  </div>
@@ -187,8 +190,9 @@
   <header class="arcade-hero"><div class="arcade-eyebrow">✦ ORBIT + MINI GAMES</div>
    <div class="arcade-hero-top"><div><h1>Orbit Arcade <span>✦</span></h1>
    <p>16 arcade and puzzle games. Earn free Cosmos from scores, and play at your own pace.</p></div>
-   <div class="arcade-wallet" aria-label="Your Cosmos"><span>YOUR COSMOS</span><strong>✦ <span id="arcadeBalance">0</span></strong><small><span id="arcadeEarnedToday">0</span> / 60 earned today</small></div></div>
+   <div class="arcade-wallet" aria-label="Your Cosmos"><span>YOUR COSMOS</span><strong>✦ <span id="arcadeBalance">0</span></strong><small><span id="arcadeEarnedToday">0</span> earned today · no earning cap</small></div></div>
   </header>
+  <div class="arcade-launch-instructions"><span class="arcade-launch-icon">▣</span><span>Pick a cartridge to open its own full-screen game.</span><span class="arcade-launch-sub">Free to play · no purchases</span></div>
   <div class="arcade-catalog" id="arcadeCatalog" aria-label="Choose a game">
    <button type="button" class="arcade-game-card selected" data-arcade-game="tetris" aria-pressed="true"><span class="arcade-card-art tetris-art" aria-hidden="true">▦</span><span class="arcade-card-text"><b>Tetris</b><small>Stack blocks, clear lines</small><em>2% score → Cosmos</em></span></button>
    <button type="button" class="arcade-game-card" data-arcade-game="snake" aria-pressed="false"><span class="arcade-card-art snake-art" aria-hidden="true">〰</span><span class="arcade-card-text"><b>Snake</b><small>Collect stars, avoid walls</small><em>50% score → Cosmos</em></span></button>
@@ -208,10 +212,27 @@
    <button type="button" class="arcade-game-card" data-arcade-game="wordle" aria-pressed="false"><span class="arcade-card-art" aria-hidden="true">A</span><span class="arcade-card-text"><b>Word Guess</b><small>Guess the hidden word</small><em>100% score → Cosmos</em></span></button>
   </div>
   <div class="arcade-play-layout">
+   <div class="arcade-immersive-bar" id="arcadeImmersiveBar">
+    <button type="button" id="arcadeBack" class="arcade-back-button">← Back to Arcade</button>
+    <div class="arcade-immersive-label"><small>ORBIT + ARCADE</small><strong id="arcadeImmersiveName">Tetris</strong></div>
+    <button type="button" id="arcadeNativeFullscreen" class="arcade-screen-button" title="Use your browser's full screen">⛶ Full screen</button>
+   </div>
    <div class="arcade-stage-wrap">
-    <div class="arcade-stage-bar"><strong id="arcadeCurrentName">Tetris</strong><span>Score <b id="arcadeScore">0</b></span><span>Best <b id="arcadeBest">0</b></span></div>
+    <div class="arcade-stage-bar">
+      <div class="arcade-hud-best"><span class="arcade-hud-crown">♛</span><span>BEST</span><b id="arcadeBest">0</b></div>
+      <div class="arcade-hud-score"><span class="arcade-hud-heart" aria-hidden="true">♥</span><small id="arcadeCurrentName">Tetris</small><strong id="arcadeScore">0</strong></div>
+      <div class="arcade-hud-wallet"><span>✦ COSMOS</span><b id="arcadeHudCosmos">0</b></div>
+    </div>
+    <div class="arcade-stage-display">
+     <aside class="arcade-tetris-side arcade-tetris-hold" id="arcadeTetrisHold">
+      <div class="arcade-tetris-panel"><span>HOLD</span><canvas id="arcadeHoldCanvas" width="105" height="110" aria-label="Held Tetris piece"></canvas></div>
+      <div class="arcade-tetris-stats"><p>LEVEL <b id="arcadeTetrisLevel">1</b></p><p>LINES <b id="arcadeTetrisLines">0</b></p></div>
+     </aside>
     <div class="arcade-canvas-wrap"><canvas id="arcadeCanvas" width="340" height="480" aria-label="Arcade game display">Your browser needs Canvas to play this game.</canvas>
       <div id="arcadeOverlay" class="arcade-overlay"><strong id="arcadeOverlayHeading">Ready to play?</strong><p id="arcadeOverlayMessage">Choose Start game to begin.</p></div>
+     <aside class="arcade-tetris-side arcade-tetris-next" id="arcadeTetrisNext">
+      <div class="arcade-tetris-panel"><span>NEXT</span><canvas id="arcadeNextCanvas" width="105" height="208" aria-label="Upcoming Tetris pieces"></canvas></div>
+     </aside>
     </div>
     <div class="arcade-control-bar"><button id="arcadeStart" type="button">Start game</button><button id="arcadePause" type="button" disabled>Pause</button><button id="arcadeStop" type="button" disabled>End round</button></div>
     <div class="arcade-touch-controls" aria-label="On-screen game controls">
@@ -219,6 +240,8 @@
      <button type="button" data-arcade-input="rotate" aria-label="Rotate block or flap">↻ / ↑</button>
      <button type="button" data-arcade-input="right" aria-label="Move right">→</button>
      <button type="button" data-arcade-input="down" aria-label="Move down">↓</button>
+     <button type="button" data-arcade-input="drop" class="arcade-hard-drop" aria-label="Hard drop">⇣</button>
+     <button type="button" data-arcade-input="hold" class="arcade-hold-button" aria-label="Hold Tetris piece">HOLD</button>
     </div>
     <div id="arcadeKeypad" class="arcade-keypad" hidden aria-label="Game number or letter inputs"></div>
    </div>
@@ -228,9 +251,30 @@
      <p class="arcade-note">Cosmos is a free, virtual ORBIT + token. It can't be purchased, transferred, or redeemed for money.</p>
     </div>
     <div class="arcade-info-card"><h2>Your best scores</h2><div id="arcadePersonalBests" class="arcade-best-list"><p>No scores yet.</p></div></div>
-    <div class="arcade-info-card arcade-wellbeing"><h2>Keep it balanced</h2><p>Games are optional. Daily Cosmos earnings are limited to 60, and there's no reward for playing endlessly.</p></div>
+    <div class="arcade-info-card arcade-wellbeing"><h2>Play your way</h2><p>All games and profile customizations stay free. There are no Cosmos earning caps and no real-money rewards.</p></div>
     <p id="arcadeStatus" class="arcade-status" role="status" aria-live="polite"></p>
    </aside>
+  </div>
+ </div>
+</section>
+<section class="view" id="leaderboard" aria-label="ORBIT + Leaderboard">
+ <div class="leaderboard-scroll">
+  <header class="leaderboard-intro">
+   <div class="leaderboard-eyebrow">♛ ORBIT + RANKINGS</div>
+   <h1>Leaderboard <span>✦</span></h1>
+   <p>Celebrate high scores from approved ORBIT + members. Rankings show nicknames only.</p>
+  </header>
+  <div class="leaderboard-shell">
+   <div class="leaderboard-picker">
+    <label for="leaderboardGame">Rankings for</label>
+    <select id="leaderboardGame" aria-label="Choose a game or Cosmos balance"><option value="cosmos">✦ Total Cosmos</option></select>
+    <button type="button" id="leaderboardRefresh">↻ Refresh</button>
+   </div>
+   <div id="leaderboardPodium" class="leaderboard-podium" aria-label="Top three players"></div>
+   <div class="leaderboard-list-header"><span>RANK</span><span>PLAYER</span><span id="leaderboardScoreLabel">COSMOS</span></div>
+   <div id="leaderboardRows" class="leaderboard-rows" role="list"><p class="leaderboard-empty">Loading rankings…</p></div>
+   <p id="leaderboardStatus" class="leaderboard-feedback" role="status" aria-live="polite"></p>
+   <p class="leaderboard-disclaimer">Scores are saved from browser games. They have basic anti-abuse checks but are not independently verified competition results. Cosmetics in Orbit Studio are always free.</p>
   </div>
  </div>
 </section>
@@ -404,7 +448,7 @@
 </div></div>
 <script>
 document.getElementById('menu')?.addEventListener('click',()=>document.getElementById('sidebar')?.classList.toggle('open'));
-</script><script src="config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="orbit-studio.js"></script><script src="orbit-member-settings.js"></script><script src="orbit-arcade-extras.js"></script><script src="orbit-arcade.js"></script>
+</script><script src="config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="orbit-studio.js"></script><script src="orbit-member-settings.js"></script><script src="orbit-arcade-extras.js"></script><script src="orbit-arcade.js"></script><script src="orbit-leaderboard.js"></script>
 <script>
 (function(){
 'use strict';
