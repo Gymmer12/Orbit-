@@ -414,7 +414,7 @@ function syncGate(){
   $('adminButton').classList.toggle('ready',isSignedIn&&adminApproved);
   if(!isSignedIn)$('adminPanel').hidden=true;
   if(isSignedIn){
-    $('profileName').textContent=(user.user_metadata?.first_name||user.user_metadata?.nickname||'ORBIT + Player').slice(0,24);
+    $('profileName').textContent=(user.user_metadata?.nickname||'ORBIT + Player').slice(0,24);
   }
 }
 $('gateLoginTab').addEventListener('click',()=>setGateMode('login'));
