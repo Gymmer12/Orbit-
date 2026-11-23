@@ -716,18 +716,19 @@ $('message').addEventListener('keydown',event=>{
 
 
 function activateView(viewId){
- if(!['home','studio','settings','text','games'].includes(viewId))return;
+ if(!['home','studio','settings','text','games','leaderboard'].includes(viewId))return;
  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===viewId));
  $('homeNav').classList.toggle('active',viewId==='home');
  $('studioNav').classList.toggle('active',viewId==='studio');
  $('settingsNav').classList.toggle('active',viewId==='settings');
  $('gamesNav').classList.toggle('active',viewId==='games');
- if(viewId!=='games')window.OrbitArcade?.pause();
+ $('leaderboardNav').classList.toggle('active',viewId==='leaderboard');
+ if(viewId!=='games')window.OrbitArcade?.close?.();
  if(viewId!=='text'){
   document.querySelectorAll('[data-social]').forEach(link=>link.classList.remove('active'));
   $('dmDirectory').hidden=true;
   $('dmToggle').setAttribute('aria-expanded','false');
-  $('pagetitle').textContent=viewId==='home'?'⌂ Home':viewId==='settings'?'⚙ Settings':viewId==='games'?'✦ Games':'✦ Orbit Studio';
+  $('pagetitle').textContent=viewId==='home'?'⌂ Home':viewId==='settings'?'⚙ Settings':viewId==='games'?'✦ Games':viewId==='leaderboard'?'♛ Leaderboard':'✦ Orbit Studio';
   $('sidebar').classList.remove('open');
  }
  if(viewId==='home'||viewId==='studio')window.OrbitStudio?.updatePreview();
@@ -736,14 +737,17 @@ function openHome(){activateView('home');loadHomeAnnouncements()}
 function openStudio(){activateView('studio');window.OrbitStudio?.loadAll().then(()=>window.OrbitStudio?.updatePreview())}
 function openSettings(){activateView('settings');window.OrbitSettings?.load()}
 function openGames(){activateView('games');window.OrbitArcade?.open()}
+function openLeaderboard(){activateView('leaderboard');window.OrbitLeaderboard?.open()}
 $('homeNav').addEventListener('click',openHome);
 $('studioNav').addEventListener('click',openStudio);
 $('settingsNav').addEventListener('click',openSettings);
 $('gamesNav').addEventListener('click',openGames);
+$('leaderboardNav').addEventListener('click',openLeaderboard);
 $('sidebarProfileButton').addEventListener('click',openSettings);
 $('sidebarAvatar').addEventListener('click',openStudio);
 $('homeAnnouncementAll').addEventListener('click',()=>openSocial('announcements'));
 $('homeGamesLink').addEventListener('click',openGames);
+$('homeLeaderboardLink').addEventListener('click',openLeaderboard);
 $('homeChatLink').addEventListener('click',()=>openSocial('general'));
 $('homeAnnouncementsLink').addEventListener('click',()=>openSocial('announcements'));
 $('homeDMsLink').addEventListener('click',()=>openSocial('dm'));
@@ -1046,6 +1050,7 @@ async function authUI(){
     await ensureProfile();
     await window.OrbitStudio?.init(db,user);
     await window.OrbitArcade?.init(db,user);
+    await window.OrbitLeaderboard?.init(db,user);
     await loadHomeAnnouncements();
     await window.OrbitSettings?.init(db,user,{
       role:adminApproved?'ORBIT + Administrator':isStaff?'ORBIT + Moderator':'ORBIT + Member',
@@ -1070,7 +1075,7 @@ async function authUI(){
 }
 $('signup').onclick=async()=>{if(!db)return;let email=$('authEmail').value.trim(),password=$('authPassword').value,nickname=$('authNickname').value.trim();if(!/^[0-9]{2}[a-z]{2,}@tesdk12\.net$/i.test(email)){status('Use your school email in the format 24jamesh@tesdk12.net (graduation year, last name, first initial).');return}if(!nickname||nickname.length<2){status('Choose a nickname with at least 2 characters.');return}if(password.length<8){status('Choose a password at least 8 characters long.');return}const r=await db.auth.signUp({email,password,options:{data:{nickname}}});if(r.error)error(r.error);else status('Check your email for a confirmation link, then log in. Never share your password.')};
 $('signin').onclick=async()=>{if(!db)return;const r=await db.auth.signInWithPassword({email:$('authEmail').value.trim(),password:$('authPassword').value});if(r.error)error(r.error);else status('Signed in.')};
-$('signout').onclick=async()=>{if(db){if(user)await db.from('orbit_presence').delete().eq('user_id',user.id);await db.auth.signOut();lastPageUser=null;window.OrbitStudio?.clear();window.OrbitSettings?.clear();window.OrbitArcade?.clear();status('Signed out.')}};
+$('signout').onclick=async()=>{if(db){if(user)await db.from('orbit_presence').delete().eq('user_id',user.id);await db.auth.signOut();lastPageUser=null;window.OrbitStudio?.clear();window.OrbitSettings?.clear();window.OrbitArcade?.clear();window.OrbitLeaderboard?.clear();status('Signed out.')}};
 $('post').onclick=async()=>{
  const body=$('message').value.trim();
  if(!db||!user||!memberApproved||!body||current==='announcements')return;
@@ -1093,7 +1098,7 @@ if(db){
   db.auth.onAuthStateChange((event,session)=>{
     if(event==='INITIAL_SESSION'&&!verified)return;
     user=session?.user||null;
-    if(!user){lastPageUser=null;window.OrbitSettings?.clear();window.OrbitArcade?.clear()}
+    if(!user){lastPageUser=null;window.OrbitSettings?.clear();window.OrbitArcade?.clear();window.OrbitLeaderboard?.clear()}
     if(verified)setTimeout(()=>authUI(),0);
   });
   db.auth.getUser().then(async ({data,error})=>{
