@@ -62,3 +62,32 @@ There are no prices, purchases, or gaming/leaderboard features.
   replacement, personal homepage theme, and absence of Approvals for members.
 - Running a query in Supabase verifies database rules, but is not a substitute
   for a live two-account browser test.
+
+## Customize the colors of the entire ORBIT + website
+1. Open **Orbit Studio → Whole website colors**.
+2. Try a quick combination: Classic Orbit, Aurora, Solar Sunset, Rose Nebula,
+   Arctic, Midnight or Daylight.
+3. To create your own, click any of the **six color swatches** to open your
+   browser's built-in color picker: Background, Sidebar, Cards & chat,
+   Buttons & highlights, Text, and Borders.
+4. The website changes **instantly** as you choose colors. The miniature
+   chat mockup also previews the combination.
+5. Click **Save my palette** to keep the colors on your account across devices.
+   **Undo changes** restores the last saved combination; **Original ORBIT + colors**
+   removes the custom palette and restores the original website style.
+6. A contrast warning appears when text is difficult to read against your
+   background, sidebar, or cards. The send button automatically uses a readable
+   contrasting foreground color.
+
+Your saved colors apply to the sidebar, Chat, Direct Messages, Announcements,
+Home, Orbit Studio, cards, input fields, buttons, and the Admin Approvals window.
+They are **personal**: other users keep their own colors. Home-background themes
+and uploaded profile pictures continue working separately. The login screen
+(before an account can be identified) remains the original ORBIT + design.
+
+Technical notes: palettes are stored as six validated hex colors in
+`orbit_appearance.site_palette`, where owner-only RLS policies apply. Invalid
+or extra values are rejected server-side. A blank JSON object (`{}`) means
+no custom palette. The CSS file `orbit-palette.css` loads after all other
+site styles; live preview changes never enter the database until saved (except
+when using the explicitly labeled original-colors reset).
