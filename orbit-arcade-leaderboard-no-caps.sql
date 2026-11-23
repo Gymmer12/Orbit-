@@ -141,7 +141,7 @@ language plpgsql stable security definer
 set search_path = ''
 as $$
 declare v_user uuid:=(select auth.uid());
-declare v_result jsonb;
+ v_result jsonb;
 begin
  if v_user is null or not private.orbit_is_member() then
    raise exception 'Approved ORBIT + membership is required.';
