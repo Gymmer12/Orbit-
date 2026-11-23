@@ -44,7 +44,7 @@ function render(rows,game){
   const val=document.createElement('small');val.textContent=Number(item.score||0).toLocaleString()+(game==='cosmos'?' Cosmos':' pts');
   member.append(medal,av,name,val);podium.append(member);
  });
- if(!rows.length){resetRows('No recorded scores yet. The first game result will appear here.');return}
+ if(!rows.length){resetRows('No opted-in scores yet. Open Settings → About Me to choose whether your scores appear.');return}
  for(const item of rows){
   const row=document.createElement('div');row.className='leaderboard-entry';row.setAttribute('role','listitem');
   if(item.user_id===user?.id)row.classList.add('self');
@@ -65,6 +65,7 @@ function bind(){
  }
  select.addEventListener('change',()=>load(true));
  $('leaderboardRefresh').addEventListener('click',()=>load(true));
+ $('leaderboardManagePrivacy').addEventListener('click',()=>{ $('settingsNav')?.click();window.OrbitSettings?.selectTab('profile') });
 }
 async function load(force=false){
  if(!client||!user)return;
