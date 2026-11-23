@@ -10,7 +10,7 @@ const STATUSES={
  dnd:{label:'Do Not Disturb',dot:'dnd'},
  invisible:{label:'Invisible',dot:'invisible'}
 };
-const DEFAULT={member_status:'online',custom_status:'',bio:'',avatar_color:'#416ECB'};
+const DEFAULT={member_status:'online',custom_status:'',bio:'',avatar_color:'#416ECB',leaderboard_visible:false};
 const PREFS={notify_dms:false,notify_all_chat:false};
 let client=null,user=null,own=null,prefs={...PREFS},publicProfiles=new Map(),ready=false;
 let onUpdate=null,onMessage=null,onOpenStudio=null,lastNotifiedAt=Date.now();
@@ -91,6 +91,7 @@ function fillForm(){
  $('settingsBio').value=own.bio||'';
  $('settingsBioCount').textContent=String(($('settingsBio').value||'').length);
  $('settingsAvatarColor').value=memberColor(user.id);
+ $('settingsLeaderboardVisible').checked=!!own.leaderboard_visible;
  $('settingsNotifyDMs').checked=!!prefs.notify_dms;
  $('settingsNotifyChat').checked=!!prefs.notify_all_chat;
  updateSidebar();updateAccountPreview();
@@ -107,7 +108,7 @@ function selectTab(tab){
 async function load(){
  if(!client||!user)return;
  const [profile,pref]=await Promise.all([
-  client.from('profiles').select('id,nickname,member_status,custom_status,bio,avatar_color').eq('id',user.id).maybeSingle(),
+  client.from('profiles').select('id,nickname,member_status,custom_status,bio,avatar_color,leaderboard_visible').eq('id',user.id).maybeSingle(),
   client.from('orbit_member_preferences').select('user_id,notify_dms,notify_all_chat').eq('user_id',user.id).maybeSingle()
  ]);
  if(profile.error){setFeedback('settingsPresenceFeedback','Could not load your profile: '+profile.error.message,true);return}
@@ -126,7 +127,7 @@ async function savePresence(){
  const btn=$('settingsPresenceSave');btn.disabled=true;
  const custom=trimText($('settingsCustomStatus').value,80);
  const {data,error}=await client.from('profiles').update({member_status:choice,custom_status:custom}).eq('id',user.id)
-  .select('id,nickname,member_status,custom_status,bio,avatar_color').single();
+  .select('id,nickname,member_status,custom_status,bio,avatar_color,leaderboard_visible').single();
  busy=false;btn.disabled=false;
  if(error){setFeedback('settingsPresenceFeedback',error.message,true);return}
  own={...DEFAULT,...data};publicProfiles.set(user.id,own);
@@ -139,13 +140,14 @@ async function savePresence(){
 async function saveBio(){
  if(!client||!user||busy)return;
  busy=true;$('settingsProfileSave').disabled=true;
- const payload={bio:trimText($('settingsBio').value,190),avatar_color:$('settingsAvatarColor').value};
+ const payload={bio:trimText($('settingsBio').value,190),avatar_color:$('settingsAvatarColor').value,leaderboard_visible:$('settingsLeaderboardVisible').checked};
  const {data,error}=await client.from('profiles').update(payload).eq('id',user.id)
-  .select('id,nickname,member_status,custom_status,bio,avatar_color').single();
+  .select('id,nickname,member_status,custom_status,bio,avatar_color,leaderboard_visible').single();
  busy=false;$('settingsProfileSave').disabled=false;
  if(error){setFeedback('settingsProfileFeedback',error.message,true);return}
  own={...DEFAULT,...data};publicProfiles.set(user.id,own);
- fillForm();setFeedback('settingsProfileFeedback','Profile saved. Other approved members can view your bio.');
+ fillForm();setFeedback('settingsProfileFeedback','Profile saved. Your leaderboard visibility preference has also been saved.');
+ window.OrbitLeaderboard?.refresh();
  if(onUpdate)await onUpdate();
 }
 async function savePrefs(){
