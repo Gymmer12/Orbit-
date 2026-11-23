@@ -111,3 +111,25 @@
 @media(max-width:650px){.studio-layout{display:flex;flex-direction:column}.studio-preview-card{position:static;width:100%}.studio-preview-bg{min-height:190px}.studio-scroll{padding:18px 12px!important}.studio-options{grid-template-columns:repeat(3,minmax(0,1fr))}.studio-section{width:100%;padding:13px}.orbit-home-hero{min-height:265px}.orbit-home-hero .home-studio-logo{width:175px;height:175px}.home-studio-content{padding:0 12px 30px}.home-featured{padding:16px;flex-wrap:wrap}.home-featured h2{font-size:18px}.home-featured button{width:100%}}
 @media(max-width:400px){.studio-options{grid-template-columns:repeat(2,minmax(0,1fr))}.home-feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.orbit-home-hero h1{font-size:35px}}
 @media(prefers-reduced-motion:reduce){.orbit-home-hero .home-studio-logo{animation:none}.home-feature-card{transition:none}}
+
+/* Subtle animated Orbit-style aura rings, disabled when reduced motion is requested. */
+@keyframes orbit-ring-breathe{
+  0%,100%{filter:brightness(1);transform:scale(1)}
+  50%{filter:brightness(1.22);transform:scale(1.055)}
+}
+@keyframes orbit-ring-radiate{
+  0%,100%{filter:brightness(1) hue-rotate(0deg)}
+  50%{filter:brightness(1.4) hue-rotate(20deg)}
+}
+.orbit-avatar[data-ring="orbit"]::before,
+.orbit-avatar[data-ring="neon"]::before,
+.orbit-avatar[data-ring="ice"]::before{animation:orbit-ring-breathe 4s ease-in-out infinite}
+.orbit-avatar[data-ring="solar"]::before,
+.orbit-avatar[data-ring="royal"]::before{animation:orbit-ring-radiate 5s linear infinite}
+.sidebar .profile{gap:8px}
+.sidebar .profile .name{max-width:104px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#sidebarAvatar{cursor:pointer}
+#sidebarAvatar:focus-visible{outline:2px solid #9bc1ff;outline-offset:5px}
+@media(prefers-reduced-motion:reduce){
+  .orbit-avatar::before{animation:none!important}
+}
