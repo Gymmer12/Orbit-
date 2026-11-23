@@ -132,3 +132,22 @@
 }
 #games .arcade-game-card .arcade-card-art{box-sizing:border-box;overflow:hidden}
 @media(max-width:520px){#games .arcade-game-card[data-arcade-game="game2048"] .arcade-card-art{font-size:19px!important}}
+
+/* Extra cartridge touch input: 2048 uses arrows, Sudoku & Word Guess get a keypad. */
+#games .arcade-keypad[hidden]{display:none!important}
+#games .arcade-keypad{
+ display:flex;flex-wrap:wrap;justify-content:center;gap:5px;
+ padding:9px 4px 2px;max-width:365px;margin:0 auto;
+}
+#games .arcade-keypad button{
+ min-width:30px;min-height:36px;flex:0 1 34px;
+ padding:5px;border:1px solid #668ac2;border-radius:7px;
+ background:#203b78;color:#f1f5ff;font-size:13px;font-weight:850;
+ cursor:pointer;touch-action:manipulation;
+}
+#games .arcade-keypad button:hover{background:#3461b4}
+#games .arcade-best-list{max-height:265px;overflow-y:auto;padding-right:4px;scrollbar-width:thin}
+#games .arcade-game-card .arcade-card-text{
+ min-width:0;max-width:100%;overflow-wrap:anywhere;
+}
+#games .arcade-card-art{flex-shrink:0}
