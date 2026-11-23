@@ -161,19 +161,11 @@
 #appLayout[data-site-palette=custom] #studio .palette-presets-header,
 #appLayout[data-site-palette=custom] #studio .palette-status,
 #appLayout[data-site-palette=custom] #studio .palette-contrast-note{color:var(--oc-text)!important}
-#appLayout[data-site-palette=custom] #studio .palette-preview-window,
-#appLayout[data-site-palette=custom] #studio .palette-preview-side,
-#appLayout[data-site-palette=custom] #studio .palette-preview-main,
-#appLayout[data-site-palette=custom] #studio .palette-preview-message,
-#appLayout[data-site-palette=custom] #studio .palette-preview-composer{
- /* Keep the mini-demo bound to the draft swatches, not the live layout. */
- background-color:revert-layer;
-}
 #appLayout[data-site-palette=custom] #home{
  --home-accent:var(--oc-accent);
  --home-card:color-mix(in srgb,var(--oc-surface) 89%,transparent);
  background-color:var(--oc-background)!important;
- background-image:linear-gradient(105deg,color-mix(in srgb,var(--oc-background) 88%,transparent),color-mix(in srgb,var(--oc-accent) 24%,transparent)),url("assets/orbit-home-poster.jpg")!important;
+ background-image:linear-gradient(105deg,color-mix(in srgb,var(--oc-background) 63%,var(--home-one)),color-mix(in srgb,var(--oc-accent) 22%,var(--home-two))),url("assets/orbit-home-poster.jpg")!important;
  color:var(--oc-text)!important;
 }
 #appLayout[data-site-palette=custom] #home .home-featured,
@@ -194,3 +186,30 @@
 @media(max-width:1050px){.palette-presets{grid-template-columns:repeat(3,minmax(0,1fr))}.palette-layout{grid-template-columns:1fr}}
 @media(max-width:520px){.palette-presets{grid-template-columns:repeat(2,minmax(0,1fr))}.palette-fields{grid-template-columns:1fr 1fr}.palette-layout{gap:10px}.palette-field{padding:9px}.palette-preview-window{height:135px}.palette-actions button{flex:1}}
 @media(max-width:375px){.palette-fields{grid-template-columns:1fr}.palette-field{grid-template-columns:minmax(0,1fr) 95px;align-items:center}.palette-input-row{justify-content:end}}
+
+/* The approvals modal is mounted outside appLayout, but the same logged-in
+   user's theme variables are also applied to the document root. */
+html[data-site-palette=custom] #adminPanel,
+html[data-site-palette=custom] #adminPanel .approval-card,
+html[data-site-palette=custom] #adminPanel .moderator-console,
+html[data-site-palette=custom] #adminPanel .ban-console{
+ background:var(--oc-background)!important;color:var(--oc-text)!important;border-color:var(--oc-border)!important}
+html[data-site-palette=custom] #adminPanel p,
+html[data-site-palette=custom] #adminPanel h2,
+html[data-site-palette=custom] #adminPanel h3,
+html[data-site-palette=custom] #adminPanel .notice,
+html[data-site-palette=custom] #adminPanel #moderatorStatus,
+html[data-site-palette=custom] #adminPanel #banStatus{color:var(--oc-text)!important}
+html[data-site-palette=custom] #adminPanel .approval-chat,
+html[data-site-palette=custom] #adminPanel .approval-message,
+html[data-site-palette=custom] #adminPanel .ban-list-item,
+html[data-site-palette=custom] #adminPanel .admin-applicant{
+ background:var(--oc-surface)!important;color:var(--oc-text)!important;border-color:var(--oc-border)!important}
+html[data-site-palette=custom] #adminPanel .admin-applicant.selected{background:var(--oc-accent)!important;color:var(--oc-accent-ink)!important}
+html[data-site-palette=custom] #adminPanel input,
+html[data-site-palette=custom] #adminPanel select,
+html[data-site-palette=custom] #adminPanel textarea{
+ background:var(--oc-surface)!important;color:var(--oc-text)!important;border-color:var(--oc-border)!important}
+html[data-site-palette=custom] #adminPanel .approval-btn:not(.secondary),
+html[data-site-palette=custom] #adminPanel #banList button{background:var(--oc-accent)!important;color:var(--oc-accent-ink)!important;border-color:var(--oc-border)!important}
+html[data-site-palette=custom] #adminPanel .approval-btn.secondary{background:var(--oc-surface)!important;color:var(--oc-text)!important;border-color:var(--oc-border)!important}
