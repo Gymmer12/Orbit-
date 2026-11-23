@@ -234,3 +234,8 @@
  #leaderboard .leaderboard-list-header,#leaderboard .leaderboard-entry{grid-template-columns:38px minmax(0,1fr) 88px;padding:10px 8px}
 }
 @media(prefers-reduced-motion:reduce){#games .arcade-game-card{transition:none}}
+
+#leaderboard .leaderboard-privacy-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin:-12px 0 19px;padding:10px 12px;border:1px solid #425da2;border-radius:9px;background:#102258b8;color:#b9cced;font-size:11px}
+#leaderboard .leaderboard-privacy-row button{border:1px solid #7b9de1;color:#f3f7ff;background:#284aa7;border-radius:7px;padding:9px 12px;cursor:pointer;font-size:11px;font-weight:800}
+#leaderboard .leaderboard-privacy-row button:hover{filter:brightness(1.12)}
+#appLayout[data-site-palette="custom"] #leaderboard .leaderboard-privacy-row{background:var(--oc-surface)!important;color:var(--oc-text)!important;border-color:var(--oc-border)!important}
