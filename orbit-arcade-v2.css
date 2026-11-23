@@ -1,0 +1,236 @@
+/* ORBIT + Arcade 2.0
+   Original retro cartridges and immersive purple game stage, based on visual
+   references inspected in Alan's Orbit games/index.html and games/tetris.html. */
+#games .arcade-launch-instructions{max-width:1150px;margin:4px auto 15px;padding:12px 15px;display:flex;gap:10px;align-items:center;color:#d0dafe;font-size:12px;border:1px solid #374a93;background:#121d50c7;border-radius:10px}
+#games .arcade-launch-icon{font-size:19px;color:#ffda7c}
+#games .arcade-launch-sub{margin-left:auto;white-space:nowrap;color:#a2edcb;font-weight:700;font-size:10px}
+#games .arcade-catalog{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+#games .arcade-game-card{
+ position:relative;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;
+ min-height:210px;gap:8px;padding:19px 11px 39px;
+ background:linear-gradient(145deg,#dde3f0 0%,#a9b2cf 22%,#7c86a9 78%,#69749e 100%);
+ border:3px solid #dfe7f7;border-bottom-color:#515b8c;border-right-color:#5b6b9c;
+ border-radius:16px 16px 20px 20px;
+ box-shadow:0 9px 0 #070d29,0 16px 20px #0008,inset 0 2px 2px #fff6;
+ color:#f6f6ff;overflow:hidden;
+ transition:transform .14s,box-shadow .14s;
+}
+#games .arcade-game-card:hover{transform:translateY(-4px);box-shadow:0 13px 0 #070d29,0 22px 25px #0008}
+#games .arcade-game-card.selected{background:linear-gradient(145deg,#e1edff,#a3b8df 50%,#7d85be);border:3px solid #e3efff;box-shadow:0 8px 0 #354fa7,0 15px 24px #09173caa}
+#games .arcade-game-card:before{content:"";position:absolute;top:6px;left:calc(50% - 28px);width:56px;height:4px;background:repeating-linear-gradient(90deg,#5f6d96 0 5px,#d4e0f3 5px 9px);border-radius:4px;box-shadow:0 1px 1px #fff}
+#games .arcade-game-card:after{content:"▶  PLAY";position:absolute;bottom:10px;left:50%;transform:translateX(-50%);border-radius:7px;padding:7px 18px;background:#e4394a;color:#fff;font-size:10px;letter-spacing:.09em;font-weight:900;white-space:nowrap;box-shadow:0 3px 0 #8c1e32,0 4px 6px #09103c88}
+#games .arcade-card-art{
+ width:100%;height:82px;min-height:82px;display:grid;place-items:center;flex:none;
+ border:3px solid #394565;border-radius:8px;
+ background:radial-gradient(ellipse at 42% 30%,#385ba0,#101c51 65%,#071239);
+ color:#c8f3ff;font-size:42px;text-shadow:0 0 13px #a6d9ffb6;max-width:100%;
+ box-shadow:inset 0 0 18px #01071b88;
+}
+#games .arcade-game-card[data-arcade-game="game2048"] .arcade-card-art{font-size:clamp(22px,2vw,29px)!important;letter-spacing:-.05em!important}
+#games .arcade-card-text{
+ width:100%;flex:1;display:flex;flex-direction:column;gap:5px;
+ min-height:59px;padding:0 2px;color:#18234c;text-align:left;
+}
+#games .arcade-card-text b{font-size:14px;color:#132247;line-height:1.1;font-weight:900}
+#games .arcade-card-text small{font-size:10px;color:#253d69;line-height:1.25}
+#games .arcade-card-text em{font-size:10px;color:#44336e;margin-top:auto}
+#games .arcade-play-layout{display:none}
+#games .arcade-immersive-bar{display:none}
+#games.arcade-immersive{
+ position:fixed!important;inset:0!important;z-index:850!important;
+ display:block!important;width:100vw!important;height:100dvh!important;
+ min-height:100dvh!important;overflow:hidden!important;color:#fff!important;
+ background:radial-gradient(ellipse at 50% 0%,#6543cf 0%,#30216f 36%,#110b3b 80%,#080526 100%)!important;
+}
+#games.arcade-immersive .arcade-scroll{
+ height:100dvh!important;max-height:100dvh;overflow-y:auto;
+ padding:0 10px 30px!important;
+ background-image:linear-gradient(#ffffff0a 1px,transparent 1px),linear-gradient(90deg,#ffffff0a 1px,transparent 1px);
+ background-size:45px 45px;scrollbar-width:thin;
+}
+#games.arcade-immersive .arcade-hero,
+#games.arcade-immersive .arcade-launch-instructions,
+#games.arcade-immersive .arcade-catalog{display:none!important}
+#games.arcade-immersive .arcade-play-layout{display:flex!important;flex-direction:column;max-width:1120px;margin:0 auto;gap:0!important}
+#games.arcade-immersive .arcade-immersive-bar{
+ display:grid;grid-template-columns:1fr auto 1fr;gap:15px;align-items:center;
+ width:100%;padding:12px 12px 9px;margin-bottom:4px;min-height:62px;
+}
+#games .arcade-back-button,#games .arcade-screen-button{
+ cursor:pointer;font-size:12px;font-weight:850;color:#fff;
+ background:linear-gradient(180deg,#7b63e9,#4b38b2);border:1px solid #b4a6ff;
+ border-radius:999px;padding:11px 16px;box-shadow:inset 0 2px 0 #ffffff52,0 4px 0 #24166a;
+}
+#games .arcade-back-button{justify-self:start}
+#games .arcade-screen-button{justify-self:end}
+#games .arcade-back-button:hover,#games .arcade-screen-button:hover{filter:brightness(1.16)}
+#games .arcade-immersive-label{text-align:center;display:grid;gap:3px}
+#games .arcade-immersive-label small{font-size:9px;font-weight:900;letter-spacing:.15em;color:#d8ccff}
+#games .arcade-immersive-label strong{font-size:21px;font-weight:900}
+#games.arcade-immersive .arcade-stage-wrap{
+ background:transparent;border:0;box-shadow:none;padding:0 5px;
+ width:100%;max-width:1100px;margin:0 auto;overflow:visible;
+}
+#games.arcade-immersive .arcade-stage-bar{
+ display:grid;grid-template-columns:1fr minmax(170px,1.2fr) 1fr;
+ align-items:center;gap:8px;margin:3px auto 7px;max-width:900px;min-height:78px;
+}
+#games .arcade-hud-best{color:#ffd450;font-size:11px;font-weight:900;display:flex;align-items:center;flex-wrap:wrap;gap:5px;justify-content:flex-start}
+#games .arcade-hud-crown{font-size:28px;color:#ffdb52;text-shadow:0 0 9px #ffa42d}
+#games .arcade-hud-best b{font-size:24px;color:#ffdc69;letter-spacing:-.03em}
+#games .arcade-hud-score{position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;gap:0}
+#games .arcade-hud-score small{font-size:12px;color:#e7d9ff;font-weight:900;letter-spacing:.15em;text-transform:uppercase}
+#games .arcade-hud-score strong{font-size:clamp(35px,4vw,55px);font-weight:900;color:#fff;line-height:1;letter-spacing:-.04em;text-shadow:0 3px 0 #2c165c,0 0 20px #ffa2fa95}
+#games .arcade-hud-heart{z-index:-1;position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:110px;color:#ff6dca8a;text-shadow:0 0 28px #fc61d8a8;line-height:1;pointer-events:none}
+#games .arcade-hud-wallet{display:grid;justify-items:end;gap:4px;font-size:11px;color:#d3c6ff;font-weight:850}
+#games .arcade-hud-wallet b{font-size:25px;color:#fbdc8c}
+#games.arcade-immersive .arcade-stage-display{
+ display:flex;align-items:center;justify-content:center;gap:18px;width:100%;margin:auto;
+}
+#games .arcade-tetris-side{display:none}
+#games[data-active-game="tetris"].arcade-immersive .arcade-tetris-side{display:flex;flex-direction:column;gap:15px;align-self:center}
+#games .arcade-tetris-panel{background:#0b0a3b99;padding:10px;border:2px solid #755cdb;border-radius:13px;width:143px;box-shadow:inset 0 1px 4px #beb4ff5c}
+#games .arcade-tetris-panel>span{display:block;font-size:12px;color:#cbbfff;font-weight:900;letter-spacing:.09em;margin-bottom:6px}
+#games .arcade-tetris-panel canvas{display:block;width:105px;height:auto;margin:auto}
+#games .arcade-tetris-stats{border:2px solid #755cdb;border-radius:13px;background:#0b0a3b99;padding:12px;min-width:143px}
+#games .arcade-tetris-stats p{display:flex;justify-content:space-between;gap:10px;margin:4px 0;color:#ded2ff;font-size:12px;font-weight:850}
+#games .arcade-tetris-stats b{color:#fff;font-size:17px}
+#games.arcade-immersive .arcade-canvas-wrap{
+ position:relative;flex:none;width:min(340px,43vw,calc(61dvh * 340 / 480))!important;
+ aspect-ratio:340 / 480!important;max-height:none!important;
+ border:4px solid #8d73f0!important;border-radius:12px!important;
+ background:#0b0731;box-shadow:0 0 0 3px #3f288f,0 22px 43px #05031f9e!important;
+ margin:0!important;
+}
+#games[data-active-game="tetris"].arcade-immersive .arcade-canvas-wrap{
+ width:min(340px,37vw,calc(61dvh * 340 / 600))!important;
+ aspect-ratio:340 / 600!important;
+}
+#games.arcade-immersive .arcade-canvas-wrap canvas{height:100%;width:100%;border-radius:7px}
+#games.arcade-immersive .arcade-overlay{background:#0d0730ea;backdrop-filter:blur(3px)}
+#games.arcade-immersive .arcade-overlay strong{color:#fff;font-size:clamp(23px,3vw,34px)}
+#games.arcade-immersive .arcade-overlay p{color:#d5cbfc;font-size:13px}
+#games.arcade-immersive .arcade-control-bar{margin:15px auto 8px;gap:13px}
+#games.arcade-immersive .arcade-control-bar button{
+ background:linear-gradient(180deg,#ffb662,#e67c27);border:0;border-radius:999px;
+ box-shadow:inset 0 2px 0 #ffffff65,0 4px 0 #a6571d;
+ font-weight:900;font-size:13px;padding:10px 24px;color:#fff;
+}
+#games.arcade-immersive .arcade-control-bar #arcadePause,#games.arcade-immersive .arcade-control-bar #arcadeStop{background:linear-gradient(180deg,#8568e8,#5a38c5);box-shadow:inset 0 2px 0 #ffffff55,0 4px 0 #301c80}
+#games.arcade-immersive .arcade-touch-controls{margin:8px auto 0;gap:10px}
+#games.arcade-immersive .arcade-touch-controls button{
+ border:0!important;border-radius:14px;min-width:54px;min-height:50px;
+ background:linear-gradient(180deg,#8e71e9,#573ac3)!important;box-shadow:inset 0 2px 0 #ffffff53,0 4px 0 #2c1d7c;
+ color:#fff!important;font-weight:850;font-size:19px;
+}
+#games.arcade-immersive .arcade-touch-controls .arcade-hard-drop{background:linear-gradient(180deg,#ffba63,#e58122)!important;box-shadow:0 4px 0 #a75c16}
+#games.arcade-immersive .arcade-touch-controls .arcade-hold-button{font-size:11px}
+#games.arcade-immersive .arcade-touch-controls .arcade-hard-drop,
+#games.arcade-immersive .arcade-touch-controls .arcade-hold-button{display:none}
+#games[data-active-game="tetris"].arcade-immersive .arcade-touch-controls .arcade-hard-drop,
+#games[data-active-game="tetris"].arcade-immersive .arcade-touch-controls .arcade-hold-button{display:block}
+#games.arcade-immersive .arcade-keypad{max-width:450px;margin:12px auto 0}
+#games.arcade-immersive .arcade-info{display:flex;align-items:start;gap:8px;max-width:800px;margin:8px auto 0;flex-wrap:wrap;justify-content:center}
+#games.arcade-immersive .arcade-info .arcade-info-card{display:none}
+#games.arcade-immersive .arcade-info .arcade-status{display:block!important;color:#d8d0ff!important;font-size:11px;text-align:center}
+#games:fullscreen,#games:-webkit-full-screen{width:100vw;height:100dvh}
+#appLayout[data-site-palette="custom"] #games.arcade-immersive{background:radial-gradient(ellipse at 50% 0,color-mix(in srgb,var(--oc-accent) 40%,var(--oc-background)),var(--oc-background) 74%)!important}
+#appLayout[data-site-palette="custom"] #games.arcade-immersive .arcade-stage-wrap{background:transparent!important}
+#appLayout[data-site-palette="custom"] #games.arcade-immersive .arcade-hud-score strong,
+#appLayout[data-site-palette="custom"] #games.arcade-immersive .arcade-immersive-label strong{color:var(--oc-text)!important}
+/* Leaderboard, scoped to signed-in membership. */
+#leaderboard{background:radial-gradient(ellipse at 90% 0,#2f276d,#081338 58%,#040c29)!important;color:#f0f4ff!important;min-height:calc(100dvh - 46px)}
+#leaderboard .leaderboard-scroll{height:calc(100dvh - 46px);overflow-y:auto;padding:31px clamp(16px,3.5vw,46px) 70px}
+#leaderboard .leaderboard-intro,#leaderboard .leaderboard-shell{max-width:960px;margin:0 auto}
+#leaderboard .leaderboard-intro{border-bottom:1px solid #4558a3;padding:0 0 22px;margin-bottom:23px}
+#leaderboard .leaderboard-eyebrow{font-size:10px;letter-spacing:.13em;color:#ffdd92;font-weight:900}
+#leaderboard .leaderboard-intro h1{font-size:clamp(28px,3.5vw,44px);margin:9px 0 9px;letter-spacing:-.04em}
+#leaderboard .leaderboard-intro h1 span{color:#bdacff}
+#leaderboard .leaderboard-intro p{font-size:12px;color:#bfcdf1;line-height:1.5;margin:0}
+#leaderboard .leaderboard-shell{background:#0d1a4bdc;border:1px solid #415aa9;border-radius:15px;padding:21px;box-shadow:0 15px 35px #0004}
+#leaderboard .leaderboard-picker{display:flex;gap:11px;flex-wrap:wrap;align-items:center;margin-bottom:25px}
+#leaderboard .leaderboard-picker label{font-size:12px;color:#ccd9f5;font-weight:850}
+#leaderboard .leaderboard-picker select{flex:1;min-width:150px;padding:12px 14px;border-radius:9px;border:1px solid #5c7acc;background:#0a1846;color:#fff;font-size:12px}
+#leaderboard .leaderboard-picker button{border:1px solid #99b4fd;background:#2648ac;color:#fff;padding:11px 18px;border-radius:9px;font-size:11px;font-weight:900;cursor:pointer}
+#leaderboard .leaderboard-podium{display:grid;grid-template-columns:1fr 1.16fr 1fr;gap:12px;align-items:end;margin:0 0 22px;min-height:160px}
+#leaderboard .leaderboard-podium[hidden]{display:none}
+#leaderboard .leaderboard-podium-member{background:linear-gradient(150deg,#192863,#111c48);border:1px solid #5571bd;border-radius:12px;padding:19px 10px;text-align:center;display:grid;justify-items:center;gap:7px;min-width:0;box-shadow:0 9px 15px #0004}
+#leaderboard .leaderboard-podium-member:first-child{order:2;min-height:175px;border-color:#ffe0a0;box-shadow:0 0 18px #ffcb7950}
+#leaderboard .leaderboard-podium-member:nth-child(2){order:1}
+#leaderboard .leaderboard-podium-member:nth-child(3){order:3}
+#leaderboard .leaderboard-podium-member .rank-icon{font-size:29px;line-height:1}
+#leaderboard .leaderboard-podium-member strong{font-size:13px;overflow-wrap:anywhere;color:#fff;max-width:100%}
+#leaderboard .leaderboard-podium-member small{color:#ffde9d;font-size:12px;font-weight:900}
+#leaderboard .leaderboard-podium-member .orbit-avatar{height:43px;width:43px;font-size:22px}
+#leaderboard .leaderboard-podium-member.self{box-shadow:0 0 0 2px #79a9ff,0 8px 20px #0006}
+#leaderboard .leaderboard-list-header{display:grid;grid-template-columns:70px 1fr 130px;color:#a8bde5;letter-spacing:.08em;font-size:10px;font-weight:900;padding:10px 16px}
+#leaderboard .leaderboard-list-header span:last-child{text-align:right}
+#leaderboard .leaderboard-rows{display:grid;gap:7px}
+#leaderboard .leaderboard-entry{display:grid;grid-template-columns:70px 1fr 130px;align-items:center;gap:8px;background:#162459;border:1px solid #2f4784;border-radius:9px;padding:11px 16px;color:#f1f4ff}
+#leaderboard .leaderboard-entry.self{border-color:#97b9ff;background:#243875}
+#leaderboard .leaderboard-rank{font-weight:900;font-size:14px;color:#f5daa0}
+#leaderboard .leaderboard-player{display:flex;align-items:center;gap:12px;min-width:0}
+#leaderboard .leaderboard-player .orbit-avatar{height:34px;width:34px;font-size:19px}
+#leaderboard .leaderboard-player span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:800}
+#leaderboard .leaderboard-entry .leaderboard-points{text-align:right;font-weight:900;font-size:13px;color:#ffde8a}
+#leaderboard .leaderboard-empty,#leaderboard .leaderboard-feedback{font-size:12px;color:#bacded;text-align:center;line-height:1.6}
+#leaderboard .leaderboard-disclaimer{border-top:1px solid #304d8a;padding-top:13px;margin:22px 0 0;font-size:11px;color:#a9bde8;line-height:1.6}
+#appLayout[data-site-palette="custom"] #leaderboard{background:var(--oc-background)!important;color:var(--oc-text)!important}
+#appLayout[data-site-palette="custom"] #leaderboard .leaderboard-shell,
+#appLayout[data-site-palette="custom"] #leaderboard .leaderboard-entry,
+#appLayout[data-site-palette="custom"] #leaderboard .leaderboard-podium-member{background:var(--oc-surface)!important;color:var(--oc-text)!important;border-color:var(--oc-border)!important}
+#appLayout[data-site-palette="custom"] #leaderboard h1,
+#appLayout[data-site-palette="custom"] #leaderboard .leaderboard-player span{color:var(--oc-text)!important}
+@media(max-width:1020px){
+ #games .arcade-catalog{grid-template-columns:repeat(3,minmax(0,1fr))}
+ #games.arcade-immersive .arcade-tetris-panel{width:115px;padding:8px}
+ #games.arcade-immersive .arcade-tetris-stats{min-width:115px}
+ #games.arcade-immersive .arcade-stage-display{gap:11px}
+}
+@media(max-width:720px){
+ #games .arcade-catalog{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+ #games .arcade-game-card{min-height:195px;padding:18px 9px 38px}
+ #games .arcade-card-art{height:74px;min-height:74px}
+ #games.arcade-immersive .arcade-immersive-bar{gap:5px;padding:10px 2px 9px}
+ #games .arcade-back-button,#games .arcade-screen-button{padding:9px 9px;font-size:10px}
+ #games .arcade-immersive-label strong{font-size:15px}
+ #games.arcade-immersive .arcade-stage-bar{min-height:62px}
+ #games .arcade-hud-best{font-size:9px}
+ #games .arcade-hud-best b{font-size:16px}
+ #games .arcade-hud-crown{font-size:19px}
+ #games .arcade-hud-wallet{font-size:10px}
+ #games .arcade-hud-wallet b{font-size:17px}
+ #games .arcade-hud-score strong{font-size:36px}
+ #games .arcade-hud-heart{font-size:85px;top:-17px}
+ #games.arcade-immersive .arcade-stage-display{gap:5px;flex-wrap:wrap}
+ #games.arcade-immersive .arcade-canvas-wrap{width:min(340px,80vw,calc(58dvh * 340 / 480))!important}
+ #games[data-active-game="tetris"].arcade-immersive .arcade-canvas-wrap{width:min(340px,75vw,calc(56dvh * 340 / 600))!important}
+ #games[data-active-game="tetris"].arcade-immersive .arcade-tetris-side{order:-1;flex-direction:row;gap:5px;width:auto}
+ #games[data-active-game="tetris"].arcade-immersive .arcade-stage-display{align-content:center}
+ #games[data-active-game="tetris"].arcade-immersive .arcade-tetris-panel{padding:3px 6px;width:112px}
+ #games .arcade-tetris-panel canvas{height:39px;max-width:95px;object-fit:contain}
+ #games .arcade-tetris-stats{padding:4px 7px;min-width:110px}
+ #games .arcade-tetris-stats p{font-size:9px}
+ #games .arcade-tetris-stats b{font-size:11px}
+ #games .arcade-tetris-panel>span{font-size:9px;margin-bottom:1px}
+ #games.arcade-immersive .arcade-touch-controls button{min-width:41px;min-height:42px;font-size:15px}
+ #games.arcade-immersive .arcade-touch-controls{gap:6px}
+ #games.arcade-immersive .arcade-control-bar{gap:8px}
+ #games.arcade-immersive .arcade-control-bar button{font-size:11px;padding:8px 15px}
+ #leaderboard .leaderboard-scroll{padding:18px 10px 38px}
+ #leaderboard .leaderboard-shell{padding:12px}
+}
+@media(max-width:430px){
+ #games .arcade-launch-instructions{flex-wrap:wrap}
+ #games .arcade-launch-sub{margin-left:0}
+ #games.arcade-immersive .arcade-immersive-bar{grid-template-columns:1fr auto}
+ #games .arcade-immersive-label{display:none}
+ #games .arcade-game-card .arcade-card-text small{font-size:9px}
+ #games.arcade-immersive .arcade-tetris-stats{display:none}
+ #games .arcade-hud-best>span:nth-child(2){display:none}
+ #leaderboard .leaderboard-podium{gap:5px}
+ #leaderboard .leaderboard-podium-member{padding:12px 4px}
+ #leaderboard .leaderboard-podium-member strong{font-size:11px}
+ #leaderboard .leaderboard-list-header,#leaderboard .leaderboard-entry{grid-template-columns:38px minmax(0,1fr) 88px;padding:10px 8px}
+}
+@media(prefers-reduced-motion:reduce){#games .arcade-game-card{transition:none}}
