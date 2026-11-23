@@ -1,0 +1,85 @@
+/* ORBIT + messaging-only layout, adapted from the original ORBIT's
+   dark-blue navigation, chat timeline and member rail. */
+:root{--orbit-navy:#050a2a;--orbit-sidebar:#061754;--orbit-border:#203b87;--orbit-ink:#eef3ff}
+.sidebar{width:207px;background:linear-gradient(180deg,#081f7a 0%,#05164e 53%,#04103b 100%)}
+.identity{height:87px}
+.sidenav{padding:9px 6px;display:flex;flex-direction:column;gap:2px}
+.sidenav .navheading{margin:8px 8px 8px;color:#98bafa;font-size:10px}
+.sidenav .navlink{font-size:12px;min-height:34px;border-radius:6px}
+.sidenav .navlink.active{background:#3046ab;border-color:#4156ad}
+#dmToggle .chevron{font-size:11px;color:#a9c6ff;margin-left:auto;transform:rotate(0);transition:transform .15s}
+#dmToggle[aria-expanded="true"] .chevron{transform:rotate(180deg)}
+.sidebar-dm-list{border-left:1px solid #36529e;margin:1px 4px 5px 18px;padding:5px 2px 4px 8px;display:flex;flex-direction:column;min-height:0;max-height:39vh;overflow:hidden}
+.sidebar-dm-list[hidden]{display:none!important}
+.sidebar-dm-list-head{color:#8fa7e5;font-size:10px;text-transform:uppercase;letter-spacing:.05em;padding:5px 4px}
+.sidebar-dm-list #peopleList{min-height:0;max-height:32vh;overflow-y:auto;overscroll-behavior:contain;padding-right:4px;scrollbar-width:thin;scrollbar-color:#5366b8 transparent;display:flex;flex-direction:column;gap:3px}
+.sidebar-dm-list .person{display:flex;gap:7px;align-items:center;width:100%;padding:8px 7px;font-size:11px;font-weight:600;background:transparent;color:#c9d7f5;border:none;border-radius:6px;min-width:0}
+.sidebar-dm-list .person.active{background:#2b41a1;border:1px solid #4f6ce0}
+.sidebar-dm-list .person:hover{background:#1c307e}
+.sidebar-dm-list .person .memberAvatar{width:23px;height:23px;flex:none}
+.sidebar-dm-list .person-name{flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sidebar-dm-list .person-status{font-size:9px;color:#8194be}
+#text .two{grid-template-columns:minmax(0,1fr) 211px}
+#text .channel-bar{background:#060c34;border-color:#243c82;min-height:42px}
+#text .channel-bar strong{font-size:13px}
+#text .channel-bar .memberHint{font-weight:600;font-size:10px;color:#7dcfaf}
+#text .social-content{display:flex!important;flex-direction:column!important;grid-template-columns:none!important;grid-template-rows:none!important;padding:0;background:#05092b}
+#text .social-content>.row:first-child{min-height:39px;background:#060b31;flex:0 0 auto}
+#text .messagefeed{flex:1 1 auto!important;grid-column:auto!important;grid-row:auto!important;min-height:0;max-height:none;overflow-y:auto}
+#text .msg{gap:10px;border-top:1px solid #0b1446;padding:8px 12px}
+#text .msg:nth-child(2n){background:#070e34}
+#text .msg .bubbleavatar{width:33px;height:33px;min-width:33px}
+#text .msgname{font-size:11px;font-weight:800;color:#9abaff}
+#text .msgbody{font-size:12px}
+#text .stack{grid-column:auto!important;grid-row:auto!important;background:#0a1649;border-color:#28418c}
+#text #composer{flex:0 0 auto}
+#text #composer .field{background:#10256d}
+#text #dmActions{grid-column:auto!important;grid-row:auto!important;flex:0 0 auto;border-top:1px solid #273e88}
+#text .two>.card:last-child{background:linear-gradient(180deg,#070c2e,#080d36);padding:12px 8px;border-left:1px solid #1a2b70;display:block}
+#text .members-title{font-size:10px;letter-spacing:.07em;font-weight:800;margin:2px 0 8px;color:#92b2f1}
+#memberList{max-height:calc(100dvh - 205px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:#5065a9 transparent}
+.member-group{margin:14px 5px 5px;color:#8eafe8;font-size:10px;font-weight:800;letter-spacing:.045em;text-transform:uppercase}
+.member-group:first-child{margin-top:5px}
+.memberItem{padding:7px 5px;border-radius:5px;display:flex;align-items:center;gap:7px}
+.memberItem:hover{background:#192c6d}
+.memberItem .memberAvatar{position:relative;display:grid;place-items:center;width:29px;height:29px;min-width:29px;font-weight:800;background:linear-gradient(140deg,#592ebe,#126cbe);border:1px solid #507ad6;border-radius:50%;color:#fff}
+.member-status-dot{width:8px;height:8px;flex:none;border-radius:50%;background:#687896;border:1px solid #334471;box-shadow:none}
+.member-status-dot.online{background:#38d99b;border-color:#8deed0;box-shadow:0 0 7px #45d6a966}
+.member-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:117px;font-size:11px;font-weight:650}
+.member-info{display:flex;flex-direction:column;min-width:0}
+.member-role{color:#90b5ee;font-size:9px;margin-top:2px}
+#text[data-channel="announcements"] .social-content #composer,
+#text[data-channel="announcements"] #dmActions{display:none!important}
+#text[data-channel="announcements"] #messages{display:none!important}
+#announcementsFeed{display:none;flex:1;min-height:0;overflow:auto;padding:13px 15px;background:radial-gradient(ellipse at top,#0c1645,#060b2e 70%)}
+#text[data-channel="announcements"] #announcementsFeed{display:block}
+.announce-card{max-width:900px;padding:15px 17px;margin:0 auto 12px;background:linear-gradient(120deg,#1b1a57,#171443);border:1px solid #5342b1;border-radius:10px;box-shadow:0 6px 14px #0002}
+.announce-card.pinned{border-color:#8371e7;background:linear-gradient(120deg,#2c205f,#271744)}
+.announce-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.announce-author{font-weight:800;color:#a4beff;font-size:11px}.announce-meta{font-size:10px;color:#93a7d4}
+.announce-card h3{font-size:16px;margin:10px 0 7px;color:#eef3ff}
+.announce-card p{font-size:12px;color:#d9defb;margin:0 0 8px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}
+.announce-pin{background:#edca63;border-radius:14px;padding:4px 7px;font-weight:900;font-size:9px;color:#272141;text-transform:uppercase}
+.announce-action{border:1px solid #8172d6;background:#3a2c7d;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:6px 10px}
+#announcementsActions{display:none;background:#091545;border-top:1px solid #304b9b;padding:10px 12px;flex:0 0 auto}
+#announcementsActions.staff-visible{display:block}
+#announcementsActions .announce-fields{display:grid;gap:8px;margin-top:8px}
+#announcementsActions input[type="text"],#announcementsActions textarea{width:100%;border:1px solid #5263ab;background:#07113c;color:#fff;border-radius:6px;padding:10px;font:12px Segoe UI,Arial,sans-serif}
+#announcementsActions textarea{min-height:70px;max-height:180px}
+#announcementsActions label{font-size:12px;color:#cbdbfb}
+#announcementsActions .row{margin-top:9px}
+#announcementsStatus{font-size:11px;color:#c9d9ff}
+#text[data-channel="announcements"] #announcementNew{display:inline-block}
+#text[data-channel="dm"] .social-content{display:flex!important}
+#text[data-channel="dm"] .social-content>.row:first-child{grid-column:auto;grid-row:auto}
+#text .accountbar{display:none} /* Authentication happens at the full-screen gate. */
+#adminPanel .moderator-console{background:#0d1e59;border:1px solid #3356ae;border-radius:10px;padding:16px;margin:15px 0}
+#adminPanel .moderator-console h3{font-size:16px;margin:0 0 7px}
+#adminPanel .moderator-console p{font-size:11px;color:#b4caf1}
+#adminPanel .mod-actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+#adminPanel .mod-actions select{background:#07113d;border:1px solid #4467b2;color:#fff;border-radius:6px;padding:8px;max-width:100%;min-width:200px}
+#moderatorList .moderator-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 2px;border-bottom:1px solid #30488c;font-size:12px}
+#moderatorList .moderator-row button{background:#14286a;border:1px solid #5771ac;color:#e4edff;padding:6px 9px;border-radius:6px}
+#moderatorStatus{font-size:11px;color:#b5d5ff;min-height:16px}
+@media(max-width:850px){#text .two{grid-template-columns:minmax(0,1fr) 165px}#text .member-name{max-width:90px}.sidebar{width:191px}}
+@media(max-width:650px){.sidebar{width:225px}#text .two{display:block}#text .two>.card:last-child{display:none}#text .social-content{height:100%}#text .pane{height:calc(100dvh - 83px)}#announcementsFeed{padding:10px}#text .social-content{border-right:0}#text .memberHint{display:none}}
