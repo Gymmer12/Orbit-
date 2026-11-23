@@ -91,3 +91,51 @@ or extra values are rejected server-side. A blank JSON object (`{}`) means
 no custom palette. The CSS file `orbit-palette.css` loads after all other
 site styles; live preview changes never enter the database until saved (except
 when using the explicitly labeled original-colors reset).
+
+## Custom Home backgrounds and animations
+
+All **approved ORBIT + members** can personalize their own homepage, free of
+charge. Open **Orbit Studio → Home background & motion**, or click
+**Customize Home** near the top of the Home screen.
+
+### Background choices
+- **Original Orbit:** The existing background from `assets/orbit-home-poster.jpg`.
+- **Deep Space:** A second Orbit galaxy scene from `assets/orbit-space.jpg`.
+- **Starlight:** A dark starfield made with CSS (no external assets).
+- **Cosmic Gradient:** A colorful, lightweight gradient made with CSS.
+
+Existing Home themes (Classic, Aurora, Sunset, Rose, Arctic, Midnight, Deep
+Nebula) remain selectable separately, as do the whole-website custom palettes.
+
+### Color and motion
+- Pick any **hex color** using the built-in browser color picker.
+- Set **Tint strength** from 0% (preserve the original image) through 75%.
+  Tinting allows the classic Orbit artwork to be recolored without replacing it.
+- Turn **Animate my home** on or off. When enabled, the home scene features
+  slowly twinkling/drifting star layers, rotating elliptical orbit rings,
+  miniature orbiting planets, an occasional comet, and subtle backdrop drift.
+  The original artwork remains recognizable.
+- Motion also automatically respects your device's **Reduce Motion** setting,
+  even when the member's own animation preference is enabled.
+- **Save my home** stores the choices in the current member's Supabase account.
+  **Undo changes** returns to the last saved design; **Restore original scene**
+  resets the wallpaper, tint, movement preference, and original Home theme.
+
+### Clickable sidebar logo
+Clicking the **ORBIT + logo at top left** refreshes the webpage. After the
+saved login is verified, ORBIT + automatically opens **Home**, so the logo
+serves as both Home navigation and a normal page reload. Unsaved previews
+are discarded on refresh. Sign-in still applies if the session has expired.
+
+### Data and privacy
+Settings are stored as `orbit_appearance.home_background`,
+`home_tint`, `home_tint_strength`, and `home_motion`.
+Existing per-account row-level security applies. Valid wallpaper choices are
+restricted to built-in local assets or gradients, tint to a six-digit hex
+color, and intensity to 0–75. Settings are personal, not shared as public
+account information. The database schema is in
+`orbit-home-background-customization.sql`, with frontend modules
+`orbit-home-custom.js` and `orbit-home-custom.css`.
+
+Verified with SQL rollback tests and a mocked frontend save/undo/reset test.
+The live Render appearance still needs visual testing on desktop and mobile.
