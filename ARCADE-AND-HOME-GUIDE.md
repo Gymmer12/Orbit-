@@ -67,7 +67,7 @@ Existing balances are preserved under the renamed `cosmos` database column. No a
 
 ## Leaderboard and full-screen Arcade
 
-The Leaderboard is available from the left sidebar and Home shortcuts. Approved members may compare their total Cosmos or their personal-best score for any of the 16 games. Up to 50 member nicknames appear, with a podium for the top three. School email addresses and legal names are not displayed. Banned and unapproved accounts are excluded from the ranked results.
+The Leaderboard is available from the left sidebar and Home shortcuts. Approved members may compare their total Cosmos or their personal-best score for any of the 16 games. Up to 50 member nicknames appear, with a podium for the top three. School email addresses and legal names are not displayed. Banned and unapproved accounts are excluded from the ranked results. **Leaderboard participation is optional:** members can enable **Show me on the Leaderboard** under **Settings → About Me**; it is off by default. Without opting in, their nickname and scores are not listed. The Leaderboard includes a shortcut to this setting.
 
 Selecting any cartridge opens a full-viewport game screen. The site requests browser fullscreen from that click and falls back to a full-viewport overlay where the native API is unavailable (including some iOS browsers). Back to Arcade or Escape exits, recording an ongoing round. The game screen has a large score HUD, Play, Pause and End controls, and on-screen movement buttons.
 
