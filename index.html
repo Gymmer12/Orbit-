@@ -193,7 +193,7 @@ $('gateForm').addEventListener('submit',async event=>{
       if(data?.session&&data?.user){
         user=data.user;verified=true;await authUI();
       }else{
-        gateMessage('Account created, but sign-in is not yet active. Please complete the site's required account verification or contact the administrator.');
+        gateMessage('Account created, but sign-in is not yet active. Please complete the required account verification or contact the administrator.');
       }
     }else{
       const {data,error}=await db.auth.signInWithPassword({email,password});
