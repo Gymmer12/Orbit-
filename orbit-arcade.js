@@ -327,25 +327,32 @@ function resumeGame(){
 function togglePause(){if(!playing)return; if(paused)resumeGame();else pauseGame()}
 async function endGame(reason){
  if(!playing)return;
- playing=false;paused=false;cancelAnimationFrame(requestId);setControls();
+ playing=false;paused=false;waiting=true;cancelAnimationFrame(requestId);setControls();
  const session=runId;runId=null;
- const final=score;
+ const final=score,owner=member?.id,finishedGame=game,claimClient=db;
  setOverlay(reason||'Round finished','Score: '+final.toLocaleString()+'. Checking Stardust earned…');
- if(!session||!db||!member)return;
+ if(!session||!claimClient||!owner){waiting=false;setControls();return}
  setStatus('Saving your result…');
- const {data,error}=await db.rpc('orbit_finish_game',{p_run_id:session,p_score:final});
- if(error){
-  setStatus('Score: '+final.toLocaleString()+'. Stardust not awarded: '+error.message);
-  setOverlay('Round over','Score: '+final.toLocaleString()+'. You can try a new round.');
-  await loadSummary();return;
+ try{
+  const {data,error}=await claimClient.rpc('orbit_finish_game',{p_run_id:session,p_score:final});
+  if(member?.id!==owner)return;
+  if(error){
+   setStatus('Score: '+final.toLocaleString()+'. Stardust not awarded: '+error.message);
+   setOverlay('Round over','Score: '+final.toLocaleString()+'. You can try a new round.');
+   await loadSummary();return;
+  }
+  wallet.total=Number(data.total||0);wallet.today=Number(data.today||0);
+  wallet.best={...wallet.best,[finishedGame]:Number(data.best||0)};
+  updateWallet();
+  const reward=Number(data.earned||0);
+  const summary=reward?'+'+reward+' Stardust ✦':'0 Stardust (daily limit reached or low score)';
+  setOverlay('Round complete',final.toLocaleString()+' points · '+summary);
+  setStatus('Round saved. '+summary+'. You have earned '+wallet.today+' of 60 Stardust today.');
+ }catch(e){
+  if(member?.id===owner)setStatus('Could not save the round: '+(e?.message||'network error'));
+ }finally{
+  if(member?.id===owner){waiting=false;setControls()}
  }
- wallet.total=Number(data.total||0);wallet.today=Number(data.today||0);
- wallet.best={...wallet.best,[game]:Number(data.best||0)};
- updateWallet();
- const reward=Number(data.earned||0);
- const summary=reward?'+'+reward+' Stardust ✦':'0 Stardust (daily limit reached or low score)';
- setOverlay('Round complete',final.toLocaleString()+' points · '+summary);
- setStatus('Nice round! '+summary+'. You have earned '+wallet.today+' of 60 Stardust today.');
 }
 async function startGame(){
  if(waiting||playing||!db||!member)return;
@@ -363,7 +370,7 @@ async function startGame(){
 }
 function chooseGame(next){
  if(!Object.prototype.hasOwnProperty.call(RULES,next))return;
- if(playing){setStatus('Finish the current round before switching games.');return}
+ if(playing||waiting){setStatus('Finish the current round before switching games.');return}
  game=next;score=0;runId=null;state=next==='tetris'?tetrisCreate():next==='snake'?snakeCreate():flappyCreate();
  $('arcadeCurrentName').textContent=RULES[game].name;
  $('arcadeInfoTitle').textContent='How to play '+RULES[game].name;
