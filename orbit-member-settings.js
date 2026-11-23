@@ -268,5 +268,5 @@ function clear(){
  closeMember();
  const sidebar=$('sidebarStatus');if(sidebar)sidebar.textContent='Offline';
 }
-window.OrbitSettings={init,load,selectTab,setProfiles,memberColor,isVisibleOnline,displayStatus,displayText,openMember,pollNotifications,clear,myStatus(){return own?.member_status||'online'}};
+window.OrbitSettings={init,load,selectTab,setProfiles,memberColor,isVisibleOnline,displayStatus,displayText,openMember,pollNotifications,clear,myStatus(){return own?.member_status||'online'},setRole(role){if(user){user._orbitRole=role;updateAccountPreview()}}};
 })();
