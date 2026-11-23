@@ -22,6 +22,7 @@
 @media(max-width:650px){.social-content{min-height:230px}.accountbar .row{flex-direction:column;align-items:stretch}}
 </style><link rel="stylesheet" href="orbit-classic.css">
 <link rel="stylesheet" href="orbit-community.css">
+<link rel="stylesheet" href="orbit-studio.css">
 </head>
 <body>
 <div id="authGate" role="region" aria-label="ORBIT + account sign-in">
@@ -118,17 +119,75 @@
 <aside class="sidebar" id="sidebar">
 <div class="identity"><div class="brand original-mark"><img src="assets/orbit-logo-wide.png" alt="Orbit" /><span class="plus-mark" aria-label="Plus">+</span></div></div>
 <nav class="sidenav" aria-label="Navigation">
-<div class="navheading">ORBIT + MESSAGING</div>
+<div class="navheading">ORBIT +</div>
+<button class="navlink" type="button" id="homeNav"><span class="glyph">⌂</span> Home</button>
+<div class="navheading">MESSAGING</div>
 <button class="navlink active" data-social="general" type="button"><span class="glyph">#</span> Chat</button>
 <button class="navlink" data-social="announcements" type="button"><span class="glyph">📣</span> Announcements</button>
 <button class="navlink" id="dmToggle" data-social="dm" aria-expanded="false" aria-controls="dmDirectory" type="button"><span class="glyph">✉</span> Direct Messages <span class="chevron">▾</span></button>
 <div class="sidebar-dm-list" id="dmDirectory" hidden><div class="sidebar-dm-list-head">Approved members</div><div id="peopleList" role="list"></div></div>
+<div class="navheading">PERSONALIZE</div>
+<button class="navlink" id="studioNav" type="button"><span class="glyph">✦</span> Orbit Studio <span class="free-tag">FREE</span></button>
 <button class="navlink" id="adminButton" type="button"><span class="glyph">✓</span> Approvals</button>
 </nav>
-<div class="profile"><div class="avatar">O+</div><div><div class="name" id="profileName">ORBIT + Player</div><div class="status">● Ready to explore</div></div><button id="sidebarSignout" type="button" title="Sign out of ORBIT +">Sign out</button></div>
+<div class="profile"><div class="avatar orbit-avatar" id="sidebarAvatar">O+</div><div><div class="name" id="profileName">ORBIT + Player</div><div class="status">● Ready to explore</div></div><button id="sidebarSignout" type="button" title="Sign out of ORBIT +">Sign out</button></div>
 </aside>
 <div class="content" id="content"><div class="stars"></div>
 <header class="topbar"><div class="row"><button class="mobilemenu" id="menu" aria-label="Open navigation">☰</button><strong id="pagetitle"># &nbsp; Chat</strong><span class="hint">Stay in the Loop. Keep it simple.</span></div></header>
+<section class="view" id="home" aria-label="ORBIT + homepage">
+ <div class="orbit-home-hero">
+  <img src="assets/orbit-logo.png" alt="Glowing blue Orbit logo" class="home-studio-logo">
+  <h1>ORBIT <span>+</span></h1>
+  <div class="home-slogan">STAY IN THE LOOP.</div>
+  <p id="homeGreeting">Welcome to your circle.</p>
+ </div>
+ <div class="home-studio-content">
+  <div class="home-featured">
+   <div><span class="home-eyebrow">YOUR SPACE • YOUR PEOPLE</span>
+   <h2>Stay connected, without distractions.</h2>
+   <p>Catch up with your friends, read announcements, and make ORBIT + feel like yours.</p></div>
+   <button type="button" id="homeChatButton">Open Chat <span aria-hidden="true">→</span></button>
+  </div>
+  <h3 class="home-quick-heading">Quick links</h3>
+  <div class="home-feature-grid">
+   <button type="button" id="homeChatLink" class="home-feature-card"><span class="feature-icon">#</span><b>Chat</b><small>Talk with everyone</small></button>
+   <button type="button" id="homeAnnouncementsLink" class="home-feature-card"><span class="feature-icon">📣</span><b>Announcements</b><small>Updates from staff</small></button>
+   <button type="button" id="homeDMsLink" class="home-feature-card"><span class="feature-icon">✉</span><b>Direct Messages</b><small>One-on-one conversations</small></button>
+   <button type="button" id="homeStudioLink" class="home-feature-card"><span class="feature-icon">✦</span><b>Orbit Studio</b><small>All customization is free</small></button>
+  </div>
+  <p class="home-tail">MORE CONNECTIONS <span>·</span> MORE MOMENTS <span>·</span> ONE ORBIT +</p>
+ </div>
+</section>
+<section class="view" id="studio" aria-label="Free appearance customization">
+ <div class="studio-scroll">
+  <div class="studio-hero">
+   <div><span class="studio-eyebrow">PERSONALIZE YOUR ORBIT</span>
+   <h1>Orbit Studio <span>✦</span></h1>
+   <p>Make your own look. Everything here is free, forever.</p></div>
+   <span class="studio-free">ALL FREE</span>
+  </div>
+  <div class="studio-layout">
+   <aside class="studio-preview-card">
+    <div class="studio-preview-bg">
+     <div id="studioAvatar" class="orbit-avatar studio-large-avatar">🪐</div>
+     <h2 id="studioDisplayName">Your name</h2>
+     <span class="studio-preview-role">ORBIT + MEMBER</span>
+    </div>
+    <label class="studio-file-button" for="studioUploadFile">Upload profile picture</label>
+    <input id="studioUploadFile" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+    <button id="studioRemovePhoto" class="studio-minor-button" type="button">Use selected avatar instead</button>
+    <p class="studio-privacy">Profile photos are visible only to approved members. Avoid uploading private or sensitive pictures.</p>
+    <p id="studioStatus" role="status" aria-live="polite"></p>
+   </aside>
+   <div class="studio-catalog">
+    <section class="studio-section"><div class="studio-section-heading"><div><h2>Profile picture</h2><p>Choose a starter avatar or upload your own.</p></div><span>FREE</span></div><div class="studio-options studio-avatar-options" id="studioAvatarOptions"></div></section>
+    <section class="studio-section"><div class="studio-section-heading"><div><h2>Avatar rings</h2><p>Frames and glowing effects everyone can see around your profile picture.</p></div><span>FREE</span></div><div class="studio-options studio-ring-options" id="studioRingOptions"></div></section>
+    <section class="studio-section"><div class="studio-section-heading"><div><h2>Display-name fonts</h2><p>Your name's font appears for other members in chats and the member list.</p></div><span>FREE</span></div><div class="studio-options" id="studioFontOptions"></div></section>
+    <section class="studio-section"><div class="studio-section-heading"><div><h2>Home themes</h2><p>Choose the colors you see on your home screen.</p></div><span>FREE</span></div><div class="studio-options studio-theme-options" id="studioThemeOptions"></div></section>
+   </div>
+  </div>
+ </div>
+</section>
 <section class="view active" id="text" data-channel="general"><div class="channel-bar"><span><strong id="channelBarName"># chat</strong><small id="channelBarDesc">Just a place to chat and catch up.</small></span><span class="memberHint">● <span id="memberCount">0 online</span></span></div><div class="pane">
 <div class="social-header"><div><h1 class="pane-title" id="socialTitle"># Chat</h1><p class="pane-sub" id="socialDescription">Talk with other approved ORBIT + members.</p></div><div class="tag" id="socialChannelLabel">CHAT</div></div>
 <div id="accountBox" class="accountbar"><div class="row"><strong id="sessionStatus">Account connected to ORBIT +</strong><button class="control secondary hide" id="signout">Sign out</button></div><div id="authFields"><div class="row"><input class="field" style="max-width:220px" id="authNickname" maxlength="24" placeholder="Public nickname" aria-label="Public nickname"><input class="field" style="max-width:240px" type="email" id="authEmail" placeholder="School email (e.g. 24jamesh@tesdk12.net)" aria-label="School email address" inputmode="email" autocomplete="email"><input class="field" style="max-width:200px" type="password" id="authPassword" placeholder="Password" aria-label="Account password"></div><div class="row"><button class="control" id="signup">Register</button><button class="control secondary" id="signin">Log in</button></div></div><div id="authStatus" class="channel-note" aria-live="polite">ORBIT + registration uses @tesdk12.net school email addresses. Use a new password, not your school login password. Your email stays private.</div></div>
@@ -157,7 +216,7 @@
 </div></div>
 <script>
 document.getElementById('menu')?.addEventListener('click',()=>document.getElementById('sidebar')?.classList.toggle('open'));
-</script><script src="config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</script><script src="config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="orbit-studio.js"></script>
 <script>
 (function(){
 'use strict';
