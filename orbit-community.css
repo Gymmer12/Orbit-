@@ -123,3 +123,21 @@
 #adminPanel .ban-list-item button{background:#263b91;border:1px solid #6178c4;border-radius:6px;color:#fff;padding:8px 10px;cursor:pointer;white-space:nowrap}
 #adminPanel #banStatus{font-size:12px;color:#c6d7fa;min-height:16px}
 @media(max-width:650px){#text #composer.chat-composer{padding:9px!important}#text .chat-composer .composer-shell{padding:4px 5px 4px 11px}#text .chat-composer .composer-bottom #composerHint{font-size:9px}#adminPanel .ban-form{flex-direction:column;align-items:stretch}}
+
+
+/* Mobile DM picker: keep member rows easy to tap and scroll on iOS/Android. */
+@media(max-width:650px){
+  .sidebar #dmToggle{min-height:44px;touch-action:manipulation}
+  .sidebar .sidebar-dm-list{
+    max-height:min(53dvh,440px);
+  }
+  .sidebar .sidebar-dm-list #peopleList{
+    max-height:min(46dvh,385px);
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .sidebar .sidebar-dm-list .person{
+    min-height:44px;
+    touch-action:manipulation;
+  }
+}
