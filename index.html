@@ -153,7 +153,7 @@
 </aside>
 <button type="button" id="sidebarBackdrop" class="mobile-sidebar-backdrop" aria-label="Close navigation menu" hidden></button>
 <div class="content" id="content"><div class="stars"></div>
-<header class="topbar"><div class="row topbar-current"><button class="mobilemenu" id="menu" aria-label="Open navigation">☰</button><strong id="pagetitle"># Chat</strong><span class="hint" id="topbarSubtitle">Talk with approved members</span></div><span class="topbar-online" id="topbarOnline" hidden>● <span id="memberCount">0 online</span></span></header>
+<header class="topbar"><div class="row topbar-current"><button class="mobilemenu" id="menu" type="button" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false">☰</button><strong id="pagetitle"># Chat</strong><span class="hint" id="topbarSubtitle">Talk with approved members</span></div><span class="topbar-online" id="topbarOnline" hidden>● <span id="memberCount">0 online</span></span></header>
 <section class="view" id="home" aria-label="ORBIT + homepage">
  <div class="home-cosmos-motion" aria-hidden="true">
   <span class="home-motion-stars home-motion-stars-back"></span>
@@ -807,8 +807,13 @@ function openSocial(channel,recipientId=null){
  activateView('text');
  if(!['general','announcements','dm'].includes(channel))channel='general';
  const wasDm=current==='dm';
+ const recipientChanged=channel==='dm'&&!!recipientId&&(!wasDm||selected!==recipientId);
  if(recipientId)selected=recipientId;
  current=channel;
+ if(recipientChanged){
+  $('messages').scrollTop=0;
+  note('Loading conversation…');
+ }
  if(channel==='dm')dmListOpen=!!recipientId||!wasDm?true:!dmListOpen;
  else dmListOpen=false;
  $('dmDirectory').hidden=!dmListOpen;
@@ -1042,10 +1047,14 @@ async function loadMessages(){
  if(!db||!user||!memberApproved)return;
  if(current==='announcements'){await loadAnnouncements();return}
  if(current==='dm'&&!selected){note('Choose a member from Direct Messages in the sidebar.');return}
+ // A previous chat request may finish after a different conversation is opened.
+ // Never let that stale response replace the newly selected person's messages.
+ const requestedChannel=current,requestedRecipient=selected,requestedUser=user.id;
  let q;
- if(current==='general')q=db.from('general_messages').select('id,sender_id,nickname,body,created_at').order('created_at',{ascending:true}).limit(100);
- else q=db.from('direct_messages').select('id,sender_id,recipient_id,nickname,body,created_at').or('and(sender_id.eq.'+user.id+',recipient_id.eq.'+selected+'),and(sender_id.eq.'+selected+',recipient_id.eq.'+user.id+')').order('created_at',{ascending:true}).limit(100);
+ if(requestedChannel==='general')q=db.from('general_messages').select('id,sender_id,nickname,body,created_at').order('created_at',{ascending:true}).limit(100);
+ else q=db.from('direct_messages').select('id,sender_id,recipient_id,nickname,body,created_at').or('and(sender_id.eq.'+requestedUser+',recipient_id.eq.'+requestedRecipient+'),and(sender_id.eq.'+requestedRecipient+',recipient_id.eq.'+requestedUser+')').order('created_at',{ascending:true}).limit(100);
  const {data,error:e}=await q;
+ if(current!==requestedChannel||selected!==requestedRecipient||user?.id!==requestedUser)return;
  if(e){note('Unable to load messages: '+e.message);return}
  renderMsgs(data||[]);
 }
