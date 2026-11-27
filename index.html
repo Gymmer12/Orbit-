@@ -810,7 +810,12 @@ function openSocial(channel,recipientId=null){
  $('announcementsActions').classList.toggle('staff-visible',channel==='announcements'&&isStaff);
  $('poststatus').textContent='';
  updateComposer();
- if(window.innerWidth<650)$('sidebar').classList.remove('open');
+ // Mobile: keep the navigation drawer visible while choosing a DM recipient.
+ // Only close it after a conversation is picked (or another page is opened).
+ // Use the same 650px breakpoint as the responsive CSS, including exactly 650px.
+ if(window.matchMedia('(max-width: 650px)').matches){
+  $('sidebar').classList.toggle('open',channel==='dm'&&!recipientId);
+ }
  if(!db||!memberApproved)return;
  if(channel==='announcements')loadAnnouncements();
  else loadMessages();
