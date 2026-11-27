@@ -761,6 +761,17 @@ function setSidebarOpen(shouldOpen){
 }
 $('menu').addEventListener('click',()=>setSidebarOpen(!$('sidebar').classList.contains('open')));
 $('sidebarBackdrop').addEventListener('click',()=>setSidebarOpen(false));
+// Fallback for mobile browsers where stacking or touch behavior lets a tap
+// land on content behind the shade: ANY outside tap should dismiss the drawer.
+// Capture the click so an underlying button isn't accidentally activated.
+document.addEventListener('click',event=>{
+ if(!window.matchMedia('(max-width: 650px)').matches)return;
+ if(!$('sidebar').classList.contains('open'))return;
+ if($('sidebar').contains(event.target)||$('menu').contains(event.target))return;
+ setSidebarOpen(false);
+ event.preventDefault();
+ event.stopPropagation();
+},true);
 document.addEventListener('keydown',event=>{
  if(event.key==='Escape'&&$('sidebar').classList.contains('open'))setSidebarOpen(false);
 });
