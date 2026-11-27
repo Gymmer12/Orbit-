@@ -97,3 +97,75 @@
   -webkit-overflow-scrolling:touch;
  }
 }
+
+
+/* Reliable phone-sized Direct Message navigation.
+   Let members choose a conversation inside the chat pane, without a sidebar. */
+#dmConversationBar,
+#dmConversationBar[hidden]{display:none!important}
+@media(max-width:650px){
+ #text[data-channel="dm"] #dmConversationBar:not([hidden]){
+  display:flex!important;
+  flex-direction:column;
+  gap:6px;
+  flex:0 0 auto;
+  padding:11px 12px 9px;
+  border-bottom:1px solid #304f9c;
+  background:linear-gradient(110deg,#0b215f,#071543);
+  position:relative;
+  z-index:1;
+ }
+ #text #dmConversationBar label{
+  color:#e3ecff;
+  font-size:12px;
+  font-weight:850;
+ }
+ #text #dmConversationBar .dm-conversation-controls{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  width:100%;
+  min-width:0;
+ }
+ #text #dmConversationSelect{
+  appearance:auto;
+  -webkit-appearance:menulist;
+  min-width:0;
+  flex:1 1 auto;
+  width:100%;
+  height:46px;
+  border-radius:9px;
+  border:1px solid #7a9add;
+  padding:7px 10px;
+  background:#12265d;
+  color:#fff;
+  font:600 16px/1.3 system-ui,-apple-system,sans-serif;
+  color-scheme:dark;
+  touch-action:manipulation;
+ }
+ #text #dmConversationRefresh{
+  width:46px;height:46px;
+  flex:0 0 46px;
+  display:grid;place-items:center;
+  border:1px solid #617fc3;
+  border-radius:9px;
+  background:#1e3980;
+  color:#f4f8ff;
+  font-size:24px;
+  cursor:pointer;
+  touch-action:manipulation;
+ }
+ #text #dmConversationRefresh:disabled{opacity:.55;cursor:wait}
+ #text #dmConversationHint{
+  margin:1px 0 0;
+  color:#b7cef9;
+  font-size:11px;
+  line-height:1.4;
+  overflow-wrap:anywhere;
+ }
+ #text #dmConversationSelect:focus-visible,
+ #text #dmConversationRefresh:focus-visible{
+  outline:2px solid #b7dfff;outline-offset:2px
+ }
+ #text[data-channel="dm"] #messages{min-height:0}
+}
