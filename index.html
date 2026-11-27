@@ -454,6 +454,14 @@
 <section class="view active" id="text" data-channel="general"><div class="pane">
 <div id="accountBox" class="accountbar"><div class="row"><strong id="sessionStatus">Account connected to ORBIT +</strong><button class="control secondary hide" id="signout">Sign out</button></div><div id="authFields"><div class="row"><input class="field" style="max-width:220px" id="authNickname" maxlength="24" placeholder="Public nickname" aria-label="Public nickname"><input class="field" style="max-width:240px" type="email" id="authEmail" placeholder="School email (e.g. 24jamesh@tesdk12.net)" aria-label="School email address" inputmode="email" autocomplete="email"><input class="field" style="max-width:200px" type="password" id="authPassword" placeholder="Password" aria-label="Account password"></div><div class="row"><button class="control" id="signup">Register</button><button class="control secondary" id="signin">Log in</button></div></div><div id="authStatus" class="channel-note" aria-live="polite">ORBIT + registration uses @tesdk12.net school email addresses. Use a new password, not your school login password. Your email stays private.</div></div>
 <div class="two"><div class="card social-content">
+<div id="dmConversationBar" class="dm-conversation-bar" hidden>
+  <label for="dmConversationSelect">Direct Messages</label>
+  <div class="dm-conversation-controls">
+   <select id="dmConversationSelect" aria-label="Choose a person to message"><option value="">Choose a person to message…</option></select>
+   <button type="button" id="dmConversationRefresh" aria-label="Refresh members" title="Refresh members">↻</button>
+  </div>
+  <p id="dmConversationHint" role="status" aria-live="polite">Choose someone to open your conversation.</p>
+</div>
 <div id="announcementsFeed" aria-live="polite"></div>
 <div id="announcementsActions"><div class="row" style="justify-content:space-between"><strong>Staff announcements</strong><button class="announce-action" id="announcementNew" type="button">+ New announcement</button></div>
 <div class="announce-fields" id="announcementEditor" hidden>
@@ -814,11 +822,12 @@ function openSocial(channel,recipientId=null){
   $('messages').scrollTop=0;
   note('Loading conversation…');
  }
- if(channel==='dm')dmListOpen=!!recipientId||!wasDm?true:!dmListOpen;
+ if(channel==='dm')dmListOpen=window.matchMedia('(max-width: 650px)').matches?true:(!!recipientId||!wasDm?true:!dmListOpen);
  else dmListOpen=false;
  $('dmDirectory').hidden=!dmListOpen;
  $('dmToggle').setAttribute('aria-expanded',String(dmListOpen));
  $('text').dataset.channel=channel;
+ $('dmConversationBar').hidden=channel!=='dm';
  document.querySelectorAll('[data-social]').forEach(b=>b.classList.toggle('active',b.dataset.social===channel));
  const target=memberRoster.find(p=>p.id===selected);
  const label=channel==='dm'?(target?'✉ '+target.nickname:'✉ Direct Messages'):channel==='announcements'?'📣 Announcements':'# Chat';
@@ -837,16 +846,36 @@ function openSocial(channel,recipientId=null){
  // Only close it after a conversation is picked (or another page is opened).
  // Use the same 650px breakpoint as the responsive CSS, including exactly 650px.
  if(window.matchMedia('(max-width: 650px)').matches){
-  // Tapping Direct Messages reveals the picker. Selecting a person
-  // closes the drawer so the selected conversation fills the phone.
-  if(recipientId||channel!=='dm')setSidebarOpen(false);
-  else setSidebarOpen(true);
+  // Always reveal the conversation page. A native member selector is now
+  // visible above messages, so opening DMs never traps users in the drawer.
+  setSidebarOpen(false);
  }
  if(!db||!memberApproved)return;
+ if(channel==='dm')renderDirectory();
  if(channel==='announcements')loadAnnouncements();
  else loadMessages();
- if(channel==='dm')renderDirectory();
 }
+$('dmConversationSelect').addEventListener('change',event=>{
+ const recipientId=event.target.value;
+ if(recipientId)openSocial('dm',recipientId);
+ else{
+  selected=null;
+  openSocial('dm');
+ }
+});
+$('dmConversationRefresh').addEventListener('click',async()=>{
+ const button=$('dmConversationRefresh');
+ button.disabled=true;
+ $('dmConversationHint').textContent='Refreshing member list…';
+ try{
+  await refreshMemberRail();
+  renderDirectory();
+ }catch(e){
+  $('dmConversationHint').textContent='Could not refresh members. Please try again.';
+ }finally{
+  button.disabled=false;
+ }
+});
 document.querySelectorAll('[data-social]').forEach(b=>b.addEventListener('click',()=>openSocial(b.dataset.social)));
 function note(message){const box=$('messages');box.replaceChildren();let p=document.createElement('p');p.className='social-disabled';p.textContent=message;box.append(p)}
 function renderMsgs(rows){
@@ -888,9 +917,26 @@ async function touchPresence(){
  if(e)console.warn('Presence update did not succeed',e.message);
 }
 function renderDirectory(){
- const list=$('peopleList');if(!list)return;
+ const list=$('peopleList'),picker=$('dmConversationSelect');
+ if(!list||!picker)return;
  list.replaceChildren();
  const targets=memberRoster.filter(p=>p.id!==user?.id&&!blocked.has(p.id)).sort((a,b)=>Number(onlineNow(b.id))-Number(onlineNow(a.id))||a.nickname.localeCompare(b.nickname));
+ // The mobile selector duplicates the *same approved, nonblocked* members as
+ // the sidebar directory, so a phone user can reach their DMs either way.
+ picker.replaceChildren();
+ const placeholder=document.createElement('option');
+ placeholder.value='';
+ placeholder.textContent=targets.length?'Choose a person to message…':(!memberApproved?'Sign in to view members':'No other members available — tap ↻');
+ picker.append(placeholder);
+ for(const person of targets){
+  const option=document.createElement('option');
+  option.value=person.id;
+  option.textContent=person.nickname+(onlineNow(person.id)?' • online':'');
+  picker.append(option);
+ }
+ picker.value=targets.some(person=>person.id===selected)?selected:'';
+ const selectedMember=targets.find(person=>person.id===selected);
+ $('dmConversationHint').textContent=selectedMember?'Talking with '+selectedMember.nickname:targets.length?'Select a member above to view your private messages.':'No available members yet. Tap ↻ to check again.';
  if(!targets.length){const p=document.createElement('p');p.className='notice';p.textContent='No other approved members yet.';list.append(p);return}
  targets.forEach(p=>{
   const b=document.createElement('button');b.type='button';b.className='person'+(selected===p.id?' active':'');
@@ -1046,7 +1092,7 @@ $('announcementSave').onclick=async()=>{
 async function loadMessages(){
  if(!db||!user||!memberApproved)return;
  if(current==='announcements'){await loadAnnouncements();return}
- if(current==='dm'&&!selected){note('Choose a member from Direct Messages in the sidebar.');return}
+ if(current==='dm'&&!selected){note('Choose a member above to see your private conversation.');return}
  // A previous chat request may finish after a different conversation is opened.
  // Never let that stale response replace the newly selected person's messages.
  const requestedChannel=current,requestedRecipient=selected,requestedUser=user.id;
