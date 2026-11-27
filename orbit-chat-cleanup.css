@@ -175,8 +175,9 @@
 
 /* Safari automatically zooms focused text fields when their computed font
    size is under 16px. Preserve user-controlled pinch zoom: change the fields
-   themselves, not the viewport accessibility settings. */
-@media(max-width:650px){
+   themselves, not the viewport accessibility settings.
+   Include touch devices in landscape, not just narrow portrait viewports. */
+@media(max-width:650px), (pointer:coarse){
  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]):not([type="hidden"]),
  textarea,
  select{
