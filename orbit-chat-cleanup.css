@@ -67,7 +67,9 @@
 #sidebarBackdrop[hidden]{display:none!important}
 #sidebarBackdrop{display:none}
 @media(max-width:650px){
- .mobile-sidebar-backdrop:not([hidden]){
+ /* This ID-qualified selector MUST outrank #sidebarBackdrop{display:none}.
+    The old class-only rule never became visible on real phones. */
+ #appLayout #sidebarBackdrop:not([hidden]){
   position:fixed;
   inset:0;
   display:block;
@@ -168,4 +170,21 @@
   outline:2px solid #b7dfff;outline-offset:2px
  }
  #text[data-channel="dm"] #messages{min-height:0}
+}
+
+
+/* Safari automatically zooms focused text fields when their computed font
+   size is under 16px. Preserve user-controlled pinch zoom: change the fields
+   themselves, not the viewport accessibility settings. */
+@media(max-width:650px){
+ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]):not([type="hidden"]),
+ textarea,
+ select{
+  font-size:16px!important;
+ }
+ /* The chat composer has an extra-specific 13px rule elsewhere. */
+ #text .chat-composer textarea#message{
+  font-size:16px!important;
+  line-height:22px;
+ }
 }
