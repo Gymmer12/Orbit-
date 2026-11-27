@@ -151,6 +151,7 @@
 </nav>
 <div class="profile"><button type="button" class="avatar orbit-avatar" id="sidebarAvatar" aria-label="Customize your profile in Orbit Studio" title="Customize your profile">O+</button><button id="sidebarProfileButton" class="sidebar-profile-detail" type="button" title="Open your settings"><span class="name" id="profileName">ORBIT + Player</span><span class="status" id="sidebarStatus"><span class="settings-presence-dot online"></span> Online</span></button><button id="sidebarSignout" type="button" title="Sign out of ORBIT +">Sign out</button></div>
 </aside>
+<button type="button" id="sidebarBackdrop" class="mobile-sidebar-backdrop" aria-label="Close navigation menu" hidden></button>
 <div class="content" id="content"><div class="stars"></div>
 <header class="topbar"><div class="row topbar-current"><button class="mobilemenu" id="menu" aria-label="Open navigation">☰</button><strong id="pagetitle"># Chat</strong><span class="hint" id="topbarSubtitle">Talk with approved members</span></div><span class="topbar-online" id="topbarOnline" hidden>● <span id="memberCount">0 online</span></span></header>
 <section class="view" id="home" aria-label="ORBIT + homepage">
@@ -474,9 +475,7 @@
 <div class="card"><div class="members-title">MEMBERS <span style="color:#9fb8f4">• Approved</span></div><div class="members-list" id="memberList"><span class="notice">Sign in to view registered members who opted into the directory.</span></div><hr style="border:0;border-top:1px solid #273979;margin:12px 0"><span class="tag">ORBIT + Chat</span><h3 id="sidebarChannelTitle">Chat</h3><p id="sidebarChannelText">A place for approved members to message each other.</p><p class="notice">Direct messages are visible only to their participants. Blocking and reporting are available.</p><p class="notice" id="connectionStatus">Messaging for approved members.</p></div></div></div></section>
 
 </div></div>
-<script>
-document.getElementById('menu')?.addEventListener('click',()=>document.getElementById('sidebar')?.classList.toggle('open'));
-</script><script src="config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="orbit-studio.js"></script><script src="orbit-home-custom.js"></script><script src="orbit-member-settings.js"></script><script src="orbit-arcade-extras.js"></script><script src="orbit-arcade.js"></script><script src="orbit-leaderboard.js"></script>
+<script src="config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="orbit-studio.js"></script><script src="orbit-home-custom.js"></script><script src="orbit-member-settings.js"></script><script src="orbit-arcade-extras.js"></script><script src="orbit-arcade.js"></script><script src="orbit-leaderboard.js"></script>
 <script>
 (function(){
 'use strict';
@@ -742,6 +741,25 @@ $('message').addEventListener('keydown',event=>{
 });
 
 
+// All mobile menu transitions go through this helper so the shade and sidebar
+// cannot get out of sync. On desktop the shade must never block navigation.
+function setSidebarOpen(shouldOpen){
+ const sidebar=$('sidebar'),shade=$('sidebarBackdrop'),mobile=window.matchMedia('(max-width: 650px)').matches;
+ const open=!!shouldOpen&&mobile;
+ sidebar.classList.toggle('open',open);
+ shade.hidden=!open;
+ $('menu').setAttribute('aria-expanded',String(open));
+ $('menu').setAttribute('aria-label',open?'Close navigation':'Open navigation');
+}
+$('menu').addEventListener('click',()=>setSidebarOpen(!$('sidebar').classList.contains('open')));
+$('sidebarBackdrop').addEventListener('click',()=>setSidebarOpen(false));
+document.addEventListener('keydown',event=>{
+ if(event.key==='Escape'&&$('sidebar').classList.contains('open'))setSidebarOpen(false);
+});
+window.addEventListener('resize',()=>{
+ // If the viewport becomes desktop-sized, clear any open phone-sized overlay.
+ if(!window.matchMedia('(max-width: 650px)').matches)setSidebarOpen(false);
+});
 function activateView(viewId){
  if(!['home','studio','settings','text','games','leaderboard'].includes(viewId))return;
  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===viewId));
@@ -758,7 +776,7 @@ function activateView(viewId){
   $('pagetitle').textContent=viewId==='home'?'⌂ Home':viewId==='settings'?'⚙ Settings':viewId==='games'?'✦ Games':viewId==='leaderboard'?'♛ Leaderboard':'✦ Orbit Studio';
   $('topbarSubtitle').textContent='Stay in the Loop. Keep it simple.';
   $('topbarOnline').hidden=true;
-  $('sidebar').classList.remove('open');
+  setSidebarOpen(false);
  }
  if(viewId==='home'||viewId==='studio')window.OrbitStudio?.updatePreview();
 }
@@ -814,7 +832,10 @@ function openSocial(channel,recipientId=null){
  // Only close it after a conversation is picked (or another page is opened).
  // Use the same 650px breakpoint as the responsive CSS, including exactly 650px.
  if(window.matchMedia('(max-width: 650px)').matches){
-  $('sidebar').classList.toggle('open',channel==='dm'&&!recipientId);
+  // Tapping Direct Messages reveals the picker. Selecting a person
+  // closes the drawer so the selected conversation fills the phone.
+  if(recipientId||channel!=='dm')setSidebarOpen(false);
+  else setSidebarOpen(true);
  }
  if(!db||!memberApproved)return;
  if(channel==='announcements')loadAnnouncements();
@@ -872,7 +893,12 @@ function renderDirectory(){
   const dot=document.createElement('span');dot.className='member-status-dot '+memberStatusKind(p,onlineNow(p.id));dot.title=window.OrbitSettings?.displayStatus(p,onlineNow(p.id))||'Offline';
   const label=document.createElement('span');label.className='person-name';label.textContent=p.nickname;window.OrbitStudio?.decorateName(label,p.id);
   b.append(av,dot,label);
-  b.onclick=()=>{selected=p.id;dmListOpen=true;openSocial('dm',p.id)};
+  b.onclick=()=>{
+   selected=p.id;
+   dmListOpen=true;
+   openSocial('dm',p.id);
+   if(window.matchMedia('(max-width: 650px)').matches)setSidebarOpen(false);
+  };
   list.append(b);
  });
 }
