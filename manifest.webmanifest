@@ -1,0 +1,19 @@
+{
+  "name": "ORBIT +",
+  "short_name": "ORBIT +",
+  "description": "ORBIT + — Stay in the Loop.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#050d2d",
+  "theme_color": "#071344",
+  "icons": [
+    {
+      "src": "/assets/orbit-logo.png",
+      "sizes": "660x651",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
