@@ -60,3 +60,40 @@
  .topbar #pagetitle{max-width:calc(100vw - 160px)}
  .topbar .topbar-online{margin-left:6px}
 }
+
+
+/* On phones, the sidebar behaves like a dismissible drawer rather than
+   covering the conversation until the hamburger is pressed again. */
+#sidebarBackdrop[hidden]{display:none!important}
+#sidebarBackdrop{display:none}
+@media(max-width:650px){
+ .mobile-sidebar-backdrop:not([hidden]){
+  position:fixed;
+  inset:0;
+  display:block;
+  width:100%;
+  height:100dvh;
+  margin:0;
+  padding:0;
+  border:0;
+  background:rgba(2,6,25,.60);
+  z-index:100;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+ }
+ #appLayout .sidebar{
+  z-index:101;
+  height:100dvh;
+  max-height:100dvh;
+  box-shadow:6px 0 28px #0008;
+ }
+ #appLayout .sidebar:not(.open){pointer-events:none}
+ #appLayout .sidebar.open{pointer-events:auto}
+ #appLayout .sidebar .sidenav{
+  min-height:0;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+ }
+}
