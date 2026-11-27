@@ -842,14 +842,10 @@ function openSocial(channel,recipientId=null){
  $('announcementsActions').classList.toggle('staff-visible',channel==='announcements'&&isStaff);
  $('poststatus').textContent='';
  updateComposer();
- // Mobile: keep the navigation drawer visible while choosing a DM recipient.
- // Only close it after a conversation is picked (or another page is opened).
- // Use the same 650px breakpoint as the responsive CSS, including exactly 650px.
- if(window.matchMedia('(max-width: 650px)').matches){
-  // Always reveal the conversation page. A native member selector is now
-  // visible above messages, so opening DMs never traps users in the drawer.
-  setSidebarOpen(false);
- }
+ // Always reveal the destination page instead of leaving the sidebar or
+ // its backdrop over the conversation. On phones the member picker sits
+ // directly above messages; desktop navigation is unchanged.
+ setSidebarOpen(false);
  if(!db||!memberApproved)return;
  if(channel==='dm')renderDirectory();
  if(channel==='announcements')loadAnnouncements();
